@@ -6,7 +6,6 @@ const { PYTHON } = require('../constants/allowedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require("openai");
 const openai = new OpenAI();
-const { respond } = require('../loader').helpers
 
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = 512
@@ -114,9 +113,7 @@ const _prepareErrorMessage = (outputLog, language, command) => {
 }
 
 
-const executePrompt = async (req, res, response) => {
-    const language = req.language
-    const langConfig = LANGUAGES_CONFIG[language]
+const _executePrompt = async (langConfig, prompt, response) => {
     try {
         const completion = await openai.chat.completions.create({
             messages: [
@@ -125,7 +122,7 @@ const executePrompt = async (req, res, response) => {
                     content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
                 }, {
                     role: "user",
-                    content: req.prompt
+                    content: prompt
                 }
             ],
             model: langConfig.model,
@@ -179,9 +176,7 @@ const execute = async (req, res) => {
     }
 
     if (req.language === 'promptv1') {
-        if (req.language === 'promptv1') {
-            await executePrompt(req, res, response);
-        }
+        await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
     }
     else {
         try {
