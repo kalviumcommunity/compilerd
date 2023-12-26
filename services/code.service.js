@@ -4,6 +4,9 @@ const os = require('os')
 const fs = require('fs')
 const { PYTHON } = require('../constants/allowedLanguages')
 const logger = require('../loader').helpers.l
+const OpenAI = require("openai");
+const openai = new OpenAI();
+const { respond } = require('../loader').helpers
 
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = 512
@@ -43,6 +46,9 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.js',
         memory: ALLOWED_RAM * ONE_MB,
     },
+    promptv1: {
+        model: "gpt-4-1106-preview",
+    }
 }
 
 const _runScript = async (cmd, res) => {
@@ -107,6 +113,51 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     return errorMsg.trim()
 }
 
+
+const executePrompt = async (req, res, response) => {
+    const language = req.language
+    const langConfig = LANGUAGES_CONFIG[language]
+    try {
+        const completion = await openai.chat.completions.create({
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
+                }, {
+                    role: "user",
+                    content: req.prompt
+                }
+            ],
+            model: langConfig.model,
+            response_format: {
+                type: "json_object"
+            }
+        })
+        let openAIResponse = {}
+        if (completion && completion.choices && completion.choices[0] && completion.choices[0].message) {
+            openAIResponse = JSON.parse(completion.choices[0].message.content)
+        }
+        const keysToCheck = ['score', 'rationale']
+        const allKeysExist = keysToCheck.every(key => key in openAIResponse)
+        if (!allKeysExist) {
+            /**
+             * 502 Bad Gateway
+             * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
+             */
+            const responseCode = 502
+            const errorMessage = "Unable to parse OPEN AI response"
+            response.errorMessage = errorMessage
+            response.statusCode = responseCode
+        } else {
+            response.output = openAIResponse
+        }
+
+    } catch (e) {
+        logger.error(e)
+        throw new Error('Unable to evaluate the prompt')
+    }
+}
+
 const execute = async (req, res) => {
     let args = null
     let code = null
@@ -124,63 +175,71 @@ const execute = async (req, res) => {
         compileMessage: '',
         error: 0,
         stdin: req?.stdin,
+        errorMessage: ''
     }
 
-    try {
-        // Parse Input
-        // eslint-disable-next-line no-unused-vars
-        args = req.args
-        // eslint-disable-next-line no-unused-vars
-        hasInputFiles = req.hasInputFiles
+    if (req.language === 'promptv1') {
+        if (req.language === 'promptv1') {
+            await executePrompt(req, res, response);
+        }
+    }
+    else {
+        try {
+            // Parse Input
+            // eslint-disable-next-line no-unused-vars
+            args = req.args
+            // eslint-disable-next-line no-unused-vars
+            hasInputFiles = req.hasInputFiles
 
-        code = req.script
-        language = req.language
-        stdin = req.stdin
-        const langConfig = LANGUAGES_CONFIG[language]
-        // Remove all files from tmp folder
-        await _runScript('rm -rf /tmp/*', res)
+            code = req.script
+            language = req.language
+            stdin = req.stdin
+            const langConfig = LANGUAGES_CONFIG[language]
+            // Remove all files from tmp folder
+            await _runScript('rm -rf /tmp/*', res)
 
-        // Write file in tmp folder based on language
-        await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
+            // Write file in tmp folder based on language
+            await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
 
-        const compileCommand = `cd /tmp/ && ${langConfig.compile}`
-        // Run compile command
-        const compileLog = await _runScript(compileCommand, res)
-        response.compileMessage =
-            compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+            const compileCommand = `cd /tmp/ && ${langConfig.compile}`
+            // Run compile command
+            const compileLog = await _runScript(compileCommand, res)
+            response.compileMessage =
+                compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
-        // Check if there is no compilation error
-        if (response.compileMessage === '') {
-            let command
-            if (language === 'java') {
-                // Remove ulimit as a temp fix
-                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+            // Check if there is no compilation error
+            if (response.compileMessage === '') {
+                let command
+                if (language === 'java') {
+                    // Remove ulimit as a temp fix
+                    command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                } else {
+                    command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                }
+
+                // Check if there is any input that is to be provided to code execution
+                if (stdin) {
+                    // Write input in a file in tmp folder
+                    await fs.promises.writeFile('/tmp/input.txt', stdin)
+                    // Update the execution command
+                    command += ' < input.txt'
+                }
+
+                const outputLog = await _runScript(command, res)
+                response.output =
+                    outputLog.error !== undefined
+                        ? _prepareErrorMessage(outputLog, language, command)
+                        : outputLog.result.stdout
+                if (outputLog.error) {
+                    response.error = 1
+                }
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
-            }
-
-            // Check if there is any input that is to be provided to code execution
-            if (stdin) {
-                // Write input in a file in tmp folder
-                await fs.promises.writeFile('/tmp/input.txt', stdin)
-                // Update the execution command
-                command += ' < input.txt'
-            }
-
-            const outputLog = await _runScript(command, res)
-            response.output =
-                outputLog.error !== undefined
-                    ? _prepareErrorMessage(outputLog, language, command)
-                    : outputLog.result.stdout
-            if (outputLog.error) {
                 response.error = 1
             }
-        } else {
-            response.error = 1
+        } catch (e) {
+            logger.error(e)
+            throw new Error('Unable to execute code.')
         }
-    } catch (e) {
-        logger.error(e)
-        throw new Error('Unable to execute code.')
     }
     return response
 }
