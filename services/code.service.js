@@ -2,53 +2,11 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
 const fs = require('fs')
-const { PYTHON } = require('../constants/allowedLanguages')
+const { PYTHON, PROMPTV1 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require("openai");
 const openai = new OpenAI();
-
-const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
-const ALLOWED_RAM = 512
-const LANGUAGES_CONFIG = {
-    c: {
-        compile: 'gcc -o a.out solution.c',
-        run: './a.out',
-        timeout: 2,
-        filename: 'solution.c',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    cpp: {
-        compile: 'g++ -o a.out -pthread -O0 solution.cpp',
-        run: './a.out',
-        timeout: 2,
-        filename: 'solution.cpp',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    python: {
-        compile: 'python -m compileall -q solution.py',
-        run: 'python solution.py',
-        timeout: 10,
-        filename: 'solution.py',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    java: {
-        compile: 'javac Solution.java',
-        run: 'java Solution',
-        timeout: 4,
-        filename: 'Solution.java',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    nodejs: {
-        compile: 'node --check solution.js',
-        run: 'node solution.js',
-        timeout: 10,
-        filename: 'solution.js',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    promptv1: {
-        model: "gpt-4-1106-preview",
-    }
-}
+const { LANGUAGES_CONFIG } = require('../configs/language.config')
 
 const _runScript = async (cmd, res) => {
     let initialMemory = 0
@@ -155,13 +113,72 @@ const _executePrompt = async (langConfig, prompt, response) => {
     }
 }
 
-const execute = async (req, res) => {
+const _executeCode = async (req, res, response) => {
     let args = null
     let code = null
     let hasInputFiles = false
     let language = null
     let stdin = null
 
+    try {
+        // Parse Input
+        // eslint-disable-next-line no-unused-vars
+        args = req.args
+        // eslint-disable-next-line no-unused-vars
+        hasInputFiles = req.hasInputFiles
+
+        code = req.script
+        language = req.language
+        stdin = req.stdin
+        const langConfig = LANGUAGES_CONFIG[language]
+        // Remove all files from tmp folder
+        await _runScript('rm -rf /tmp/*', res)
+
+        // Write file in tmp folder based on language
+        await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
+
+        const compileCommand = `cd /tmp/ && ${langConfig.compile}`
+        // Run compile command
+        const compileLog = await _runScript(compileCommand, res)
+        response.compileMessage =
+            compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+
+        // Check if there is no compilation error
+        if (response.compileMessage === '') {
+            let command
+            if (language === 'java') {
+                // Remove ulimit as a temp fix
+                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+            } else {
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+            }
+
+            // Check if there is any input that is to be provided to code execution
+            if (stdin) {
+                // Write input in a file in tmp folder
+                await fs.promises.writeFile('/tmp/input.txt', stdin)
+                // Update the execution command
+                command += ' < input.txt'
+            }
+
+            const outputLog = await _runScript(command, res)
+            response.output =
+                outputLog.error !== undefined
+                    ? _prepareErrorMessage(outputLog, language, command)
+                    : outputLog.result.stdout
+            if (outputLog.error) {
+                response.error = 1
+            }
+        } else {
+            response.error = 1
+        }
+    } catch (e) {
+        logger.error(e)
+        throw new Error('Unable to execute code.')
+    }
+}
+
+const execute = async (req, res) => {
     const response = {
         output: '',
         executeTime: null,
@@ -175,66 +192,11 @@ const execute = async (req, res) => {
         errorMessage: ''
     }
 
-    if (req.language === 'promptv1') {
+    if (req.language === PROMPTV1) {
         await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
     }
     else {
-        try {
-            // Parse Input
-            // eslint-disable-next-line no-unused-vars
-            args = req.args
-            // eslint-disable-next-line no-unused-vars
-            hasInputFiles = req.hasInputFiles
-
-            code = req.script
-            language = req.language
-            stdin = req.stdin
-            const langConfig = LANGUAGES_CONFIG[language]
-            // Remove all files from tmp folder
-            await _runScript('rm -rf /tmp/*', res)
-
-            // Write file in tmp folder based on language
-            await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
-
-            const compileCommand = `cd /tmp/ && ${langConfig.compile}`
-            // Run compile command
-            const compileLog = await _runScript(compileCommand, res)
-            response.compileMessage =
-                compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
-
-            // Check if there is no compilation error
-            if (response.compileMessage === '') {
-                let command
-                if (language === 'java') {
-                    // Remove ulimit as a temp fix
-                    command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
-                } else {
-                    command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
-                }
-
-                // Check if there is any input that is to be provided to code execution
-                if (stdin) {
-                    // Write input in a file in tmp folder
-                    await fs.promises.writeFile('/tmp/input.txt', stdin)
-                    // Update the execution command
-                    command += ' < input.txt'
-                }
-
-                const outputLog = await _runScript(command, res)
-                response.output =
-                    outputLog.error !== undefined
-                        ? _prepareErrorMessage(outputLog, language, command)
-                        : outputLog.result.stdout
-                if (outputLog.error) {
-                    response.error = 1
-                }
-            } else {
-                response.error = 1
-            }
-        } catch (e) {
-            logger.error(e)
-            throw new Error('Unable to execute code.')
-        }
+        await _executeCode(req, res, response)
     }
     return response
 }

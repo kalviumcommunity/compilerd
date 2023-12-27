@@ -1,7 +1,8 @@
 module.exports = {
+    C: 'c',
     CPP: 'cpp',
     PYTHON: 'python',
-    NODEJS: 'nodejs',
     JAVA: 'java',
-    C: 'c',
+    NODEJS: 'nodejs',
+    PROMPTV1: 'promptv1'
 }
