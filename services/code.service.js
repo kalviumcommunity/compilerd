@@ -2,7 +2,7 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
 const fs = require('fs')
-const { PYTHON, PROMPTV1 } = require('../enums/supportedLanguages')
+const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require("openai");
 const openai = new OpenAI();
@@ -194,7 +194,7 @@ const execute = async (req, res) => {
         errorMessage: ''
     }
 
-    if (req.language === PROMPTV1) {
+    if ([PROMPTV1 , PROMPTV2].includes(req.language)) {
         await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
     }
     else {

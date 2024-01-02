@@ -4,5 +4,6 @@ module.exports = {
     PYTHON: 'python',
     JAVA: 'java',
     NODEJS: 'nodejs',
-    PROMPTV1: 'promptv1'
+    PROMPTV1: 'promptv1',
+    PROMPTV2: 'promptv2'
 }

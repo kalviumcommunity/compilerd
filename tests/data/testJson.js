@@ -208,9 +208,24 @@ const testCases = [
         }
     },
     {
-        name: "OPEN AI test",
+        name: "OPEN AI test promptv1",
         reqObject: {
             language: "promptv1",
+            prompt: "The question is what is 2 plus 2. The answer given is 4."
+        },
+        expectedResponse: {
+            val: {
+                score: 10,
+                rationale: "good answer"
+            },
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "OPEN AI test promptv2",
+        reqObject: {
+            language: "promptv2",
             prompt: "The question is what is 2 plus 2. The answer given is 4."
         },
         expectedResponse: {
