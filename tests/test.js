@@ -1,26 +1,16 @@
-const axios = require('axios');
-const assert = require('assert');
-const {testCases} = require('./data/testJson')
+const axios = require('axios')
+const { testCases } = require('./data/testJson')
+const { describe, expect, it } = require('@jest/globals')
 
-const ENDPOINT = process.env.ENDPOINT || `http://localhost:3000/api/execute/`
+const ENDPOINT = process.env.ENDPOINT || 'http://localhost:3000/api/execute/'
 
-async function runTests(){
-    const totalTests = testCases.length
-    let testCasesPassed = 0
+describe('Tests', () => {
     for (const testCase of testCases) {
-        try{
+        it(testCase.name, async () => {
             const response = await axios.post(ENDPOINT, testCase.reqObject)
-            assert.strictEqual(response.data.error, testCase.expectedResponse.error, `Compilation error : ${response.data.compile_message}`)
-            assert.strictEqual(response.status, testCase.expectedResponse.status, `Expected status code ${testCase.expectedResponse.status}`);
-            assert.strictEqual(response.data.output, testCase.expectedResponse.val, 'Expected output doesnot match')
-            console.log(`${testCase.name}, status : passed`)
-            testCasesPassed++
-        } catch(error) {
-            console.log(`${testCase.name}, stauts : failed : `, error.message);
-        }
-    } 
-    const passPercent = testCasesPassed/totalTests*100;
-    console.log(`\npass percentage: ${passPercent}, failed tests count: ${totalTests-testCasesPassed}`)
-}
-
-runTests()
+            expect(response).toHaveProperty('data.output', testCase.expectedResponse.val)
+            expect(response).toHaveProperty('status', testCase.expectedResponse.status)
+            expect(response).toHaveProperty('data.error', testCase.expectedResponse.error)
+        }, 15000)
+    }
+})
