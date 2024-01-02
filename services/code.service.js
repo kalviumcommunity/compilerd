@@ -77,7 +77,7 @@ const _executePrompt = async (langConfig, prompt, response) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
+                    content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. You have to provide a score to the answer per the rubric. Your response is ONLY a json, with 2 keys: score, and rationale. You provide a score out of 10, per the question, student's answer and the criteria listed below. The rationale clearly explains why you provided the score, including breaking up the score when needed."
                 }, {
                     role: "user",
                     content: prompt
@@ -178,6 +178,14 @@ const _executeCode = async (req, res, response) => {
     }
 }
 
+const substitutePlaceholders = (req) => {
+    req.prompt = req.prompt.replace("{{Question placeholder}}", req.question)
+    if("expected_answer" in req){
+        req.prompt = req.prompt.replace("{{Expected answer placeholder}}", req.expected_answer)
+    }
+    req.prompt = req.prompt.replace("{{Student solution placeholder}}", req.user_answer)
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -193,6 +201,7 @@ const execute = async (req, res) => {
     }
 
     if (req.language === PROMPTV1) {
+        substitutePlaceholders(req)
         await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
     }
     else {
