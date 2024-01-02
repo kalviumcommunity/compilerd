@@ -78,7 +78,8 @@ const _executePrompt = async (langConfig, prompt, response) => {
                 {
                     role: "system",
                     content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
-                }, {
+                }, 
+                {
                     role: "user",
                     content: prompt
                 }
@@ -103,6 +104,7 @@ const _executePrompt = async (langConfig, prompt, response) => {
             const errorMessage = "Unable to parse OPEN AI response"
             response.errorMessage = errorMessage
             response.statusCode = responseCode
+            response.error = 1
         } else {
             response.output = openAIResponse
         }
