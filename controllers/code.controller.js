@@ -7,9 +7,8 @@ const execute = async (req, res) => {
     try {
         const validatedData = await isValidForExecute(req.body)
 
-        return respond(res, 200, codeTransformer.transform(
-            await codeService.execute(validatedData, res),
-        ))
+        const responseBody = await codeService.execute(validatedData, res)
+        return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody))
     } catch (error) {
         respondWithException(res, error)
     }
