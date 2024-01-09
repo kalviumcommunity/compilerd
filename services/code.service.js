@@ -43,7 +43,7 @@ const _runScript = async (cmd, res) => {
                 // exit the main process
                 process.exit(1)
             }
-        }, 250)
+        }, 10)
         const execPromise = exec(cmd);
         child = execPromise.child;
         console.log('Spawned child pid:', child.pid);
