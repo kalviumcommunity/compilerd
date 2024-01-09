@@ -7,10 +7,12 @@ const logger = require('../loader').helpers.l
 const OpenAI = require("openai");
 const openai = new OpenAI();
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
+const { log } = require('console')
 
 const _runScript = async (cmd, res) => {
     let initialMemory = 0
     let myInterval
+    let child
     try {
         myInterval = setInterval(() => {
             if (!initialMemory) {
@@ -24,6 +26,10 @@ const _runScript = async (cmd, res) => {
                     total_mem: Math.round((os.totalmem() / 1024 / 1024)),
                 })
                 logger.warn('Memory exceeded')
+                // try to kill the child processes
+                process.kill(child.pid);
+                
+                // send response that we are not able to do anything
                 res.status(200).send({
                     output: 'Memory exceeded',
                     execute_time: null,
@@ -34,10 +40,15 @@ const _runScript = async (cmd, res) => {
                     compile_message: '',
                     error: 1,
                 })
+                // exit the main process
                 process.exit(1)
             }
         }, 250)
-        const result = await exec(cmd)
+        const execPromise = exec(cmd);
+        child = execPromise.child;
+        console.log('Spawned child pid:', child.pid);
+        const result = await execPromise;
+        // const result = await exec(cmd)
         clearInterval(myInterval)
         return { result }
     } catch (e) {
