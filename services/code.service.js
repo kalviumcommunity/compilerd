@@ -33,7 +33,7 @@ const _runScript = async (cmd, res) => {
                 // try to kill the child processes
                 process.kill(child.pid);
                 // wait for some time
-                await sleep(200)
+                await sleep(230)
                 // send response that we are not able to do anything
                 res.status(200).send({
                     output: 'Memory exceeded',
@@ -46,7 +46,8 @@ const _runScript = async (cmd, res) => {
                     error: 1,
                 })
                 // exit the main process
-                process.exit(1)
+                // process.exit(1)
+                setImmediate(() => process.exit(1));
             }
         }, 250)
         const execPromise = exec(cmd);
