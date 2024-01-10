@@ -9,10 +9,6 @@ const openai = new OpenAI();
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const { log } = require('console')
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 const _runScript = async (cmd, res) => {
     let initialMemory = 0
     let myInterval
@@ -33,7 +29,7 @@ const _runScript = async (cmd, res) => {
                 // try to kill the child processes
                 process.kill(child.pid);
                 // wait for some time
-                await sleep(230)
+                await new Promise(resolve => setTimeout(resolve, 100));
                 // send response that we are not able to do anything
                 res.status(200).send({
                     output: 'Memory exceeded',
@@ -47,7 +43,7 @@ const _runScript = async (cmd, res) => {
                 })
                 // exit the main process
                 // process.exit(1)
-                setImmediate(() => process.exit(1));
+                process.exit(1)
             }
         }, 250)
         const execPromise = exec(cmd);

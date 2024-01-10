@@ -1,41 +1,27 @@
-// const util = require('util');
-// const exec = util.promisify(require('child_process').exec);
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
-// const function1 = async () => {
-//     let intervalId;
-//     try {
-//         const first_promise = exec('sleep 5');
-//         const child = first_promise.child;
+const function1 = async () => {
+    console.log('Start');
 
-//         intervalId = setInterval(() => {
-//             if (child && !child.killed) {
-//                 try {
-//                     process.kill(child.pid);
-//                 } catch (e) {
-//                     console.log('Error killing process:', e.message);
-//                 }
-//             } else {
-//                 clearInterval(intervalId);
-//             }
-//         }, 3000);
+    setTimeout(() => {
+        console.log('Inside setTimeout');
+    }, 20000); // setTimeout will be executed after 2000ms
 
-//         const result_first = await first_promise;
-//     } catch (e) {
-//         console.log(e);
-//     } finally {
-//         if (intervalId) {
-//             clearInterval(intervalId);
-//         }
-//     }
-// }
+    console.log('After setTimeout');
 
-// function1();
+    await exec('sleep 5'); // Pauses execution for 5 seconds
+    console.log('After first sleep');
 
-
-
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    await exec('sleep 5'); // Pauses execution for another 5 seconds
+    console.log('End');
 }
 
-sleep(5000)
+
+
+const function_2 = async () => {
+    await function1();
+    console.log('out')
+}
+
+function_2()
