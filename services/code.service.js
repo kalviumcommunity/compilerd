@@ -28,6 +28,11 @@ const _runScript = async (cmd, res) => {
                 logger.warn('Memory exceeded')
                 // try to kill the child processes
                 process.kill(child.pid);
+                logger.info({
+                    use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
+                    free_mem: Math.round((os.freemem() / 1024 / 1024)),
+                    total_mem: Math.round((os.totalmem() / 1024 / 1024)),
+                })
                 // wait for some time
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 // send response that we are not able to do anything
