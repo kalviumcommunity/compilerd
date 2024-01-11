@@ -63,12 +63,12 @@ const _runScript = async (cmd, res) => {
                 // logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
 
                 // await new Promise(resolve => setTimeout(resolve, 1000));
-                await new Promise(resolve => {
-                    setTimeout(() => {
-                        console.log('waiting for some time');
-                        resolve();
-                    }, 250);
-                });
+                // await new Promise(resolve => {
+                //     setTimeout(() => {
+                //         console.log('waiting for some time');
+                //         resolve();
+                //     }, 250);
+                // });
 
                 // wait for some time
                 // await new Promise(resolve => setTimeout(resolve, 1000));
