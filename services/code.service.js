@@ -20,6 +20,7 @@ const _runScript = async (cmd, res) => {
             }
 
             if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 425) {
+                logger.info(cmd)
                 logger.info({
                     use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
                     free_mem: Math.round((os.freemem() / 1024 / 1024)),
