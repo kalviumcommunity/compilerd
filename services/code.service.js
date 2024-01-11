@@ -25,16 +25,37 @@ const _runScript = async (cmd, res) => {
                     free_mem: Math.round((os.freemem() / 1024 / 1024)),
                     total_mem: Math.round((os.totalmem() / 1024 / 1024)),
                 })
-                logger.warn('Memory exceeded')
+                // logger.warn('Memory exceeded')
+                // logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
                 // try to kill the child processes
-                process.kill(child.pid);
+                try {
+                    process.kill(child.pid);
+                } catch (e) {
+                    console.log(e)
+                }
+
+                await new Promise((resolve) => child.on('exit', resolve));
+
+                // child.on('exit', () => {
+                //     logger.info({
+                //         use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
+                //         free_mem: Math.round((os.freemem() / 1024 / 1024)),
+                //         total_mem: Math.round((os.totalmem() / 1024 / 1024)),
+                //     })
+                //     logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
+                // })
+
                 logger.info({
                     use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
                     free_mem: Math.round((os.freemem() / 1024 / 1024)),
                     total_mem: Math.round((os.totalmem() / 1024 / 1024)),
                 })
+                // logger.warn('Memory exceeded')
+                // logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
+
+
                 // wait for some time
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // await new Promise(resolve => setTimeout(resolve, 1000));
                 // send response that we are not able to do anything
                 res.status(200).send({
                     output: 'Memory exceeded',
@@ -54,7 +75,12 @@ const _runScript = async (cmd, res) => {
         const execPromise = exec(cmd);
         child = execPromise.child;
         // console.log('Spawned child pid:', child.pid);
-        const result = await execPromise;
+        let result
+        try {
+            result = await execPromise
+        } catch (e) {
+            console.log(e)
+        }
         // const result = await exec(cmd)
         clearInterval(myInterval)
         return { result }
@@ -96,7 +122,7 @@ const _executePrompt = async (langConfig, prompt, response) => {
                 {
                     role: "system",
                     content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
-                }, 
+                },
                 {
                     role: "user",
                     content: prompt
@@ -212,7 +238,7 @@ const execute = async (req, res) => {
         errorMessage: ''
     }
 
-    if ([PROMPTV1 , PROMPTV2].includes(req.language)) {
+    if ([PROMPTV1, PROMPTV2].includes(req.language)) {
         await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
     }
     else {
