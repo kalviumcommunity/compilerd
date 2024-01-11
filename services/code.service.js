@@ -29,13 +29,21 @@ const _runScript = async (cmd, res) => {
                 // logger.warn('Memory exceeded')
                 // logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
                 // try to kill the child processes
+
+                const exitPromise = new Promise((resolve) => {
+                    child.on('exit', () => {
+                        console.log('exiting child process');
+                        resolve();
+                    })
+                });
+
                 try {
                     process.kill(child.pid);
                 } catch (e) {
                     console.log(e)
                 }
 
-                await new Promise((resolve) => child.on('exit', resolve));
+                await exitPromise
 
                 // child.on('exit', () => {
                 //     logger.info({
@@ -54,6 +62,13 @@ const _runScript = async (cmd, res) => {
                 // logger.warn('Memory exceeded')
                 // logger.info((await exec(`ps -ef | grep ${process.pid}`)).stdout)
 
+                // await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => {
+                    setTimeout(() => {
+                        console.log('waiting for some time');
+                        resolve();
+                    }, 250);
+                });
 
                 // wait for some time
                 // await new Promise(resolve => setTimeout(resolve, 1000));
