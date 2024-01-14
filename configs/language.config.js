@@ -1,6 +1,6 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, PROMPTV1, PROMPTV2 } = require("../enums/supportedLanguages")
+const { CPP, C, PYTHON, JAVA, NODEJS, PROMPTV1, PROMPTV2, GOLANG } = require("../enums/supportedLanguages")
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
-const ALLOWED_RAM = 512
+const ALLOWED_RAM = 1024
 
 const LANGUAGES_CONFIG = {
     [C]: {
@@ -36,6 +36,13 @@ const LANGUAGES_CONFIG = {
         run: 'node solution.js',
         timeout: 10,
         filename: 'solution.js',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [GOLANG]: {
+        compile: 'go build -o solution solution.go',
+        run: './solution',
+        timeout: 10,
+        filename: 'solution.go',
         memory: ALLOWED_RAM * ONE_MB,
     },
     [PROMPTV1]: {
