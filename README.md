@@ -100,7 +100,7 @@ For local development we should have the following dependencies set up locally i
   - It is important to make sure that changes are not breaking, hence they should be tested aginst provided suite of test cases in repo.
   - Run the server in a docker container by using below commands :
     - ```docker build -t <tag-name> .```
-    - ```docker run -p 3000:3000 <tag-name>```
+    - ```docker run -p 3000:3000 -e OPENAI_API_KEY=<your-api-key> <image-name>```
   - Execute the test script by running command ```node ./tests/test.js```
   - Summary can be seen on the console when all the tests have finished.
 
