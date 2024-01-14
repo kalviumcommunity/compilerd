@@ -184,6 +184,54 @@ const testCases = [
         }
     },
     {
+        name: "golang : hello world",
+        reqObject: {
+            language: "golang",
+            script:
+                "package main\n" +
+                "import \"fmt\"\n" +
+                "func main() {\n" +
+                "       fmt.Println(\"hello world\")\n" +
+                "}\n",
+        },
+        expectedResponse: {
+            val: "hello world\n",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "golang : find sqrt",
+        reqObject: {
+            language: "golang",
+            script:
+                "package main\n" +
+                "import (\n" +
+                "\"fmt\"\n" +
+                "\"math\"\n" +
+                "\"os\"\n" +
+                "\"strconv\"\n" +
+                ")\n" +
+                "func main() {\n" +
+                "       input := \"\"\n" +
+                "       fmt.Scanln(&input)\n" +
+                "       number, err := strconv.ParseFloat(input, 64)\n" +
+                "       if err != nil {\n" +
+                "       fmt.Println(\"Error:\", err)\n" +
+                "       os.Exit(1)\n" +
+                "   }\n" +
+                "       squareRoot := math.Sqrt(number)\n" +
+                "       fmt.Printf(\"%v\", squareRoot)\n" +
+                "}\n",
+            stdin: "25"
+        },
+        expectedResponse: {
+            val: "5",
+            status: 200,
+            error: 0
+        }
+    },
+    {
         name: "TLE test",
         reqObject: {
             language: "nodejs",
@@ -199,7 +247,7 @@ const testCases = [
         name: "MLE test",
         reqObject: {
             language: "python",
-            script: "one_gb_data = bytearray(1000 * 1024 * 1024)"
+            script: "one_gb_data = bytearray(1000 * 1024 * 1024 * 2)"
         },
         expectedResponse: {
             val: "Memory limit exceeded",
