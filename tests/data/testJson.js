@@ -232,6 +232,21 @@ const testCases = [
         }
     },
     {
+        name: "MLE test 3",
+        reqObject: {
+            language: "python",
+            script:
+                "a = [100]\n" +
+                "for i in a:\n" +
+                "    a.append(i)\n"
+        },
+        expectedResponse: {
+            val: "Memory limit exceeded",
+            status: 200,
+            error: 1
+        }
+    },
+    {
         name: "OPEN AI test promptv1",
         reqObject: {
             language: "promptv1",
