@@ -65,7 +65,6 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
              */
             gc()
             await new Promise(resolve => setTimeout(resolve, 2000))
-            isChildKilled = false
             // need some way to know from the error message that memory is the issue
             e.message = e.message + ' Process killed due to Memory Limit Exceeded'
         }
