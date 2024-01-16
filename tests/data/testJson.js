@@ -208,6 +208,45 @@ const testCases = [
         }
     },
     {
+        name: "MLE test 2",
+        reqObject: {
+            language: "python",
+            script:
+                "import time\n" +
+                "def consume_memory(target_mb, duration_sec):\n" +
+                "    float_size = 8\n" +
+                "    floats_per_mb = (1024 * 1024) // float_size\n" +
+                "    total_floats = target_mb * floats_per_mb\n" +
+                "    iterations = int(duration_sec / 0.1)\n" +
+                "    floats_per_iteration = total_floats // iterations\n" +
+                "    memory_hog = []\n" +
+                "    for _ in range(iterations):\n" +
+                "        memory_hog.extend([0.0] * floats_per_iteration)\n" +
+                "        time.sleep(0.1)\n" +
+                "consume_memory(1000, 1)\n"
+        },
+        expectedResponse: {
+            val: "Memory limit exceeded",
+            status: 200,
+            error: 1
+        }
+    },
+    {
+        name: "MLE test 3",
+        reqObject: {
+            language: "python",
+            script:
+                "a = [100]\n" +
+                "for i in a:\n" +
+                "    a.append(i)\n"
+        },
+        expectedResponse: {
+            val: "Memory limit exceeded",
+            status: 200,
+            error: 1
+        }
+    },
+    {
         name: "OPEN AI test promptv1",
         reqObject: {
             language: "promptv1",

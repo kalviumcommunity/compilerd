@@ -1,3 +1,4 @@
+/* globals gc */
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
@@ -8,42 +9,82 @@ const OpenAI = require("openai");
 const openai = new OpenAI();
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 
-const _runScript = async (cmd, res) => {
+const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
-    let myInterval
+    let memoryCheckInterval
+    let childProcess
+    let isChildKilled = false
     try {
-        myInterval = setInterval(() => {
-            if (!initialMemory) {
-                initialMemory = Math.round((os.freemem() / 1024 / 1024))
-            }
+        if (runMemoryCheck) {
+            memoryCheckInterval = setInterval(async () => {
+                if (!initialMemory) {
+                    initialMemory = Math.round((os.freemem() / 1024 / 1024))
+                }
 
-            if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 425) {
-                logger.info({
-                    use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
-                    free_mem: Math.round((os.freemem() / 1024 / 1024)),
-                    total_mem: Math.round((os.totalmem() / 1024 / 1024)),
-                })
-                logger.warn('Memory exceeded')
-                res.status(200).send({
-                    output: 'Memory exceeded',
-                    execute_time: null,
-                    status_code: 200,
-                    memory: null,
-                    cpu_time: null,
-                    output_files: [],
-                    compile_message: '',
-                    error: 1,
-                })
-                process.exit(1)
-            }
-        }, 250)
-        const result = await exec(cmd)
-        clearInterval(myInterval)
+                if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 400) {
+                    /**
+                     * detection logic of memory limit exceeded
+                     */
+                    logger.info({
+                        use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
+                        free_mem: Math.round((os.freemem() / 1024 / 1024)),
+                        total_mem: Math.round((os.totalmem() / 1024 / 1024)),
+                    })
+                    logger.warn('Memory exceeded')
+
+                    if (childProcess) {
+                        childProcess.kill('SIGKILL')
+                        isChildKilled = true
+                    } else {
+                        logger.warn('Child process is undefined and response is on way, trying to send another response')
+                        _respondWithMemoryExceeded(res)
+                    }
+                }
+            }, 50)
+        }
+
+        const execPromise = exec(cmd)
+        childProcess = execPromise.child
+
+        const result = await execPromise
+
+        if (memoryCheckInterval) {
+            clearInterval(memoryCheckInterval); childProcess = undefined
+        }
+
         return { result }
     } catch (e) {
-        if (myInterval) { clearInterval(myInterval) }
+        if (memoryCheckInterval) {
+            clearInterval(memoryCheckInterval); childProcess = undefined
+        }
+
+        if (isChildKilled) {
+            /**
+             * Logic for doing proper garbage collection once child process is killed
+             * 2 sec delay is added just to give enough time for GC to happen
+             */
+            gc()
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            // need some way to know from the error message that memory is the issue
+            e.message = e.message + ' Process killed due to Memory Limit Exceeded'
+        }
         // languages like java, c and c++ sometimes throw an error and write it to stdout
         return { error: e.message, stdout: e.stdout, stderr: e.stderr }
+    }
+}
+
+const _respondWithMemoryExceeded = (res) => {
+    if (!res.headersSent) {
+        res.status(200).send({
+            output: 'Memory exceeded',
+            execute_time: null,
+            status_code: 200,
+            memory: null,
+            cpu_time: null,
+            output_files: [],
+            compile_message: '',
+            error: 1,
+        })
     }
 }
 
@@ -60,7 +101,7 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     }
 
     const subString = 'MemoryError\n'
-    if (errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) {
+    if ((errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) || errorMsg.includes('Process killed due to Memory Limit Exceeded')) {
         errorMsg = 'Memory limit exceeded'
     }
 
@@ -141,7 +182,7 @@ const _executeCode = async (req, res, response) => {
 
         const compileCommand = `cd /tmp/ && ${langConfig.compile}`
         // Run compile command
-        const compileLog = await _runScript(compileCommand, res)
+        const compileLog = await _runScript(compileCommand, res, true)
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
@@ -163,7 +204,7 @@ const _executeCode = async (req, res, response) => {
                 command += ' < input.txt'
             }
 
-            const outputLog = await _runScript(command, res)
+            const outputLog = await _runScript(command, res, true)
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
