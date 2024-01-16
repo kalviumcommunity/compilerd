@@ -1,4 +1,4 @@
-const {logger} = require('./logger')
+const { logger } = require('./logger')
 const { ValidationError } = require('joi')
 
 const _logNon200Codes = (code, body) => {
@@ -38,4 +38,4 @@ const respondWithException = (res, error) => {
     return res.status(errorCode).send(body)
 }
 
-module.exports = {respond, respondWithException}
+module.exports = { respond, respondWithException }
