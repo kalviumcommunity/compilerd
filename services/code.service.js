@@ -1,49 +1,90 @@
+/* globals gc */
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
 const fs = require('fs')
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
-const OpenAI = require("openai");
-const openai = new OpenAI();
+const OpenAI = require('openai')
+const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 
-const _runScript = async (cmd, res) => {
+const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
-    let myInterval
+    let memoryCheckInterval
+    let childProcess
+    let isChildKilled = false
     try {
-        myInterval = setInterval(() => {
-            if (!initialMemory) {
-                initialMemory = Math.round((os.freemem() / 1024 / 1024))
-            }
+        if (runMemoryCheck) {
+            memoryCheckInterval = setInterval(async () => {
+                if (!initialMemory) {
+                    initialMemory = Math.round((os.freemem() / 1024 / 1024))
+                }
 
-            if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 425) {
-                logger.info({
-                    use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
-                    free_mem: Math.round((os.freemem() / 1024 / 1024)),
-                    total_mem: Math.round((os.totalmem() / 1024 / 1024)),
-                })
-                logger.warn('Memory exceeded')
-                res.status(200).send({
-                    output: 'Memory exceeded',
-                    execute_time: null,
-                    status_code: 200,
-                    memory: null,
-                    cpu_time: null,
-                    output_files: [],
-                    compile_message: '',
-                    error: 1,
-                })
-                process.exit(1)
-            }
-        }, 250)
-        const result = await exec(cmd)
-        clearInterval(myInterval)
+                if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 400) {
+                    /**
+                     * detection logic of memory limit exceeded
+                     */
+                    logger.info({
+                        use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
+                        free_mem: Math.round((os.freemem() / 1024 / 1024)),
+                        total_mem: Math.round((os.totalmem() / 1024 / 1024)),
+                    })
+                    logger.warn('Memory exceeded')
+
+                    if (childProcess) {
+                        childProcess.kill('SIGKILL')
+                        isChildKilled = true
+                    } else {
+                        logger.warn('Child process is undefined and response is on way, trying to send another response')
+                        _respondWithMemoryExceeded(res)
+                    }
+                }
+            }, 50)
+        }
+
+        const execPromise = exec(cmd)
+        childProcess = execPromise.child
+
+        const result = await execPromise
+
+        if (memoryCheckInterval) {
+            clearInterval(memoryCheckInterval); childProcess = undefined
+        }
+
         return { result }
     } catch (e) {
-        if (myInterval) { clearInterval(myInterval) }
+        if (memoryCheckInterval) {
+            clearInterval(memoryCheckInterval); childProcess = undefined
+        }
+
+        if (isChildKilled) {
+            /**
+             * Logic for doing proper garbage collection once child process is killed
+             * 2 sec delay is added just to give enough time for GC to happen
+             */
+            gc()
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            // need some way to know from the error message that memory is the issue
+            e.message = e.message + ' Process killed due to Memory Limit Exceeded'
+        }
         // languages like java, c and c++ sometimes throw an error and write it to stdout
         return { error: e.message, stdout: e.stdout, stderr: e.stderr }
+    }
+}
+
+const _respondWithMemoryExceeded = (res) => {
+    if (!res.headersSent) {
+        res.status(200).send({
+            output: 'Memory exceeded',
+            execute_time: null,
+            status_code: 200,
+            memory: null,
+            cpu_time: null,
+            output_files: [],
+            compile_message: '',
+            error: 1,
+        })
     }
 }
 
@@ -60,7 +101,7 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     }
 
     const subString = 'MemoryError\n'
-    if (errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) {
+    if ((errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) || errorMsg.includes('Process killed due to Memory Limit Exceeded')) {
         errorMsg = 'Memory limit exceeded'
     }
 
@@ -70,24 +111,23 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     return errorMsg.trim()
 }
 
-
 const _executePrompt = async (langConfig, prompt, response) => {
     try {
         const completion = await openai.chat.completions.create({
             messages: [
                 {
-                    role: "system",
-                    content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
-                }, 
+                    role: 'system',
+                    content: 'You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed',
+                },
                 {
-                    role: "user",
-                    content: prompt
-                }
+                    role: 'user',
+                    content: prompt,
+                },
             ],
             model: langConfig.model,
             response_format: {
-                type: "json_object"
-            }
+                type: 'json_object',
+            },
         })
         let openAIResponse = {}
         if (completion && completion.choices && completion.choices[0] && completion.choices[0].message) {
@@ -101,14 +141,13 @@ const _executePrompt = async (langConfig, prompt, response) => {
              * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
              */
             const responseCode = 502
-            const errorMessage = "Unable to parse OPEN AI response"
+            const errorMessage = 'Unable to parse OPEN AI response'
             response.errorMessage = errorMessage
             response.statusCode = responseCode
             response.error = 1
         } else {
             response.output = openAIResponse
         }
-
     } catch (e) {
         logger.error(e)
         throw new Error('Unable to evaluate the prompt')
@@ -141,7 +180,7 @@ const _executeCode = async (req, res, response) => {
 
         const compileCommand = `cd /tmp/ && ${langConfig.compile}`
         // Run compile command
-        const compileLog = await _runScript(compileCommand, res)
+        const compileLog = await _runScript(compileCommand, res, true)
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
@@ -163,7 +202,7 @@ const _executeCode = async (req, res, response) => {
                 command += ' < input.txt'
             }
 
-            const outputLog = await _runScript(command, res)
+            const outputLog = await _runScript(command, res, true)
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
@@ -191,13 +230,12 @@ const execute = async (req, res) => {
         compileMessage: '',
         error: 0,
         stdin: req?.stdin,
-        errorMessage: ''
+        errorMessage: '',
     }
 
-    if ([PROMPTV1 , PROMPTV2].includes(req.language)) {
-        await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
-    }
-    else {
+    if ([PROMPTV1, PROMPTV2].includes(req.language)) {
+        await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response)
+    } else {
         await _executeCode(req, res, response)
     }
     return response
