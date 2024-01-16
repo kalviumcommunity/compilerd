@@ -1,284 +1,281 @@
 const testCases = [
     {
-        name: "cpp : hello world",
+        name: 'cpp : hello world',
         reqObject: {
-            language: "cpp",
+            language: 'cpp',
             script:
-                "#include<bits/stdc++.h>\n" +
-                "using namespace std;\n" +
-                "int main(){\n" +
-                "    cout << \"hello world\";\n" +
-                "return 0;\n" +
-                "}\n"
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    cout << "hello world";\n' +
+                'return 0;\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: "hello world",
+            val: 'hello world',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "cpp : print stdin",
+        name: 'cpp : print stdin',
         reqObject: {
-            language: "cpp",
+            language: 'cpp',
             script:
-                "#include<bits/stdc++.h>\n\n" +
-                "using namespace std;\n" +
-                "int main(){\n\n" +
-                "    int a;\n" +
-                "    while(cin >> a){\n" +
-                "        cout << a << endl;\n" +
-                "    }\n" +
-                "    return 0;\n\n" +
-                "}\n",
-            stdin: "1 2 3"
+                '#include<bits/stdc++.h>\n\n' +
+                'using namespace std;\n' +
+                'int main(){\n\n' +
+                '    int a;\n' +
+                '    while(cin >> a){\n' +
+                '        cout << a << endl;\n' +
+                '    }\n' +
+                '    return 0;\n\n' +
+                '}\n',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: "1\n2\n3\n",
+            val: '1\n2\n3\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
 
     },
     {
-        name: "nodejs : hello world",
+        name: 'nodejs : hello world',
         reqObject: {
-            language: "nodejs",
-            script: "console.log('hello world')"
+            language: 'nodejs',
+            script: 'console.log(\'hello world\')',
         },
         expectedResponse: {
-            val: "hello world\n",
+            val: 'hello world\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "nodejs : print stdin",
+        name: 'nodejs : print stdin',
         reqObject: {
-            language: "nodejs",
+            language: 'nodejs',
             script:
-                "process.stdin.setEncoding('utf8'); \n " +
-                "process.stdin.on('data', (input) => { \n " +
-                "  console.log(input); \n " +
-                " \n " +
-                "}); \n ",
-            stdin : "1 2 3"
+                'process.stdin.setEncoding(\'utf8\'); \n ' +
+                'process.stdin.on(\'data\', (input) => { \n ' +
+                '  console.log(input); \n ' +
+                ' \n ' +
+                '}); \n ',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: "1 2 3\n",
+            val: '1 2 3\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "python : hello world",
+        name: 'python : hello world',
         reqObject: {
-            language: "python",
-            script: "print('hello world')"
+            language: 'python',
+            script: 'print(\'hello world\')',
         },
         expectedResponse: {
-            val: "hello world\n",
+            val: 'hello world\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "python : print stdin",
+        name: 'python : print stdin',
         reqObject: {
-            language: "python",
+            language: 'python',
             script:
-                "try:\n" +
-                "    while(True):\n" +
-                "        line = input()\n" +
-                "        if not line:\n" +
-                "            break\n" +
-                "        print(line)\n" +
-                "except EOFError:\n" +
-                "    pass",
-            stdin: "1 2 3"
+                'try:\n' +
+                '    while(True):\n' +
+                '        line = input()\n' +
+                '        if not line:\n' +
+                '            break\n' +
+                '        print(line)\n' +
+                'except EOFError:\n' +
+                '    pass',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: "1 2 3\n",
+            val: '1 2 3\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "c : hello world",
+        name: 'c : hello world',
         reqObject: {
-            language: "c",
+            language: 'c',
             script:
-                "#include<stdio.h>\n\n" +
-                "int main(){\n\n" +
-                "    printf(\"hello world\");\n" +
-                "    return 0;\n" +
-                "}\n"
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    printf("hello world");\n' +
+                '    return 0;\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: "hello world",
+            val: 'hello world',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "c : print stdin",
+        name: 'c : print stdin',
         reqObject: {
-            language: "c",
+            language: 'c',
             script:
-                "#include <stdio.h>\n" +
-                "int main() {\n" +
-                "    int number;\n" +
-                "    while (scanf(\"%d\", &number) == 1) {\n" +
-                "        printf(\"\%d\\n\", number);\n" +
-                "    } \n" +
-                "    return 0;\n" +
-                "}",
-            stdin: "1 2 3"
+                '#include <stdio.h>\n' +
+                'int main() {\n' +
+                '    int number;\n' +
+                '    while (scanf("%d", &number) == 1) {\n' +
+                '        printf("%d\\n", number);\n' +
+                '    } \n' +
+                '    return 0;\n' +
+                '}',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: "1\n2\n3\n",
+            val: '1\n2\n3\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "java : print stdin",
+        name: 'java : print stdin',
         reqObject: {
-            language: "java",
+            language: 'java',
             script:
-                "import java.util.Scanner;\n" +
-                "public class Solution {\n" +
-                "    public static void main(String[] args) {\n" +
-                "        System.out.println(\"hello world\");\n" +
-                "    }\n" +
-                "}\n"
+                'import java.util.Scanner;\n' +
+                'public class Solution {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        System.out.println("hello world");\n' +
+                '    }\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: "hello world\n",
+            val: 'hello world\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "java : print stdin",
+        name: 'java : print stdin',
         reqObject: {
-            language: "java",
+            language: 'java',
             script:
-                "import java.util.Scanner;\n" +
-                "public class Solution {\n" +
-                "    public static void main(String[] args) {\n" +
-                "        Scanner scanner = new Scanner(System.in);\n" +
-                "        while (scanner.hasNextInt()) {\n" +
-                "            int number = scanner.nextInt();\n" +
-                "            System.out.println(number);\n" +
-                "        } \n" +
-                "        scanner.close();\n" +
-                "    }\n" +
-                "}\n",
-            stdin: "1 2 3"
+                'import java.util.Scanner;\n' +
+                'public class Solution {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        Scanner scanner = new Scanner(System.in);\n' +
+                '        while (scanner.hasNextInt()) {\n' +
+                '            int number = scanner.nextInt();\n' +
+                '            System.out.println(number);\n' +
+                '        } \n' +
+                '        scanner.close();\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: "1\n2\n3\n",
+            val: '1\n2\n3\n',
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "TLE test",
+        name: 'TLE test',
         reqObject: {
-            language: "nodejs",
-            script: "for(let i=0 ; ; ){i++}"
+            language: 'nodejs',
+            script: 'for(let i=0 ; ; ){i++}',
         },
         expectedResponse: {
-            val: "Time limit exceeded",
+            val: 'Time limit exceeded',
             status: 200,
-            error: 1
-        }
+            error: 1,
+        },
     },
     {
-        name: "MLE test",
+        name: 'MLE test',
         reqObject: {
-            language: "python",
-            script: "one_gb_data = bytearray(1000 * 1024 * 1024)"
+            language: 'python',
+            script: 'one_gb_data = bytearray(1000 * 1024 * 1024)',
         },
         expectedResponse: {
-            val: "Memory limit exceeded",
+            val: 'Memory limit exceeded',
             status: 200,
-            error: 1
-        }
+            error: 1,
+        },
     },
     {
-        name: "MLE test 2",
+        name: 'MLE test 2',
         reqObject: {
-            language: "python",
+            language: 'python',
             script:
-                "import time\n" +
-                "def consume_memory(target_mb, duration_sec):\n" +
-                "    float_size = 8\n" +
-                "    floats_per_mb = (1024 * 1024) // float_size\n" +
-                "    total_floats = target_mb * floats_per_mb\n" +
-                "    iterations = int(duration_sec / 0.1)\n" +
-                "    floats_per_iteration = total_floats // iterations\n" +
-                "    memory_hog = []\n" +
-                "    for _ in range(iterations):\n" +
-                "        memory_hog.extend([0.0] * floats_per_iteration)\n" +
-                "        time.sleep(0.1)\n" +
-                "consume_memory(1000, 1)\n"
+                'import time\n' +
+                'def consume_memory(target_mb, duration_sec):\n' +
+                '    float_size = 8\n' +
+                '    floats_per_mb = (1024 * 1024) // float_size\n' +
+                '    total_floats = target_mb * floats_per_mb\n' +
+                '    iterations = int(duration_sec / 0.1)\n' +
+                '    floats_per_iteration = total_floats // iterations\n' +
+                '    memory_hog = []\n' +
+                '    for _ in range(iterations):\n' +
+                '        memory_hog.extend([0.0] * floats_per_iteration)\n' +
+                '        time.sleep(0.1)\n' +
+                'consume_memory(1000, 1)\n',
         },
         expectedResponse: {
-            val: "Memory limit exceeded",
+            val: 'Memory limit exceeded',
             status: 200,
-            error: 1
-        }
+            error: 1,
+        },
     },
     {
-        name: "MLE test 3",
+        name: 'MLE test 3',
         reqObject: {
-            language: "python",
+            language: 'python',
             script:
-                "a = [100]\n" +
-                "for i in a:\n" +
-                "    a.append(i)\n"
+                'a = [100]\n' +
+                'for i in a:\n' +
+                '    a.append(i)\n',
         },
         expectedResponse: {
-            val: "Memory limit exceeded",
+            val: 'Memory limit exceeded',
             status: 200,
-            error: 1
-        }
+            error: 1,
+        },
     },
     {
-        name: "OPEN AI test promptv1",
+        name: 'OPEN AI test promptv1',
         reqObject: {
-            language: "promptv1",
-            prompt: "The question is what is 2 plus 2. The answer given is 4."
+            language: 'promptv1',
+            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
         },
         expectedResponse: {
             val: {
                 score: 10,
-                rationale: "good answer"
+                rationale: 'good answer',
             },
             status: 200,
-            error: 0
-        }
+            error: 0,
+        },
     },
     {
-        name: "OPEN AI test promptv2",
+        name: 'OPEN AI test promptv2',
         reqObject: {
-            language: "promptv2",
-            prompt: "The question is what is 2 plus 2. The answer given is 4."
+            language: 'promptv2',
+            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
         },
         expectedResponse: {
             val: {
                 score: 10,
-                rationale: "good answer"
+                rationale: 'good answer',
             },
             status: 200,
-            error: 0
-        }
-    }
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
-
-
-

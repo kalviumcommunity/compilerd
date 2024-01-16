@@ -6,15 +6,15 @@ const isValidForExecute = async (body) => {
         language: Joi.string().required(),
         script: Joi.string()
             .when('language', {
-                is: [PROMPTV1 , PROMPTV2],
+                is: [PROMPTV1, PROMPTV2],
                 then: Joi.optional(),
-                otherwise: Joi.required()
+                otherwise: Joi.required(),
             }),
         prompt: Joi.string()
             .when('language', {
-                is: [PROMPTV1 , PROMPTV2],
+                is: [PROMPTV1, PROMPTV2],
                 then: Joi.required(),
-                otherwise: Joi.optional()
+                otherwise: Joi.optional(),
             }),
         hasInputFiles: Joi.bool(),
         args: Joi.string(),

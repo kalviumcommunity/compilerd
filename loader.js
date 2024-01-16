@@ -8,10 +8,10 @@ const loadDependency = (app) => {
 const helpers = {
     respond,
     respondWithException,
-    l
+    l,
 }
 
 module.exports = {
     helpers,
-    loadDependency
+    loadDependency,
 }

@@ -5,8 +5,8 @@ const os = require('os')
 const fs = require('fs')
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
-const OpenAI = require("openai");
-const openai = new OpenAI();
+const OpenAI = require('openai')
+const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
@@ -111,24 +111,23 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     return errorMsg.trim()
 }
 
-
 const _executePrompt = async (langConfig, prompt, response) => {
     try {
         const completion = await openai.chat.completions.create({
             messages: [
                 {
-                    role: "system",
-                    content: "You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed"
-                }, 
+                    role: 'system',
+                    content: 'You are a helpful tutoring assistant. You will be given the question, students answer, and optionally rubrics for evaluation. If no rubric is given you can build one by yourself. Your task is to evaluate the answer and return a JSON object with only 2 keys: score and rationale. Score should be out of 10. The rationale clearly explains why you provided the score, including breaking up the score when needed',
+                },
                 {
-                    role: "user",
-                    content: prompt
-                }
+                    role: 'user',
+                    content: prompt,
+                },
             ],
             model: langConfig.model,
             response_format: {
-                type: "json_object"
-            }
+                type: 'json_object',
+            },
         })
         let openAIResponse = {}
         if (completion && completion.choices && completion.choices[0] && completion.choices[0].message) {
@@ -142,14 +141,13 @@ const _executePrompt = async (langConfig, prompt, response) => {
              * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
              */
             const responseCode = 502
-            const errorMessage = "Unable to parse OPEN AI response"
+            const errorMessage = 'Unable to parse OPEN AI response'
             response.errorMessage = errorMessage
             response.statusCode = responseCode
             response.error = 1
         } else {
             response.output = openAIResponse
         }
-
     } catch (e) {
         logger.error(e)
         throw new Error('Unable to evaluate the prompt')
@@ -232,13 +230,12 @@ const execute = async (req, res) => {
         compileMessage: '',
         error: 0,
         stdin: req?.stdin,
-        errorMessage: ''
+        errorMessage: '',
     }
 
-    if ([PROMPTV1 , PROMPTV2].includes(req.language)) {
-        await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response);
-    }
-    else {
+    if ([PROMPTV1, PROMPTV2].includes(req.language)) {
+        await _executePrompt(LANGUAGES_CONFIG[req.language], req.prompt, response)
+    } else {
         await _executeCode(req, res, response)
     }
     return response

@@ -1,4 +1,4 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, PROMPTV1, PROMPTV2 } = require("../enums/supportedLanguages")
+const { CPP, C, PYTHON, JAVA, NODEJS, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = 512
 
@@ -39,11 +39,11 @@ const LANGUAGES_CONFIG = {
         memory: ALLOWED_RAM * ONE_MB,
     },
     [PROMPTV1]: {
-        model: "gpt-4-1106-preview",
+        model: 'gpt-4-1106-preview',
     },
     [PROMPTV2]: {
-        model: "gpt-3.5-turbo-1106",
-    }
+        model: 'gpt-3.5-turbo-1106',
+    },
 }
 
-module.exports = {LANGUAGES_CONFIG}
+module.exports = { LANGUAGES_CONFIG }
