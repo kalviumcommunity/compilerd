@@ -53,7 +53,7 @@ We will run the project locally and try to make a request to see a sample use ca
   - Change directory to the project's root folder.
   - Install dependencies : ```npm install```
   - Build docker image : ```docker build -t <tag> .```
-  - Run the docker container with the built image : ```docker run -p 3000:3000 <tag>```
+  - Run the docker container with the built image : ```docker run -p 3000:3000 -e OPENAI_API_KEY=<your-api-key> <image-name>```
   - Now we have the service running on localhost ```http://localhost:3000/```
   - Open postman and try to make a POST request on ```http://localhost:3000/api/execute/``` with given payload :
     ```json 
