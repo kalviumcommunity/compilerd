@@ -20,6 +20,10 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
             memoryCheckInterval = setInterval(async () => {
                 if (!initialMemory) {
                     initialMemory = Math.round((os.freemem() / 1024 / 1024))
+                    logger.info({
+                        initial_memory: initialMemory
+                    })
+
                 }
 
                 if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 400) {
