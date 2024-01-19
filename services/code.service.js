@@ -41,7 +41,7 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
                         _respondWithMemoryExceeded(res)
                     }
                 }
-            }, 50)
+            }, 5)
         }
 
         const execPromise = exec(cmd)
