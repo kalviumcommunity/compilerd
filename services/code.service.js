@@ -10,7 +10,7 @@ const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 
-const _runScript = async (cmd, res, runMemoryCheck = false, printInitialMemory = false) => {
+const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
     let memoryCheckInterval
     let childProcess
@@ -20,11 +20,10 @@ const _runScript = async (cmd, res, runMemoryCheck = false, printInitialMemory =
             memoryCheckInterval = setInterval(async () => {
                 if (!initialMemory) {
                     initialMemory = Math.round((os.freemem() / 1024 / 1024))
-                    if(printInitialMemory === true){
-                        logger.info({
-                            initial_memory: initialMemory
-                        })
-                    }
+                    logger.info({
+                        initial_memory: initialMemory
+                    })
+
                 }
 
                 if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 400) {
@@ -185,14 +184,14 @@ const _executeCode = async (req, res, response) => {
         stdin = req.stdin
         const langConfig = LANGUAGES_CONFIG[language]
         // Remove all files from tmp folder
-        await _runScript('rm -rf /tmp/*', res, true, true)
+        await _runScript('rm -rf /tmp/*', res)
 
         // Write file in tmp folder based on language
         await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
 
         const compileCommand = `cd /tmp/ && ${langConfig.compile}`
         // Run compile command
-        const compileLog = await _runScript(compileCommand, res, true, false)
+        const compileLog = await _runScript(compileCommand, res, true)
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
@@ -214,7 +213,7 @@ const _executeCode = async (req, res, response) => {
                 command += ' < input.txt'
             }
 
-            const outputLog = await _runScript(command, res, true, false)
+            const outputLog = await _runScript(command, res, true)
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
