@@ -184,6 +184,47 @@ const testCases = [
         },
     },
     {
+        name: 'golang : hello world',
+        reqObject: {
+            language: 'golang',
+            script:
+            'package main\n' +
+            'import "fmt"\n' +
+            'func main() {\n' +
+            'fmt.Println("hello world")\n' +
+            '}\n'
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'golang : Print sqrt root',
+        reqObject: {
+            language: 'golang',
+            script:
+            'package main\n' +
+            'import (\n' +
+            '"fmt"\n' +
+            '"math"\n' +
+            ')\n' +
+            'func main() {\n' +
+            'var number float64\n' +
+            'fmt.Scan(&number)\n' +
+            'result := math.Sqrt(number)\n' +
+            'fmt.Printf("%.2f",result)\n' +
+            '}\n',
+            stdin: '144'
+        },
+        expectedResponse: {
+            val: '12.00',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'TLE test',
         reqObject: {
             language: 'nodejs',
