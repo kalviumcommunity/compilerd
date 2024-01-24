@@ -1,6 +1,6 @@
 const { CPP, C, PYTHON, JAVA, NODEJS, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
-const ALLOWED_RAM = process.env.ALLOWED_RAM
+const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
     [C]: {
