@@ -18,8 +18,8 @@ jobs:
       with:
         registry: ghcr.io
         repository: harshsharma2002/testing
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.TOKEN }}
+        username: ${{ secrets.GITHUB_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
       run: |
