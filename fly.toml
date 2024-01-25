@@ -1,0 +1,22 @@
+app = "compilerd"
+
+[env]
+  REGION = "bom"
+
+[build]
+  image = "ghcr.io/harshsharma2002/testing:latest"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+[[services.ports]]
+  handlers = ["http"]
+  port = 3000
+
+[secrets]
+  OPENAI_API_KEY = "your-api-key"
+
+[[services.env]]
+  name = "OPENAI_API_KEY"
+  value = "your-api-key"
