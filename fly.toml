@@ -1,5 +1,5 @@
-[app]
-  name = "compilerd-fly"
+# App Configuration
+app = "compilerd-fly"
 
 [build]
   image = "compilerd"
@@ -14,4 +14,4 @@
     processes = ["app"]
 
 [processes]
-  app = { cmd = ["docker", "run", "-p", "3000:3000", "-e", "OPENAI_API_KEY=$OPENAI_API_KEY", "."] }
+  app = { cmd = ["sh", "/usr/bin/start.sh"] }
