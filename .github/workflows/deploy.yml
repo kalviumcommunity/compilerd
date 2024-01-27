@@ -12,7 +12,7 @@ jobs:
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build the Docker image
-        run: docker build -t compilerd:latest .
+        run: docker build -t compilerd . && docker images
       - name: Push the Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/compilerd:latest
       - name: Deploy to Render
