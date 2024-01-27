@@ -1,15 +1,20 @@
-name: Fly Deploy
+name: Deploy to Render
 on:
   push:
     branches:
       - main
 jobs:
-  deploy:
-    name: Deploy app
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build the Docker image
+        run: docker build . -t your-docker-image:latest
+      - name: Push the Docker image to Docker Hub
+        run: docker push your-docker-image:latest
+      - name: Deploy to Render
+        run: |
+          curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "image=your-docker-image:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services
