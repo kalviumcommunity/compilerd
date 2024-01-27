@@ -12,9 +12,9 @@ jobs:
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build the Docker image
-        run: docker build . -t your-docker-image:latest
+        run: docker build . -t compilerd:latest
       - name: Push the Docker image to Docker Hub
-        run: docker push your-docker-image:latest
+        run: docker push compilerd:latest
       - name: Deploy to Render
         run: |
           curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "image=your-docker-image:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services
