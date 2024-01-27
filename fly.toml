@@ -1,22 +1,27 @@
+# fly.toml
+
+# App Configuration
 app = "compilerd"
 
-[env]
-  REGION = "bom"
+# Build Configuration
+[[builds]]
+  # Use the builder name "app" defined below
+  builder = "app"
 
-[build]
-  image = "ghcr.io/harshsharma2002/testing:latest"
+# Build the Docker image
+[b]uilders]
+  [b]uilders."app" = { image = "docker.io/library/node:16.17.0-alpine3.16" }
 
-[[services]]
-  internal_port = 8080
-  protocol = "tcp"
+# Run the application
+# Define the command to start your application
+# Replace "your-start-command" with the actual command to start your app
+# For example, if your start command is "npm start", then replace it accordingly.
+[processe]s
+  [processe]s."compilerd" = { 
+    script = [ "sh", "/usr/bin/start.sh" ],
+    env = { OPENAI_API_KEY = "your-api-key" }  # Add your environment variables here
+  }
 
-[[services.ports]]
-  handlers = ["http"]
-  port = 3000
-
-[secrets]
-  OPENAI_API_KEY = "your-api-key"
-
-[[services.env]]
-  name = "OPENAI_API_KEY"
-  value = "your-api-key"
+# Expose ports
+[services]
+  [s]ervices.ports = ["3000"]
