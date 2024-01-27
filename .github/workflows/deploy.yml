@@ -16,7 +16,8 @@
         - name: Push the Docker image to Docker Hub
           run: docker push harshpsharma/compilerd:latest
         - name: Deploy to Render
-          run: | curl -X POST \
+          run: |
+            curl -X POST \
                -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
                -H "Content-Type: application/json" \
                -d '{"image": "harshpsharma/compilerd:latest"}' \
