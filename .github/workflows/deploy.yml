@@ -17,6 +17,4 @@
           run: docker push harshpsharma/compilerd:latest
         - name: Deploy to Render
           run: |
-            curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -H "Content-Type: application/json" -d '{"image": "***/compilerd:latest", "environment": {"OPENAI_API_KEY": "'"$OPENAI_API_KEY"'"}}' https://api.render.com/v1/services
-          env:
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}       
+            curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "harshpsharma/compilerd:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services    
