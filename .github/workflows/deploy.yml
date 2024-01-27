@@ -14,7 +14,7 @@ jobs:
       - name: Build the Docker image
         run: docker build -t compilerd . && docker images
       - name: Push the Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/compilerd:latest
+        run: docker push compilerd:latest
       - name: Deploy to Render
         run: |
           curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "image=your-docker-image:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services
