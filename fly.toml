@@ -1,3 +1,6 @@
+[app]
+  name = "compilerd-fly"
+
 [build]
   image = "compilerd"
   dockerfile = "Dockerfile"
