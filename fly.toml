@@ -1,8 +1,6 @@
-# App Configuration
-app = "compilerd-fly"
+app = "fly-compilerd"
 
 [build]
-  image = "compilerd"
   dockerfile = "Dockerfile"
 
 [env]
