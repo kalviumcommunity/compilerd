@@ -1,4 +1,4 @@
-name: Deploy to fly.io
+name: Deploy to Docker Hub
 
 on:
   push:
@@ -16,14 +16,14 @@ jobs:
     - name: Set up Docker
       uses: docker/login-action@v1
       with:
-        registry: ghcr.io
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.io  # Use Docker Hub registry
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker image
       run: |
-        docker build -t ghcr.io/harshsharma2002/testing:latest .
-        docker push ghcr.io/harshsharma2002/testing:latest
+        docker build -t harshsharma2002/testing:latest .
+        docker push harshsharma2002/testing:latest
 
     - name: Deploy to fly.io
       run: |
