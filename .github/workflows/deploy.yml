@@ -12,9 +12,9 @@
         - name: Login to Docker Hub
           run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
         - name: Build the Docker image
-          run: docker build -t harshpsharma/compilerd . && docker images
+          run: docker build -t ${{ secrets.DOCKER_USERNAME}}/compilerd . && docker images
         - name: Push the Docker image to Docker Hub
-          run: docker push harshpsharma/compilerd:latest
+          run: docker push ${{ secrets.DOCKER_USERNAME}}/compilerd:latest
         - name: Deploy to Render
           run: |
-            curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "harshpsharma/compilerd:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services    
+            curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" -d "${{ secrets.DOCKER_USERNAME}}/compilerd:latest" -H "OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}" https://api.render.com/v1/services    
