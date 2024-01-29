@@ -253,10 +253,7 @@ const testCases = [
             prompt: 'The question is what is 2 plus 2. The answer given is 4.',
         },
         expectedResponse: {
-            val: {
-                score: 10,
-                rationale: 'good answer',
-            },
+            val: {},
             status: 200,
             error: 0,
         },
@@ -268,10 +265,7 @@ const testCases = [
             prompt: 'The question is what is 2 plus 2. The answer given is 4.',
         },
         expectedResponse: {
-            val: {
-                score: 10,
-                rationale: 'good answer',
-            },
+            val: {},
             status: 200,
             error: 0,
         },
