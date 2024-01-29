@@ -16,6 +16,7 @@ const isValidForExecute = async (body) => {
                 then: Joi.required(),
                 otherwise: Joi.optional(),
             }),
+        points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),
         args: Joi.string(),
         stdin: Joi.string(),
