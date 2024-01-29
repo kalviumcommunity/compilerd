@@ -1,6 +1,7 @@
 FROM docker.io/library/node:16.17.0-alpine3.16
 
 ENV PYTHONUNBUFFERED=1
+ENV ALLOWED_RAM=
 RUN set -ex && \
     apk add --no-cache gcc g++ musl-dev python3 openjdk17 iptables ip6tables
 
