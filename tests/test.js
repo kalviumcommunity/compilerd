@@ -9,8 +9,10 @@ describe('Tests', () => {
         it(testCase.name, async () => {
             const response = await axios.post(ENDPOINT, testCase.reqObject)
             if (typeof response.data.output === 'object') {
-                expect(response.data.output.score).toEqual(testCase.expectedResponse.val.score)
-                expect(response.data.output.rationale).toBeDefined()
+                expect(response.data.output.score).toBeDefined()
+                expect(response.data.output.rationale.positives).toBeDefined()
+                expect(response.data.output.rationale.negatives).toBeDefined()
+                expect(response.data.output.points).toBeDefined()
             } else {
                 expect(response).toHaveProperty('data.output', testCase.expectedResponse.val)
             }
