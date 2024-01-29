@@ -9,6 +9,7 @@ const OpenAI = require('openai')
 const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
+const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -26,7 +27,7 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
 
                 }
 
-                if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > 400) {
+                if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
                     /**
                      * detection logic of memory limit exceeded
                      */
