@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 const initializeENV = () => {
-    const path = '/usr/bin/.env'
+    const path = '/env/.env'
     if (fs.existsSync(path)) { require('dotenv').config({ path }) } else { require('dotenv').config() }
 }
 
