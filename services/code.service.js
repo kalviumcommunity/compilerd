@@ -142,8 +142,8 @@ const _executePrompt = async (langConfig, prompt, response, maxPoints = 10) => {
         const schema = Joi.object({
             score: Joi.number().integer().required(),
             rationale: Joi.object({
-                positives: Joi.string().required(),
-                negatives: Joi.string().required(),
+                positives: Joi.string().required().allow(''),
+                negatives: Joi.string().required().allow(''),
             }).required(),
             points: Joi.number().integer().required(),
         })
