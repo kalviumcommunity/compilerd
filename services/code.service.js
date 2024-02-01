@@ -153,6 +153,7 @@ const _executePrompt = async (langConfig, prompt, response, maxPoints = 10) => {
              * 502 Bad Gateway
              * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
              */
+            logger.error(openAIResponse)
             const responseCode = 502
             const errorMessage = 'Unable to parse OPEN AI response'
             response.errorMessage = errorMessage
