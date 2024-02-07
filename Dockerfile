@@ -2,7 +2,12 @@ FROM docker.io/library/node:16.17.0-alpine3.16
 
 ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 iptables ip6tables
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 iptables ip6tables && \
+    apk add --no-cache --virtual .build-deps curl && \
+    curl -O https://dl.google.com/go/go1.21.6.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
+    rm go1.21.6.linux-amd64.tar.gz && \
+    apk del .build-deps
 
 RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
@@ -10,21 +15,12 @@ RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
     rm -f /usr/bin/x86_64-alpine-linux-musl-gcj
 
-RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 iptables ip6tables && \
-    apk add --no-cache --virtual .build-deps bash curl git && \
-    curl -O https://dl.google.com/go/go1.21.6.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz && \
-    rm go1.21.6.linux-amd64.tar.gz && \
-    apk del .build-deps
-
 RUN ln -sf python3 /usr/bin/python
 
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
 ENV PATH=$PATH:/usr/local/go/bin
-ENV GOPATH=/go
 
 RUN npm --prefix /usr/bin/ install
 EXPOSE 8080

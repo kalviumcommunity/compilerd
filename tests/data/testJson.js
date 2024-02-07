@@ -188,11 +188,11 @@ const testCases = [
         reqObject: {
             language: 'golang',
             script:
-            'package main\n' +
-            'import "fmt"\n' +
-            'func main() {\n' +
-            'fmt.Println("hello world")\n' +
-            '}\n'
+                'package main\n' +
+                'import "fmt"\n' +
+                'func main() {\n' +
+                'fmt.Println("hello world")\n' +
+                '}\n'
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -205,17 +205,17 @@ const testCases = [
         reqObject: {
             language: 'golang',
             script:
-            'package main\n' +
-            'import (\n' +
-            '"fmt"\n' +
-            '"math"\n' +
-            ')\n' +
-            'func main() {\n' +
-            'var number float64\n' +
-            'fmt.Scan(&number)\n' +
-            'result := math.Sqrt(number)\n' +
-            'fmt.Printf("%.2f",result)\n' +
-            '}\n',
+                'package main\n' +
+                'import (\n' +
+                '"fmt"\n' +
+                '"math"\n' +
+                ')\n' +
+                'func main() {\n' +
+                'var number float64\n' +
+                'fmt.Scan(&number)\n' +
+                'result := math.Sqrt(number)\n' +
+                'fmt.Printf("%.2f",result)\n' +
+                '}\n',
             stdin: '144'
         },
         expectedResponse: {
