@@ -1,0 +1,8 @@
+app = "compilerd"
+
+[[services]]
+  internal_port = 8080  # Adjust the internal port as needed
+  protocol = "tcp"
+
+[[services.env]]
+  OPENAI_API_KEY = "{{ env `OPENAI_API_KEY` }}"
