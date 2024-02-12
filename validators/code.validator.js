@@ -16,6 +16,12 @@ const isValidForExecute = async (body) => {
                 then: Joi.required(),
                 otherwise: Joi.optional(),
             }),
+        systemPrompt: Joi.string()
+            .when('language', {
+                is: [PROMPTV1, PROMPTV2],
+                then: Joi.optional(),
+                otherwise: Joi.forbidden(),
+            }),
         points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),
         args: Joi.string(),

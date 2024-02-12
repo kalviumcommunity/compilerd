@@ -1,0 +1,27 @@
+meta {
+  name: Evaluate Prompt With User Passed System Prompt
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/execute
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+    {
+        "language":"promptv1",
+        "prompt" : "question is longest river of world, answer is nile",
+        "systemPrompt" : "you are an evaluation assistant. a question will be passed, an answer will be passed. please evaluate the answer against the question and return score out of 10 and the reason for giving the score in json format."
+    }
+}

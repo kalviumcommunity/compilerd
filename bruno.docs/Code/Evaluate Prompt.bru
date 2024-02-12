@@ -1,0 +1,26 @@
+meta {
+  name: Evaluate Prompt
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/execute
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+    {
+        "language":"promptv1",
+        "prompt" : "question is longest river of world, answer is nile"
+    }
+}
