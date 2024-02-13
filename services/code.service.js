@@ -123,15 +123,14 @@ const _executePrompt = async (
     prompt,
     response,
     maxPoints = 10,
-    systemPrompt = getAIEvalSystemPrompt(maxPoints),
-    isSystemPromptPassed,
+    systemPrompt,
 ) => {
     try {
         const completion = await openai.chat.completions.create({
             messages: [
                 {
                     role: 'system',
-                    content: systemPrompt,
+                    content: systemPrompt ?? getAIEvalSystemPrompt(maxPoints),
                 },
                 {
                     role: 'user',
@@ -148,7 +147,7 @@ const _executePrompt = async (
             openAIResponse = JSON.parse(completion.choices[0].message.content)
         }
         let schema
-        if (isSystemPromptPassed) {
+        if (systemPrompt) {
             schema = Joi.any()
         } else {
             schema = Joi.object({
@@ -261,14 +260,12 @@ const execute = async (req, res) => {
     }
 
     if ([PROMPTV1, PROMPTV2].includes(req.language)) {
-        isSystemPromptPassed = req?.systemPrompt ? true : false
         await _executePrompt(
             LANGUAGES_CONFIG[req.language],
             req.prompt,
             response,
             req.points,
             req.systemPrompt,
-            isSystemPromptPassed
         )
     } else {
         await _executeCode(req, res, response)
