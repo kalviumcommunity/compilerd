@@ -10,7 +10,7 @@ const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
-const getAIEvalSystemPrompt = require('../helpers/aiEvaluationSystemPrompt')
+const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -130,7 +130,7 @@ const _executePrompt = async (
             messages: [
                 {
                     role: 'system',
-                    content: systemPrompt ?? getAIEvalSystemPrompt(maxPoints),
+                    content: systemPrompt ?? getDefaultAIEvalSystemPrompt(maxPoints),
                 },
                 {
                     role: 'user',
