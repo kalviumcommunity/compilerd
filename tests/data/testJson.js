@@ -184,6 +184,34 @@ const testCases = [
         },
     },
     {
+        name: 'ruby : print hello world',
+        reqObject: {
+            language: 'ruby',
+            script:
+                'print "hello world"'
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : print stdin',
+        reqObject: {
+            language: 'ruby',
+            script:
+                'user_input = gets.chomp\n' +
+                'puts user_input',
+            stdin: '10\n'
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'TLE test',
         reqObject: {
             language: 'nodejs',

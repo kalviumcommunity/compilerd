@@ -76,6 +76,14 @@ We will run the project locally and try to make a request to see a sample use ca
         }
     ```
 
+## Languages supported :
+  - C
+  - CPP
+  - Python
+  - Java
+  - Node.js
+  - Ruby
+
 ## Contribution :
 
 ### Prerequisites:
