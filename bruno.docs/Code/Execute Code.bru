@@ -1,0 +1,21 @@
+meta {
+  name: Execute Code
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/execute
+  body: json
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+    {
+        "language": "nodejs",
+        "script" : "console.log('hello world')"
+    }
+}
