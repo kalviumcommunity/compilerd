@@ -11,6 +11,10 @@ const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
+const puppeteer = require('puppeteer');
+const express = require('express')
+const http = require('http')
+const unzipper = require('unzipper');
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -267,9 +271,313 @@ const execute = async (req, res) => {
             req.points,
             req.systemPrompt,
         )
-    } else {
+    } else if (['multifile'].includes(req.language)) {
+		await _executeMultiFile(req, res, response)
+	} else {
         await _executeCode(req, res, response)
     }
+    return response
+}
+
+const sleep = (ms) => {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve()
+		}, ms)
+	})
+}
+
+const setPermissions = (path) => {
+    exec(`chmod -R 777 ${path}`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error setting permissions: ${error}`);
+            return;
+        }
+        if (stderr) {
+            console.error(`Error output: ${stderr}`);
+        }
+        console.log('Permissions set to 777 for all files and directories');
+    });
+};
+
+const _extractBucketAndFileName = (url) => {
+    const urlParts = new URL(url);
+    const pathSegments = urlParts.pathname.substring(1).split('/');
+
+    const bucketName = pathSegments.shift();
+    const fileName = pathSegments.join('/');
+
+    return {
+        bucketName,
+        fileName
+    };
+}
+
+const _getSubmission = async (url, destPath) => {
+	const { bucketName, fileName } = _extractBucketAndFileName(url);
+	const destFileName = destPath;
+
+	const {Storage} = require('@google-cloud/storage');
+
+	const storage = new Storage();
+	async function downloadFile() {
+	  const options = {
+	    destination: destFileName,
+	  };
+
+	  await storage.bucket(bucketName).file(fileName).download(options);
+
+	  console.log(
+	    `gs://${bucketName}/${fileName} downloaded to ${destFileName}.`
+	  );
+	}
+
+	// downloadFile().catch(console.error);
+	try{
+		await downloadFile()
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+// const _unzipSubmission = async (submissionFile) => {
+// 	try {
+//         // Ensure the path to the zip file exists and it's a file not a directory
+//         const stats = await fs.promises.stat(submissionFile);
+//         if (!stats.isFile()) {
+//             throw new Error('The provided path does not point to a file.');
+//         }
+
+//         // Create a read stream from the zip file
+//         const zipStream = fs.createReadStream(submissionFile);
+
+//         // Create a directory for the unzipped files, if needed
+//         // const outputDir = submissionFile.replace(/\.zip$/, ''); // Removes '.zip' and uses the name as the directory
+// 		const outputDir = './submission/';
+//         if (!fs.existsSync(outputDir)) {
+//             await fs.promises.mkdir(outputDir);
+//         }
+
+//         // Pipe the read stream into the unzipper which extracts the files to the output directory
+//         await zipStream
+//             .pipe(unzipper.Extract({ path: outputDir }))
+//             .promise();
+
+//         console.log(`Unzipped files to ${outputDir}`);
+//     } catch (error) {
+//         console.error('Failed to unzip the file:', error);
+//     }
+// }
+
+const _unzipSubmission = async (submissionFile) => {
+	try {
+        // Ensure the path to the zip file exists and it's a file not a directory
+        const stats = await fs.promises.stat(submissionFile);
+        if (!stats.isFile()) {
+            throw new Error('The provided path does not point to a file.');
+        }
+
+        // Define the output directory
+        const outputDir = './submission';
+
+        // Create the directory if it doesn't exist
+        if (!fs.existsSync(outputDir)) {
+            await fs.promises.mkdir(outputDir, { recursive: true });
+        }
+
+        // Build the unzip command
+        const command = `unzip -o "${submissionFile}" -d "${outputDir}"`;
+
+        // Execute the unzip command
+        const { stdout, stderr } = await exec(command);
+        console.log('stdout:', stdout);
+        console.error('stderr:', stderr);
+
+        console.log(`Unzipped files to ${outputDir}`);
+    } catch (error) {
+        console.error('Failed to unzip the file:', error);
+    }
+}
+
+const _startStaticServer = async () => {
+	const submissionDir = './submission/';
+    const staticServer = express();
+    staticServer.use(express.static(submissionDir));
+    const staticServerInstance = http.createServer(staticServer);
+    return new Promise((resolve, reject) => {
+        staticServerInstance.listen(8080, () => {
+            console.log('Static file server running on http://localhost:8080');
+            resolve(staticServerInstance);
+        }).on('error', (err) => {
+            console.error('Failed to start server:', err);
+            reject(err);
+        });
+    });
+}
+
+const _runTests = async (staticServerInstance) => {
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Redirect console output from the browser to Node.js console
+    let testResults = [];
+
+	page.on('request', request => {
+		console.log(`Request: ${request.url()} - ${request.method()}`);
+	});
+	page.on('response', response => {
+		if (!response.ok()) {
+			console.log(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`);
+		}
+	});
+
+	page.on('requestfailed', request => {
+        console.log(`Failed request: ${request.url()} - ${request.failure().errorText}`);
+    });
+
+
+    page.on('console', msg => {
+        console.log('BROWSER:', msg.text());
+        testResults.push(msg.text());
+    });
+
+    // Load the HTML file with Jasmine and the tests
+    // await page.goto('https://expressjs.com/en/api.html');
+	try{
+    	await page.goto('http://localhost:8080/index.html');
+		console.log('🙂 went to index.html')
+	} catch (error) {
+		console.log(error)
+		staticServerInstance.close(() => {
+			console.log('Static server closed');
+		});
+	}
+
+	try{
+    	await page.waitForFunction(() => 
+    		document.querySelector('.jasmine-duration')?.textContent.includes('finished') // Assuming '.jasmine-overall-result' gets updated with 'finished'
+  		);
+	} catch (error) {
+		console.log(error)
+		staticServerInstance.close(() => {
+			console.log('Static server closed');
+		});
+	}
+
+	console.log('🙂 jasmine painted score')
+
+  	const jasmineResults = await page.evaluate(() => {
+    	// const suites = [...document.querySelectorAll('.jasmine-suite')];
+    	// return suites.map(suite => {
+    	//   	const id = suite?.id;
+    	//   	const specs = suite.querySelectorAll('.jasmine-specs');
+    	//   	return { id, specs };
+    	// });
+
+		return document.querySelector('.jasmine-bar').textContent
+  	});
+
+	console.log('🙂 got the test suite')
+
+	return {browser, jasmineResults}
+
+    // await page.screenshot({ path: 'screenshot.png' });
+
+    // Optionally wait for the tests to complete
+    // await page.waitForT // Adjust this timeout based on the expected test duration
+}
+
+function extractSpecsAndFailures(summary) {
+	console.log('😇 summary')
+	console.log(summary)
+    // Regular expression to match numbers before the words "specs" and "failures"
+    const specsRegex = /(\d+)\s+spec(s?)/;
+    const failuresRegex = /(\d+)\s+failure(s?)/;
+
+    // Extract the numbers using the regular expressions
+    const specsMatch = summary.match(specsRegex);
+    const failuresMatch = summary.match(failuresRegex);
+
+    // Initialize the result
+    const result = {
+        success: parseInt(specsMatch) - parseInt(failuresMatch),
+        failures: parseInt(failuresMatch)
+    };
+    return result;
+}
+
+const _executeMultiFile = async (req, res,response) => {
+
+	await _getSubmission(req.url, req.path)
+	// mkdir /submission
+	await _unzipSubmission(req.path)
+	setPermissions('./submission/')
+	const staticServerInstance = await _startStaticServer()
+	await sleep(10000)
+	const {browser, jasmineResults} = await _runTests(staticServerInstance)
+
+
+    // const submissionDir = './submission';
+    // const staticServer = express();
+    // staticServer.use(express.static(submissionDir));
+    // const staticServerInstance = http.createServer(staticServer);
+    // staticServerInstance.listen(8080, () => console.log('Static file server running on http://localhost:8080'));
+
+
+    // const browser = await puppeteer.launch();
+    // const page = await browser.newPage();
+
+    // // Redirect console output from the browser to Node.js console
+    // let testResults = [];
+    // page.on('console', msg => {
+    //     console.log('BROWSER:', msg.text());
+    //     testResults.push(msg.text());
+    // });
+
+    // // Load the HTML file with Jasmine and the tests
+    // // await page.goto('https://expressjs.com/en/api.html');
+    // await page.goto('http://localhost:8080/index.html');
+	// console.log('🙂 went to index.html')
+
+    // await page.waitForFunction(() => 
+    // 	document.querySelector('.jasmine-duration')?.textContent.includes('finished') // Assuming '.jasmine-overall-result' gets updated with 'finished'
+  	// );
+
+	// console.log('🙂 jasmine painted score')
+
+  	// const jasmineResults = await page.evaluate(() => {
+    // 	// const suites = [...document.querySelectorAll('.jasmine-suite')];
+    // 	// return suites.map(suite => {
+    // 	//   	const id = suite?.id;
+    // 	//   	const specs = suite.querySelectorAll('.jasmine-specs');
+    // 	//   	return { id, specs };
+    // 	// });
+
+	// 	return document.querySelector('.jasmine-bar').textContent
+  	// });
+
+	// console.log('🙂 got the test suite')
+
+
+    // // await page.screenshot({ path: 'screenshot.png' });
+
+    // // Optionally wait for the tests to complete
+    // // await page.waitForT // Adjust this timeout based on the expected test duration
+
+	staticServerInstance.close(() => {
+        console.log('Static server closed');
+    });
+
+    await browser.close();
+
+	const result = extractSpecsAndFailures(jasmineResults)
+
+    // Send the collected results back to the client
+	response.output = result
+	// response.output = 'hello'
+	response.statusCode = 200
+	response.message = "Tests completed"
     return response
 }
 

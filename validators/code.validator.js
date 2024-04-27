@@ -6,7 +6,7 @@ const isValidForExecute = async (body) => {
         language: Joi.string().required(),
         script: Joi.string()
             .when('language', {
-                is: [PROMPTV1, PROMPTV2],
+                is: [PROMPTV1, PROMPTV2, 'multifile'],
                 then: Joi.optional(),
                 otherwise: Joi.required(),
             }),
@@ -20,6 +20,24 @@ const isValidForExecute = async (body) => {
             .when('language', {
                 is: [PROMPTV1, PROMPTV2],
                 then: Joi.optional(),
+                otherwise: Joi.forbidden(),
+            }),
+        url: Joi.string().trim()
+            .when('language', {
+                is: 'multifile',
+                then: Joi.required(),
+                otherwise: Joi.forbidden(),
+            }),
+        type: Joi.string().trim()
+            .when('language', {
+                is: 'multifile',
+                then: Joi.required(),
+                otherwise: Joi.forbidden(),
+            }),
+        path: Joi.string().trim()
+            .when('language', {
+                is: 'multifile',
+                then: Joi.required(),
                 otherwise: Joi.forbidden(),
             }),
         points: Joi.number().integer().optional(), // totalScore
