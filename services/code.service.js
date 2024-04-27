@@ -315,7 +315,7 @@ const _extractBucketAndFileName = (url) => {
 
 const _getSubmission = async (url, destPath) => {
 	const { bucketName, fileName } = _extractBucketAndFileName(url);
-	const destFileName = destPath;
+	const destFileName = destPath + 'submission.zip';
 
 	const {Storage} = require('@google-cloud/storage');
 
@@ -334,25 +334,26 @@ const _getSubmission = async (url, destPath) => {
 
 	try{
 		await downloadFile()
+        return destFileName
 	} catch (error) {
 		console.log(error)
 	}
 }
 
-const _unzipSubmission = async (submissionFile) => {
+const _unzipSubmission = async (fileLocalPath, unzipPath) => {
 	try {
-        const stats = await fs.promises.stat(submissionFile);
+        const stats = await fs.promises.stat(fileLocalPath);
         if (!stats.isFile()) {
             throw new Error('The provided path does not point to a file.');
         }
 
-        const outputDir = './submission';
+        const outputDir = unzipPath + 'submission/';
 
         if (!fs.existsSync(outputDir)) {
             await fs.promises.mkdir(outputDir, { recursive: true });
         }
 
-        const command = `unzip -o "${submissionFile}" -d "${outputDir}"`;
+        const command = `unzip -o "${fileLocalPath}" -d "${outputDir}"`;
 
         const { stdout, stderr } = await exec(command);
         console.log('stdout:', stdout);
@@ -364,8 +365,8 @@ const _unzipSubmission = async (submissionFile) => {
     }
 }
 
-const _startStaticServer = async () => {
-	const submissionDir = './submission/';
+const _startStaticServer = async (rootPath) => {
+	const submissionDir = rootPath;
     const staticServer = express();
     staticServer.use(express.static(submissionDir));
     const staticServerInstance = http.createServer(staticServer);
@@ -380,7 +381,7 @@ const _startStaticServer = async () => {
     });
 }
 
-const _runTests = async (staticServerInstance) => {
+const _runTests = async (staticServerInstance, entryPath) => {
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -407,7 +408,7 @@ const _runTests = async (staticServerInstance) => {
     });
 
 	try{
-    	await page.goto('http://localhost:8080/index.html');
+    	await page.goto('http://localhost:8080/' + entryPath);
 		console.log('🙂 went to index.html')
 	} catch (error) {
 		console.log(error)
@@ -452,22 +453,37 @@ function extractSpecsAndFailures(summary) {
     return result;
 }
 
-const _executeMultiFile = async (req, res,response) => {
+const cleanUpDir = async (dirPath, zipPath) => {
+    await fs.promises.rm(dirPath, { recursive: true, force: true });
+    console.log(`Removed directory: ${dirPath}`);
 
-	await _getSubmission(req.url, req.path)
-	await _unzipSubmission(req.path)
-	setPermissions('./submission/')
-	const staticServerInstance = await _startStaticServer()
-	await sleep(10000)
-	const {browser, jasmineResults} = await _runTests(staticServerInstance)
+    // Remove the zip file
+    await fs.promises.rm(zipPath, {recursive: true, force: true});
+    console.log(`Removed file: ${zipPath}`);
+}
+
+const _executeMultiFile = async (req, res, response) => {
+	const fileLocalPath = await _getSubmission(req.url, '/tmp/')
+    if(!fileLocalPath) {
+        response.output = 'Failed to download submission';
+        response.statusCode = 404;
+        response.message = 'Failed to download submission';
+        return response;
+    }
+	await _unzipSubmission(fileLocalPath, '/tmp/')
+	// setPermissions('./submission/')
+	const staticServerInstance = await _startStaticServer('/tmp/submission/')
+	await sleep(2000)
+	const {browser, jasmineResults} = await _runTests(staticServerInstance, req.path)
 
 	staticServerInstance.close(() => {
         console.log('Static server closed');
     });
 
     await browser.close();
-
 	const result = extractSpecsAndFailures(jasmineResults)
+
+    await cleanUpDir('/tmp/submission/', '/tmp/submission.zip')
 
 	response.output = result
 	response.statusCode = 200

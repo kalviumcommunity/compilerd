@@ -14,17 +14,6 @@ const execute = async (req, res) => {
     }
 }
 
-const testMultiFile = async (req, res) => {
-    console.log('inside controller')
-    try{
-        const responseBody = await codeService.executeMultiFile(req.body, res)
-        return respond(res, responseBody.statusCode, responseBody)
-    } catch(error){
-        respondWithException(res, error)
-    }
-}
-
 module.exports = {
     execute,
-    testMultiFile,
 }
