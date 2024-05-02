@@ -16,6 +16,8 @@ const express = require('express')
 const http = require('http')
 const unzipper = require('unzipper');
 
+const STATIC_SERVER_PATH = "/Users/anirudhpanwar/Downloads/jasmine-standalone-react/"
+
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
     let memoryCheckInterval
@@ -408,13 +410,18 @@ const _runTests = async (staticServerInstance, entryPath) => {
     });
 
 	try{
-    	await page.goto('http://localhost:8080/' + entryPath);
+    	const resp = await page.goto('http://localhost:8080/' + entryPath);
+        // check the http response code to figure out if the static server returned the response or not
+        if(resp.status() !== 200){
+            throw new Error('Failed to load the entry page');
+        }
 		console.log('🙂 went to index.html')
 	} catch (error) {
 		console.log(error)
 		staticServerInstance.close(() => {
 			console.log('Static server closed');
 		});
+        throw(error)
 	}
 
 	try{
@@ -463,17 +470,17 @@ const cleanUpDir = async (dirPath, zipPath) => {
 }
 
 const _executeMultiFile = async (req, res, response) => {
-	const fileLocalPath = await _getSubmission(req.url, '/tmp/')
-    if(!fileLocalPath) {
-        response.output = 'Failed to download submission';
-        response.statusCode = 404;
-        response.message = 'Failed to download submission';
-        return response;
-    }
-	await _unzipSubmission(fileLocalPath, '/tmp/')
+	// const fileLocalPath = await _getSubmission(req.url, '/tmp/')
+    // if(!fileLocalPath) {
+    //     response.output = 'Failed to download submission';
+    //     response.statusCode = 404;
+    //     response.message = 'Failed to download submission';
+    //     return response;
+    // }
+	// await _unzipSubmission(fileLocalPath, '/tmp/')
 	// setPermissions('./submission/')
-	const staticServerInstance = await _startStaticServer('/tmp/submission/')
-	await sleep(2000)
+	const staticServerInstance = await _startStaticServer(STATIC_SERVER_PATH)
+	await sleep(20000)
 	const {browser, jasmineResults} = await _runTests(staticServerInstance, req.path)
 
 	staticServerInstance.close(() => {
