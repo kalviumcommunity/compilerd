@@ -37,8 +37,14 @@ const isValidForExecute = async (body) => {
         path: Joi.string().trim()
             .when('language', {
                 is: 'multifile',
-                then: Joi.required(),
+                then: Joi.required().allow(''),
                 otherwise: Joi.forbidden(),
+            }),
+        isJasmineStandAlone: Joi.boolean()
+            .when('language', {
+                is: 'jasmine',
+                then: Joi.required(),
+                otherwise: Joi.optional(),
             }),
         points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),

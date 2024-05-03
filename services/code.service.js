@@ -15,6 +15,8 @@ const puppeteer = require('puppeteer');
 const express = require('express')
 const http = require('http')
 const unzipper = require('unzipper');
+const { resolve } = require('path')
+const { spawn } = require('child_process');
 
 const STATIC_SERVER_PATH = "/Users/anirudhpanwar/Downloads/jasmine-standalone-react/"
 
@@ -469,6 +471,99 @@ const cleanUpDir = async (dirPath, zipPath) => {
     console.log(`Removed file: ${zipPath}`);
 }
 
+const _installDependencies = async (path) => {
+    return new Promise((resolve, reject) =>{
+        const npmInstall = spawn('npm', ['install'], { cwd: path });
+        npmInstall.on('close', (code) => {
+            console.log(`npm install exited with code ${code}`);
+            resolve()
+        })
+        npmInstall.on('error', (err) => {
+            console.error('Failed to start npm install process:', err);
+            reject(err);
+        });
+    })
+}
+
+const _startJamsmineServer = async () => {
+    return new Promise((resolve, reject)=>{ 
+        const jasmineServer = spawn('npm', ['run', 'test:serve'], {cwd: '/tmp/submission/', detached: true});
+        jasmineServer.stdout.on('data', (data) => {
+            const output = data.toString();
+            console.log(output);
+
+            // check if the default port is already getting used, in that case we might have to switch
+            if (output.includes('Jasmine server is running here')) {
+                console.log('Jasmine server is up and running.');
+                resolve(jasmineServer);
+            }
+        });
+        jasmineServer.on('error', (err) => {
+            console.error('Failed to start jasmine server:', err);
+            reject(err);
+        })
+        jasmineServer.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+    })
+}
+
+
+const _runTests2 = async (jasmineServer, entryPath) => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    let testResults = [];
+
+	page.on('request', request => {
+		console.log(`Request: ${request.url()} - ${request.method()}`);
+	});
+	page.on('response', response => {
+		if (!response.ok()) {
+			console.log(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`);
+		}
+	});
+	page.on('requestfailed', request => {
+        console.log(`Failed request: ${request.url()} - ${request.failure().errorText}`);
+    });
+    page.on('console', msg => {
+        console.log('BROWSER:', msg.text());
+        testResults.push(msg.text());
+    });
+
+	try{
+    	const resp = await page.goto('http://localhost:8888/' + entryPath);
+        // check the http response code to figure out if the static server returned the response or not
+        if(resp.status() !== 200){
+            throw new Error('Failed to load the entry page');
+        }
+		console.log('🙂 went to index.html')
+	} catch (error) {
+		console.log(error)
+        process.kill(-jasmineServer.pid);
+        throw(error)
+	}
+
+	try{
+    	await page.waitForFunction(() => 
+    		document.querySelector('.jasmine-duration')?.textContent.includes('finished')
+  		);
+	} catch (error) {
+		console.log(error)
+		process.kill(-jasmineServer.pid);
+	}
+
+	console.log('🙂 jasmine painted score')
+
+  	const jasmineResults = await page.evaluate(() => {
+		return document.querySelector('.jasmine-bar').textContent
+  	});
+
+	console.log('🙂 got the test suite')
+
+	return {browser, jasmineResults}
+}
+
 const _executeMultiFile = async (req, res, response) => {
 	// const fileLocalPath = await _getSubmission(req.url, '/tmp/')
     // if(!fileLocalPath) {
@@ -479,18 +574,34 @@ const _executeMultiFile = async (req, res, response) => {
     // }
 	// await _unzipSubmission(fileLocalPath, '/tmp/')
 	// setPermissions('./submission/')
-	const staticServerInstance = await _startStaticServer(STATIC_SERVER_PATH)
-	await sleep(20000)
-	const {browser, jasmineResults} = await _runTests(staticServerInstance, req.path)
 
-	staticServerInstance.close(() => {
-        console.log('Static server closed');
-    });
+    let browser
+    let jasmineResults
+    if(req.isJasmineStandAlone){
+        const staticServerInstance = await _startStaticServer(STATIC_SERVER_PATH)
+        let values = await _runTests(staticServerInstance, req.path)
+        browser = values.browser
+        jasmineResults = values.jasmineResults
+        staticServerInstance.close(() => {
+            console.log('Static server closed');
+        });
+        await browser.close();
+    } else {
+        if(fs.existsSync('/tmp/submission/package.json')){
+            await _installDependencies('/tmp/submission/')
+        }
+        const jasmineServer = await _startJamsmineServer()
+        // await sleep(60000)
+        let values = await _runTests2(jasmineServer, req.path)
+        browser = values.browser
+        jasmineResults = values.jasmineResults
+        process.kill(-jasmineServer.pid);
+        await browser.close();
+    }
 
-    await browser.close();
 	const result = extractSpecsAndFailures(jasmineResults)
 
-    await cleanUpDir('/tmp/submission/', '/tmp/submission.zip')
+    // await cleanUpDir('/tmp/submission/', '/tmp/submission.zip')
 
 	response.output = result
 	response.statusCode = 200
