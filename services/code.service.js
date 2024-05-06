@@ -565,14 +565,14 @@ const _runTests2 = async (jasmineServer, entryPath) => {
 }
 
 const _executeMultiFile = async (req, res, response) => {
-	// const fileLocalPath = await _getSubmission(req.url, '/tmp/')
-    // if(!fileLocalPath) {
-    //     response.output = 'Failed to download submission';
-    //     response.statusCode = 404;
-    //     response.message = 'Failed to download submission';
-    //     return response;
-    // }
-	// await _unzipSubmission(fileLocalPath, '/tmp/')
+	const fileLocalPath = await _getSubmission(req.url, '/tmp/')
+    if(!fileLocalPath) {
+        response.output = 'Failed to download submission';
+        response.statusCode = 404;
+        response.message = 'Failed to download submission';
+        return response;
+    }
+	await _unzipSubmission(fileLocalPath, '/tmp/')
 	// setPermissions('./submission/')
 
     let browser
