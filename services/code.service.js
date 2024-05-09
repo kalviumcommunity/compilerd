@@ -546,7 +546,7 @@ const _startJamsmineServer = async () => {
 
 
 const _runTests2 = async (jasmineServer, entryPath) => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
     let testResults = [];
