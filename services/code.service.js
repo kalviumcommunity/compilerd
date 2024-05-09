@@ -17,8 +17,12 @@ const http = require('http')
 const unzipper = require('unzipper');
 const { resolve } = require('path')
 const { spawn } = require('child_process');
+const {Storage} = require('@google-cloud/storage');
+const storage = new Storage();
 
 const STATIC_SERVER_PATH = "/Users/anirudhpanwar/Downloads/jasmine-standalone-react/"
+const SUBMISSION_FILE_DOWNLOAD_PATH = '/tmp/submission.zip'
+const WORKING_DIR = '/tmp/submission/'
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -291,19 +295,6 @@ const sleep = (ms) => {
 	})
 }
 
-const setPermissions = (path) => {
-    exec(`chmod -R 777 ${path}`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error setting permissions: ${error}`);
-            return;
-        }
-        if (stderr) {
-            console.error(`Error output: ${stderr}`);
-        }
-        console.log('Permissions set to 777 for all files and directories');
-    });
-};
-
 const _extractBucketAndFileName = (url) => {
     const urlParts = new URL(url);
     const pathSegments = urlParts.pathname.substring(1).split('/');
@@ -318,54 +309,48 @@ const _extractBucketAndFileName = (url) => {
 }
 
 const _getSubmission = async (url, destPath) => {
-	const { bucketName, fileName } = _extractBucketAndFileName(url);
-	const destFileName = destPath + 'submission.zip';
+    const { bucketName, fileName } = _extractBucketAndFileName(url);
+    const destFileName = destPath
 
-	const {Storage} = require('@google-cloud/storage');
-
-	const storage = new Storage();
-	async function downloadFile() {
-	  const options = {
-	    destination: destFileName,
-	  };
-
-	  await storage.bucket(bucketName).file(fileName).download(options);
-
-	  console.log(
-	    `gs://${bucketName}/${fileName} downloaded to ${destFileName}.`
-	  );
-	}
-
-	try{
-		await downloadFile()
+    try {
+        const options = {
+            destination: destFileName,
+        };
+        await storage.bucket(bucketName).file(fileName).download(options);
         return destFileName
-	} catch (error) {
-		console.log(error)
-	}
-}
+    } catch (err) {
+        console.log(err)
+        throw (err)
+    }
+};
 
 const _unzipSubmission = async (fileLocalPath, unzipPath) => {
 	try {
         const stats = await fs.promises.stat(fileLocalPath);
         if (!stats.isFile()) {
-            throw new Error('The provided path does not point to a file.');
+            throw new Error(`${fileLocalPath} does not point to a file.`);
         }
 
-        const outputDir = unzipPath + 'submission/';
+        const outputDir = unzipPath
 
-        if (!fs.existsSync(outputDir)) {
+        if (!fs.existsSync(outputDir)) {   // fs.exists is deprecated
             await fs.promises.mkdir(outputDir, { recursive: true });
         }
 
-        const command = `unzip -o "${fileLocalPath}" -d "${outputDir}"`;
+        const unzipProcess = spawn('unzip', ['-o', fileLocalPath, '-d', outputDir])
 
-        const { stdout, stderr } = await exec(command);
-        console.log('stdout:', stdout);
-        console.error('stderr:', stderr);
-
-        console.log(`Unzipped files to ${outputDir}`);
+        return new Promise ((resolve, reject) => {
+            unzipProcess.on('close', (code) => {
+                if(code === 0){
+                    resolve()
+                } else {
+                    reject(new Error('Failed to unzip the file'))
+                }
+            })
+        })
     } catch (error) {
-        console.error('Failed to unzip the file:', error);
+        console.error(error);
+        throw(new Error('Failed to unzip the file:', error))
     }
 }
 
@@ -473,23 +458,54 @@ const cleanUpDir = async (dirPath, zipPath) => {
 
 const _installDependencies = async (path) => {
     return new Promise((resolve, reject) =>{
+        let isRejected = false
         const npmInstall = spawn('npm', ['install'], { cwd: path });
+
+        let stdout = ''
+        npmInstall.stdout.on('data', (data) => {
+            stdout += data.toString()
+        })
+
+        let stderr = ''
+        npmInstall.stderr.on('data', (data) => {
+            stderr += data.toString()
+        })
+
+        npmInstall.on('exit', (code) => {
+            console.log(`npm install exited with code ${code}`)
+        })
+
         npmInstall.on('close', (code) => {
             console.log(`npm install exited with code ${code}`);
-            resolve()
+            if(code === 0) {
+                resolve()
+            } else {
+                if(!isRejected) {
+                    reject(new Error('Failed to install dependencies'))
+                    isRejected = true
+                }
+            }
         })
+
         npmInstall.on('error', (err) => {
             console.error('Failed to start npm install process:', err);
-            reject(err);
+            if(!isRejectionHandled) {
+                reject(err);
+                isRejectionHandled = true
+            }
         });
     })
 }
 
 const _startJamsmineServer = async () => {
     return new Promise((resolve, reject)=>{ 
-        const jasmineServer = spawn('npm', ['run', 'test:serve'], {cwd: '/tmp/submission/', detached: true});
+        const jasmineServer = spawn('npm', ['run', 'test:serve'], {cwd: WORKING_DIR, detached: true});
+        let isRejected = false
+
+        let stdout = ''
         jasmineServer.stdout.on('data', (data) => {
             const output = data.toString();
+            stdout += output;
             console.log(output);
 
             // check if the default port is already getting used, in that case we might have to switch
@@ -498,13 +514,33 @@ const _startJamsmineServer = async () => {
                 resolve(jasmineServer);
             }
         });
+        let stderr =''
+        jasmineServer.stderr.on('data', (data) => {
+            stderr += data.toString()
+            console.log(data.toString())
+        });
+
         jasmineServer.on('error', (err) => {
             console.error('Failed to start jasmine server:', err);
-            reject(err);
+            if(!isRejected) {
+                reject(err);
+                isRejected = true
+            }
         })
-        jasmineServer.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-        });
+        
+        jasmineServer.on('close', (code) => {
+            if(code !== 0) {
+                if(!isRejected) {
+                    reject(new Error('Failed to start jasmine server'))
+                    isRejected = true
+                }
+            }
+        })
+
+        jasmineServer.on('exit', (code) => {
+            console.log(`Jasmine server exited with code ${code}`)
+        })
+        
     })
 }
 
@@ -531,33 +567,28 @@ const _runTests2 = async (jasmineServer, entryPath) => {
         testResults.push(msg.text());
     });
 
+    let jasmineResults
 	try{
     	const resp = await page.goto('http://localhost:8888/' + entryPath);
-        // check the http response code to figure out if the static server returned the response or not
         if(resp.status() !== 200){
             throw new Error('Failed to load the entry page');
         }
 		console.log('🙂 went to index.html')
+
+        await page.waitForFunction(() => 
+            document.querySelector('.jasmine-duration')?.textContent.includes('finished')
+        );
+
+        console.log('🙂 jasmine painted score')
+
+        jasmineResults = await page.evaluate(() => {
+          return document.querySelector('.jasmine-bar').textContent
+        });
 	} catch (error) {
 		console.log(error)
         process.kill(-jasmineServer.pid);
         throw(error)
 	}
-
-	try{
-    	await page.waitForFunction(() => 
-    		document.querySelector('.jasmine-duration')?.textContent.includes('finished')
-  		);
-	} catch (error) {
-		console.log(error)
-		process.kill(-jasmineServer.pid);
-	}
-
-	console.log('🙂 jasmine painted score')
-
-  	const jasmineResults = await page.evaluate(() => {
-		return document.querySelector('.jasmine-bar').textContent
-  	});
 
 	console.log('🙂 got the test suite')
 
@@ -565,48 +596,52 @@ const _runTests2 = async (jasmineServer, entryPath) => {
 }
 
 const _executeMultiFile = async (req, res, response) => {
-	const fileLocalPath = await _getSubmission(req.url, '/tmp/')
-    if(!fileLocalPath) {
-        response.output = 'Failed to download submission';
-        response.statusCode = 404;
-        response.message = 'Failed to download submission';
-        return response;
-    }
-	await _unzipSubmission(fileLocalPath, '/tmp/')
-	// setPermissions('./submission/')
-
-    let browser
-    let jasmineResults
-    if(req.isJasmineStandAlone){
-        const staticServerInstance = await _startStaticServer(STATIC_SERVER_PATH)
-        let values = await _runTests(staticServerInstance, req.path)
-        browser = values.browser
-        jasmineResults = values.jasmineResults
-        staticServerInstance.close(() => {
-            console.log('Static server closed');
-        });
-        await browser.close();
-    } else {
-        if(fs.existsSync('/tmp/submission/package.json')){
-            await _installDependencies('/tmp/submission/')
+    try {
+        const fileLocalPath = await _getSubmission(req.url, SUBMISSION_FILE_DOWNLOAD_PATH)
+        if(!fileLocalPath) {
+            response.output = 'Failed to download submission';
+            response.statusCode = 404;
+            response.message = 'Failed to download submission';
+            return response;
         }
-        const jasmineServer = await _startJamsmineServer()
-        // await sleep(60000)
-        let values = await _runTests2(jasmineServer, req.path)
-        browser = values.browser
-        jasmineResults = values.jasmineResults
-        process.kill(-jasmineServer.pid);
-        await browser.close();
+        await _unzipSubmission(fileLocalPath, WORKING_DIR)
+    
+        let browser
+        let jasmineResults
+        if(req.isJasmineStandAlone){
+            const staticServerInstance = await _startStaticServer(STATIC_SERVER_PATH)
+            let values = await _runTests(staticServerInstance, req.path)
+            browser = values.browser
+            jasmineResults = values.jasmineResults
+            staticServerInstance.close(() => {
+                console.log('Static server closed');
+            });
+            await browser.close();
+        } else {
+            if(fs.existsSync(WORKING_DIR + 'package.json')){
+                await _installDependencies(WORKING_DIR)
+            }
+            const jasmineServer = await _startJamsmineServer()
+            // await sleep(60000)
+            let values = await _runTests2(jasmineServer, req.path)
+            browser = values.browser
+            jasmineResults = values.jasmineResults
+            process.kill(-jasmineServer.pid);
+            await browser.close();
+        }
+    
+        const result = extractSpecsAndFailures(jasmineResults)
+    
+        await cleanUpDir(WORKING_DIR, SUBMISSION_FILE_DOWNLOAD_PATH)
+    
+        response.output = result
+        response.statusCode = 200
+        response.message = "Tests completed"
+        return response
+    } catch (err) {
+        console.log(err)
+        throw(new Error('Error in running multifile submission'))
     }
-
-	const result = extractSpecsAndFailures(jasmineResults)
-
-    // await cleanUpDir('/tmp/submission/', '/tmp/submission.zip')
-
-	response.output = result
-	response.statusCode = 200
-	response.message = "Tests completed"
-    return response
 }
 
 module.exports = { execute }
