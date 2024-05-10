@@ -476,7 +476,7 @@ const _installDependencies = async (path) => {
         })
 
         npmInstall.on('close', (code) => {
-            console.log(`npm install exited with code ${code}`);
+            console.log(`npm install closed with code ${code}`);
             if(code === 0) {
                 resolve()
             } else {
