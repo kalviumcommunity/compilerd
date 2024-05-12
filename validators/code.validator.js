@@ -4,24 +4,26 @@ const { PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const isValidForExecute = async (body) => {
     const schema = Joi.object({
         language: Joi.string().required(),
-        script: Joi.string()
-            .when('language', {
-                is: [PROMPTV1, PROMPTV2],
-                then: Joi.optional(),
-                otherwise: Joi.required(),
-            }),
-        prompt: Joi.string()
-            .when('language', {
-                is: [PROMPTV1, PROMPTV2],
-                then: Joi.required(),
-                otherwise: Joi.optional(),
-            }),
-        systemPrompt: Joi.string()
-            .when('language', {
-                is: [PROMPTV1, PROMPTV2],
-                then: Joi.optional(),
-                otherwise: Joi.forbidden(),
-            }),
+        script: Joi.string().when('language', {
+            is: [PROMPTV1, PROMPTV2],
+            then: Joi.optional(),
+            otherwise: Joi.required(),
+        }),
+        question: Joi.string().when('language', {
+            is: [PROMPTV1, PROMPTV2],
+            then: Joi.required(),
+            otherwise: Joi.optional(),
+        }),
+        userAnswer: Joi.string().when('language', {
+            is: [PROMPTV1, PROMPTV2],
+            then: Joi.optional(),
+            otherwise: Joi.forbidden(),
+        }),
+        rubric: Joi.string().when('language', {
+            is: [PROMPTV1, PROMPTV2],
+            then: Joi.optional(),
+            otherwise: Joi.forbidden(),
+        }),
         points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),
         args: Joi.string(),

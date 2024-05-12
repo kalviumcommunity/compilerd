@@ -23,9 +23,8 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
                 if (!initialMemory) {
                     initialMemory = Math.round((os.freemem() / 1024 / 1024))
                     logger.info({
-                        initial_memory: initialMemory
+                        initial_memory: initialMemory,
                     })
-
                 }
 
                 if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
@@ -119,38 +118,39 @@ const _prepareErrorMessage = (outputLog, language, command) => {
 }
 
 const _executePrompt = async (
+    count,
     langConfig,
     prompt,
     response,
-    maxPoints = 10,
-    systemPrompt,
+    points = 10,
 ) => {
     try {
-        const completion = await openai.chat.completions.create({
-            messages: [
-                {
-                    role: 'system',
-                    content: systemPrompt ?? getDefaultAIEvalSystemPrompt(maxPoints),
+        const promises = Array.from({ length: count }, () =>
+            openai.chat.completions.create({
+                messages: [
+                    {
+                        role: 'system',
+                        content: getDefaultAIEvalSystemPrompt(points),
+                    },
+                    {
+                        role: 'user',
+                        content: prompt,
+                    },
+                ],
+                model: langConfig.model,
+                response_format: {
+                    type: 'json_object',
                 },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
-            model: langConfig.model,
-            response_format: {
-                type: 'json_object',
-            },
-        })
-        let openAIResponse = {}
-        if (completion && completion.choices && completion.choices[0] && completion.choices[0].message) {
-            openAIResponse = JSON.parse(completion.choices[0].message.content)
-        }
-        let schema
-        if (systemPrompt) {
-            schema = Joi.any()
-        } else {
-            schema = Joi.object({
+            }),
+        )
+
+        const evaluatedResponses = (await Promise.all(promises)).map((res) => {
+            let openAIResponse = {}
+            if (res.choices[0]?.message) {
+                openAIResponse = JSON.parse(res.choices[0].message.content)
+            }
+
+            const schema = Joi.object({
                 score: Joi.number().integer().required(),
                 rationale: Joi.object({
                     positives: Joi.string().required().allow(''),
@@ -158,22 +158,24 @@ const _executePrompt = async (
                 }).required(),
                 points: Joi.number().integer().required(),
             })
-        }
-        const validatedData = schema.validate(openAIResponse)
-        if (validatedData.error) {
-            /**
-             * 502 Bad Gateway
-             * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
-             */
-            logger.error(openAIResponse)
-            const responseCode = 502
-            const errorMessage = 'Unable to parse OPEN AI response'
-            response.errorMessage = errorMessage
-            response.statusCode = responseCode
-            response.error = 1
-        } else {
-            response.output = openAIResponse
-        }
+
+            const validatedData = schema.validate(openAIResponse)
+            if (validatedData.error) {
+                /**
+                    * 502 Bad Gateway
+                    * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
+                */
+                logger.error(openAIResponse)
+                const responseCode = 502
+                const errorMessage = 'Unable to parse OPEN AI response'
+                response.errorMessage = errorMessage
+                response.statusCode = responseCode
+                response.error = 1
+            } else {
+                return openAIResponse
+            }
+        })
+        return evaluatedResponses
     } catch (e) {
         logger.error(e)
         throw new Error('Unable to evaluate the prompt')
@@ -245,6 +247,87 @@ const _executeCode = async (req, res, response) => {
     }
 }
 
+const _calculateScoreConfidence = (scores) => {
+    const scoreDetails = new Map()
+
+    for (let i = 0; i < scores.length; ++i) {
+        const score = scores[i].score
+        if (scoreDetails.has(score)) {
+            const details = scoreDetails.get(score)
+            details.frequency++
+            scoreDetails.set(score, details)
+        } else {
+            scoreDetails.set(score, {
+                frequency: 1,
+                rationale: scores[i].rationale,
+                points: scores[i].points,
+            })
+        }
+    }
+
+    const sortedEntries = Array.from(scoreDetails.entries())
+        .map(([score, details]) => ({
+            score,
+            frequency: details.frequency,
+            rationale: details.rationale,
+            points: details.points,
+        }))
+        .sort((a, b) => b.frequency - a.frequency)
+
+    const highestFrequencyDetails = sortedEntries[0]
+
+    return {
+        score: highestFrequencyDetails.score,
+        frequency: highestFrequencyDetails.frequency,
+        rationale: highestFrequencyDetails.rationale,
+        points: highestFrequencyDetails.points,
+        total: scores.length,
+    }
+}
+
+const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric) => {
+    const prompt = `Question: ${question}\n\nAnswer: ${userAnswer}\n\nRubric: ${rubric}`
+    let totalRequests = 0
+    let scores = await _executePrompt(3, langConfig, prompt, response, points)
+    totalRequests += 3
+    let result = _calculateScoreConfidence(scores)
+
+    // If there's variation in the scores, increase the number of requests
+    if (result.frequency !== 3) {
+        const additionalScores = await _executePrompt(
+            7,
+            langConfig,
+            prompt,
+            response,
+            points,
+        )
+        scores = scores.concat(additionalScores)
+        totalRequests += 7
+        result = _calculateScoreConfidence(scores)
+    }
+
+    // Keep requesting until a high confidence score is determined, respecting the request limit
+    while (result.frequency / result.total < 0.5 && totalRequests < 15) {
+        const additionalScores = await _executePrompt(
+            1,
+            langConfig,
+            prompt,
+            response,
+            points,
+        )
+        scores = scores.concat(additionalScores)
+        totalRequests += 1
+        result = _calculateScoreConfidence(scores)
+    }
+    const confidence = (result.frequency / result.total) * 100
+    response.output = {
+        score: result.score,
+        points: result.points,
+        rationale: result.rationale,
+        confidence,
+    }
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -260,12 +343,13 @@ const execute = async (req, res) => {
     }
 
     if ([PROMPTV1, PROMPTV2].includes(req.language)) {
-        await _executePrompt(
+        await _getAiScore(
             LANGUAGES_CONFIG[req.language],
-            req.prompt,
+            req.question,
             response,
             req.points,
-            req.systemPrompt,
+            req.userAnswer,
+            req.rubric,
         )
     } else {
         await _executeCode(req, res, response)
