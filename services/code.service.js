@@ -179,7 +179,7 @@ const _executePrompt = async (
         return evaluatedResponses
     } catch (e) {
         logger.error(e)
-        throw new Error('Unable to evaluate the prompt')
+        throw new Error('Unable to get response from open AI')
     }
 }
 
