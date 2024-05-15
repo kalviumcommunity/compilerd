@@ -546,7 +546,9 @@ const _startJamsmineServer = async () => {
 
 
 const _runTests2 = async (jasmineServer, entryPath) => {
-    const browser = await puppeteer.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({ 
+        // executablePath: '/usr/bin/chromium', 
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
     let testResults = [];
@@ -597,6 +599,9 @@ const _runTests2 = async (jasmineServer, entryPath) => {
 
 const _executeMultiFile = async (req, res, response) => {
     try {
+        let timeTakenLog = ''
+        let previousTime = Date.now()
+
         const fileLocalPath = await _getSubmission(req.url, SUBMISSION_FILE_DOWNLOAD_PATH)
         if(!fileLocalPath) {
             response.output = 'Failed to download submission';
@@ -604,7 +609,14 @@ const _executeMultiFile = async (req, res, response) => {
             response.message = 'Failed to download submission';
             return response;
         }
+        let timeDiff = Date.now() - previousTime
+        previousTime = Date.now()
+        timeTakenLog = timeTakenLog + `\nTime taken to download submission : ${timeDiff} ms`
+
         await _unzipSubmission(fileLocalPath, WORKING_DIR)
+        timeDiff = Date.now() - previousTime
+        previousTime = Date.now()
+        timeTakenLog = timeTakenLog + `\nTime taken to unzip submission : ${timeDiff} ms`
     
         let browser
         let jasmineResults
@@ -620,10 +632,21 @@ const _executeMultiFile = async (req, res, response) => {
         } else {
             if(fs.existsSync(WORKING_DIR + 'package.json')){
                 await _installDependencies(WORKING_DIR)
+                timeDiff = Date.now() - previousTime
+                previousTime = Date.now()
+                timeTakenLog = timeTakenLog + `\nTime taken to install dependencies : ${timeDiff} ms`
             }
             const jasmineServer = await _startJamsmineServer()
+            timeDiff = Date.now() - previousTime
+            previousTime = Date.now()
+            timeTakenLog = timeTakenLog + `\nTime taken to build files and start jasmine-browser-runner : ${timeDiff} ms`
+
             // await sleep(60000)
             let values = await _runTests2(jasmineServer, req.path)
+            timeDiff = Date.now() - previousTime
+            previousTime = Date.now()
+            timeTakenLog = timeTakenLog + `\nTime taken to start puppeteer with browser inside and scrape test result : ${timeDiff} ms`
+
             browser = values.browser
             jasmineResults = values.jasmineResults
             process.kill(-jasmineServer.pid);
@@ -633,6 +656,11 @@ const _executeMultiFile = async (req, res, response) => {
         const result = extractSpecsAndFailures(jasmineResults)
     
         await cleanUpDir(WORKING_DIR, SUBMISSION_FILE_DOWNLOAD_PATH)
+
+        timeDiff = Date.now() - previousTime
+        previousTime = Date.now()
+        timeTakenLog = timeTakenLog + `\nTime taken to clean up resources, parse, results, and clean up files : ${timeDiff} ms`
+        console.log(`🚀🚀 \n${timeTakenLog}`)
     
         response.output = result
         response.statusCode = 200
