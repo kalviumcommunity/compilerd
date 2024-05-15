@@ -547,7 +547,7 @@ const _startJamsmineServer = async () => {
 
 const _runTests2 = async (jasmineServer, entryPath) => {
     const browser = await puppeteer.launch({ 
-        // executablePath: '/usr/bin/chromium', 
+        executablePath: '/usr/bin/chromium', 
         args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
