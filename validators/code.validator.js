@@ -16,7 +16,7 @@ const isValidForExecute = async (body) => {
         }),
         userAnswer: Joi.string().when('language', {
             is: [PROMPTV1, PROMPTV2],
-            then: Joi.optional(),
+            then: Joi.required(),
             otherwise: Joi.forbidden(),
         }),
         rubric: Joi.string().when('language', {
