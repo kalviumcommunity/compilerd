@@ -117,69 +117,86 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     return errorMsg.trim()
 }
 
+const _getResponse = async (langConfig, prompt, points) => {
+    const res = await openai.chat.completions.create({
+        messages: [
+            {
+                role: 'system',
+                content: getDefaultAIEvalSystemPrompt(points),
+            },
+            {
+                role: 'user',
+                content: prompt,
+            },
+        ],
+        model: langConfig.model,
+        response_format: {
+            type: 'json_object',
+        },
+        temperature: 0.1,
+    })
+
+    let openAIResponse = {}
+    if (res.choices[0]?.message) {
+        openAIResponse = JSON.parse(res.choices[0].message.content)
+    }
+
+    const schema = Joi.object({
+        score: Joi.number().integer().required(),
+        rationale: Joi.object({
+            positives: Joi.string().required().allow(''),
+            negatives: Joi.string().required().allow(''),
+        }).required(),
+        points: Joi.number().integer().required(),
+    })
+
+    const validatedData = schema.validate(openAIResponse)
+    if (validatedData.error) {
+        throw new Error('Invalid response format')
+    } else {
+        return openAIResponse
+    }
+}
+
+const _retryRequest = async (langConfig, prompt, points, maxRetries) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return _getResponse(langConfig, prompt, points)
+        } catch (error) {
+            if (attempt === maxRetries) {
+                throw new Error(
+                    error.message + '\nFailed to get a valid response from OpenAI after multiple attempts',
+                )
+            }
+            logger.warn(`Retrying request (${attempt}/${maxRetries})`)
+        }
+    }
+}
+
 const _executePrompt = async (
     count,
     langConfig,
     prompt,
     response,
-    points = 10,
+    points = 10, // Maximum points that can be given by open AI
+    maxRetries = 3, // Maximum amount of retries of a single request failure to open AI
 ) => {
     try {
         const promises = Array.from({ length: count }, () =>
-            openai.chat.completions.create({
-                messages: [
-                    {
-                        role: 'system',
-                        content: getDefaultAIEvalSystemPrompt(points),
-                    },
-                    {
-                        role: 'user',
-                        content: prompt,
-                    },
-                ],
-                model: langConfig.model,
-                response_format: {
-                    type: 'json_object',
-                },
-                temperature: 0.1,
-            }),
+            _retryRequest(langConfig, prompt, points, maxRetries),
         )
-
-        const evaluatedResponses = (await Promise.all(promises)).map((res) => {
-            let openAIResponse = {}
-            if (res.choices[0]?.message) {
-                openAIResponse = JSON.parse(res.choices[0].message.content)
-            }
-
-            const schema = Joi.object({
-                score: Joi.number().integer().required(),
-                rationale: Joi.object({
-                    positives: Joi.string().required().allow(''),
-                    negatives: Joi.string().required().allow(''),
-                }).required(),
-                points: Joi.number().integer().required(),
-            })
-
-            const validatedData = schema.validate(openAIResponse)
-            if (validatedData.error) {
-                /**
-                    * 502 Bad Gateway
-                    * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
-                */
-                logger.error(openAIResponse)
-                const responseCode = 502
-                const errorMessage = 'Unable to parse OPEN AI response'
-                response.errorMessage = errorMessage
-                response.statusCode = responseCode
-                response.error = 1
-            } else {
-                return openAIResponse
-            }
-        })
+        const evaluatedResponses = await Promise.all(promises)
         return evaluatedResponses
     } catch (e) {
         logger.error(e)
-        throw new Error('Unable to get response from open AI')
+        /**
+       * 502 Bad Gateway
+       * This is often used when a server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.
+       */
+        response.errorMessage = 'Unable to get response from OpenAI'
+        response.statusCode = 502
+        response.error = 1
+        throw new Error('Unable to get response from OpenAI')
     }
 }
 
@@ -287,45 +304,49 @@ const _calculateScoreConfidence = (scores) => {
 }
 
 const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric) => {
-    const prompt = `Question: ${question}\n\nAnswer: ${userAnswer}\n\nRubric: ${rubric}`
-    let totalRequests = 0
-    let scores = await _executePrompt(3, langConfig, prompt, response, points)
-    totalRequests += 3
-    let result = _calculateScoreConfidence(scores)
+    try {
+        const prompt = `Question: ${question}\n\nAnswer: ${userAnswer}\n\nRubric: ${rubric}`
+        let totalRequests = 0
+        let scores = await _executePrompt(3, langConfig, prompt, response, points)
+        totalRequests += 3
+        let result = _calculateScoreConfidence(scores)
 
-    // If there's variation in the scores, increase the number of requests
-    if (result.frequency !== 3) {
-        const additionalScores = await _executePrompt(
-            7,
-            langConfig,
-            prompt,
-            response,
-            points,
-        )
-        scores = scores.concat(additionalScores)
-        totalRequests += 7
-        result = _calculateScoreConfidence(scores)
-    }
+        // If there's variation in the scores, increase the number of requests
+        if (result.frequency !== 3) {
+            const additionalScores = await _executePrompt(
+                7,
+                langConfig,
+                prompt,
+                response,
+                points,
+            )
+            scores = scores.concat(additionalScores)
+            totalRequests += 7
+            result = _calculateScoreConfidence(scores)
+        }
 
-    // Keep requesting until a high confidence score is determined, respecting the request limit
-    while (result.frequency / result.total < 0.5 && totalRequests < 15) {
-        const additionalScores = await _executePrompt(
-            1,
-            langConfig,
-            prompt,
-            response,
-            points,
-        )
-        scores = scores.concat(additionalScores)
-        totalRequests += 1
-        result = _calculateScoreConfidence(scores)
-    }
-    const confidence = (result.frequency / result.total) * 100
-    response.output = {
-        score: result.score,
-        points: result.points,
-        rationale: result.rationale,
-        confidence,
+        // Keep requesting until a high confidence score is determined, respecting the request limit
+        while (result.frequency / result.total < 0.5 && totalRequests < 15) {
+            const additionalScores = await _executePrompt(
+                1,
+                langConfig,
+                prompt,
+                response,
+                points,
+            )
+            scores = scores.concat(additionalScores)
+            totalRequests += 1
+            result = _calculateScoreConfidence(scores)
+        }
+        const confidence = (result.frequency / result.total) * 100
+        response.output = {
+            score: result.score,
+            points: result.points,
+            rationale: result.rationale,
+            confidence,
+        }
+    } catch (err) {
+        throw new Error(err.message)
     }
 }
 
