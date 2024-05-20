@@ -340,7 +340,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
         }
 
         // Keep requesting until a high confidence score is determined, respecting the request limit
-        while (scoreConfidence.frequency / scoreConfidence.total < 0.5 && totalRequests < 20 && allValidResponses.length < 10) {
+        while (totalRequests < 20) {
             const {
                 allValidResponses: additionalValidResponses,
             } = await _executePrompt(1, langConfig, prompt, response, points)
@@ -348,6 +348,9 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             ++totalRequests
             scoreConfidence = _calculateScoreConfidence(allValidResponses)
+            if (allValidResponses.length >= 10 && scoreConfidence.frequency / scoreConfidence.total >= 0.5) {
+                break
+            }
         }
 
         if (allValidResponses.length < 10) {
