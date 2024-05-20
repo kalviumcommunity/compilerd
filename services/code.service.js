@@ -241,11 +241,12 @@ const _executeCode = async (req, res, response) => {
     }
 }
 
-const _calculateScoreConfidence = (scores) => {
+// This function expects an array of size greater than 0
+const _calculateScoreConfidence = (evaluations) => {
     const scoreDetails = new Map()
 
-    for (let i = 0; i < scores.length; ++i) {
-        const score = scores[i].score
+    for (let i = 0; i < evaluations.length; ++i) {
+        const score = evaluations[i].score
         if (scoreDetails.has(score)) {
             const details = scoreDetails.get(score)
             details.frequency++
@@ -253,8 +254,8 @@ const _calculateScoreConfidence = (scores) => {
         } else {
             scoreDetails.set(score, {
                 frequency: 1,
-                rationale: scores[i].rationale,
-                points: scores[i].points,
+                rationale: evaluations[i].rationale,
+                points: evaluations[i].points,
             })
         }
     }
@@ -275,7 +276,7 @@ const _calculateScoreConfidence = (scores) => {
         frequency: highestFrequencyDetails.frequency,
         rationale: highestFrequencyDetails.rationale,
         points: highestFrequencyDetails.points,
-        total: scores.length,
+        total: evaluations.length,
     }
 }
 
@@ -293,10 +294,10 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
             throw new Error('Open AI is not responding with valid responses or It is not in service')
         }
 
-        let result = _calculateScoreConfidence(allValidResponses)
+        let scoreConfidence = _calculateScoreConfidence(allValidResponses)
 
         // If there's variation in the scores, increase the number of requests
-        if (result.frequency !== 3) {
+        if (scoreConfidence.frequency !== 3) {
             const { allValidResponses: additionalValidResponses, errorResponsesCount: additionalErrorCount } = await _executePrompt(
                 7 + errorResponsesCount,
                 langConfig,
@@ -313,9 +314,9 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             totalRequests += (7 + errorResponsesCount)
             totalValidRequests += (7 + errorResponsesCount - additionalErrorCount)
-            result = _calculateScoreConfidence(allValidResponses)
+            scoreConfidence = _calculateScoreConfidence(allValidResponses)
 
-            if (result.frequency / result.total < 0.5 && totalValidRequests < 10) {
+            if (scoreConfidence.frequency / scoreConfidence.total < 0.5 && totalValidRequests < 10) {
                 const {
                     allValidResponses: additionalValidResponses,
                     errorResponsesCount: additionalErrorNewCount,
@@ -334,29 +335,34 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
                 allValidResponses = allValidResponses.concat(additionalValidResponses)
                 totalRequests += (5 + additionalErrorCount)
-                result = _calculateScoreConfidence(allValidResponses)
+                scoreConfidence = _calculateScoreConfidence(allValidResponses)
             }
         }
 
         // Keep requesting until a high confidence score is determined, respecting the request limit
-        while (result.frequency / result.total < 0.5 && totalRequests < 20) {
+        while (scoreConfidence.frequency / scoreConfidence.total < 0.5 && (totalRequests < 20 || allValidResponses.length < 10)) {
             const {
                 allValidResponses: additionalValidResponses,
             } = await _executePrompt(1, langConfig, prompt, response, points)
 
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             ++totalRequests
-            result = _calculateScoreConfidence(additionalValidResponses)
+            scoreConfidence = _calculateScoreConfidence(allValidResponses)
         }
-        const confidence = (result.frequency / result.total) * 100
+
+        if (allValidResponses.length < 10) {
+            throw new Error('We were not able to achieve 10 valid responses')
+        }
+
+        const confidence = (scoreConfidence.frequency / scoreConfidence.total) * 100
         response.output = {
-            score: result.score,
-            points: result.points,
-            rationale: result.rationale,
+            score: scoreConfidence.score,
+            points: scoreConfidence.points,
+            rationale: scoreConfidence.rationale,
             confidence,
         }
     } catch (err) {
-        throw new Error('Open AI is not responding')
+        throw new Error(err.message)
     }
 }
 
