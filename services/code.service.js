@@ -343,7 +343,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
         while (totalRequests < 20) {
             const {
                 allValidResponses: additionalValidResponses,
-            } = await _executePrompt(1, langConfig, prompt, response, points)
+            } = await _executePrompt(1, langConfig, prompt, points)
 
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             ++totalRequests
