@@ -337,6 +337,15 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 totalRequests += (5 + additionalErrorCount)
                 scoreConfidence = _calculateScoreConfidence(allValidResponses)
             }
+        } else {
+            response.output = {
+                score: scoreConfidence.score,
+                points: scoreConfidence.points,
+                rationale: scoreConfidence.rationale,
+                confidence:
+                (scoreConfidence.frequency / scoreConfidence.total) * 100,
+            }
+            return
         }
 
         // Keep requesting until a high confidence score is determined, respecting the request limit
