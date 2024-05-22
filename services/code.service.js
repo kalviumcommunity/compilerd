@@ -165,7 +165,7 @@ const _executePrompt = async (
 
             const validatedData = schema.validate(openAIResponse)
             if (validatedData.error || openAIResponse.points !== points) {
-                logger.error(`The response received from Open AI failed the validation check: ${validatedData}`)
+                logger.error(`The response received from Open AI failed the validation check: ${JSON.stringify(validatedData)}`)
                 ++errorResponsesCount
             } else {
                 allValidResponses.push(openAIResponse)
