@@ -164,12 +164,14 @@ const _executePrompt = async (
             })
 
             const validatedData = schema.validate(openAIResponse)
-            if (validatedData.error) {
+            if (validatedData.error || openAIResponse.points !== points) {
+                logger.error(`The response received from Open AI failed the validation check: ${validatedData}`)
                 ++errorResponsesCount
             } else {
                 allValidResponses.push(openAIResponse)
             }
         } else {
+            logger.error('No response received from Open AI')
             ++errorResponsesCount
         }
     })
@@ -337,6 +339,15 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 totalRequests += (5 + additionalErrorCount)
                 scoreConfidence = _calculateScoreConfidence(allValidResponses)
             }
+        } else {
+            response.output = {
+                score: scoreConfidence.score,
+                points: scoreConfidence.points,
+                rationale: scoreConfidence.rationale,
+                confidence:
+                (scoreConfidence.frequency / scoreConfidence.total) * 100,
+            }
+            return
         }
 
         // Keep requesting until a high confidence score is determined, respecting the request limit
@@ -354,7 +365,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
         }
 
         if (allValidResponses.length < 10) {
-            throw new Error('We were not able to achieve 10 valid responses')
+            throw new Error('We were not able to achieve 10 valid evaluations from Open AI to generate a confidence')
         }
 
         const confidence = (scoreConfidence.frequency / scoreConfidence.total) * 100
