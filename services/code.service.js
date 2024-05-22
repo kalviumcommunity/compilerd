@@ -19,10 +19,13 @@ const { resolve } = require('path')
 const { spawn } = require('child_process');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
+const path = require('path')
+const { kill } = require('process')
 
 const STATIC_SERVER_PATH = "/Users/anirudhpanwar/Downloads/jasmine-standalone-react/"
 const SUBMISSION_FILE_DOWNLOAD_PATH = '/tmp/submission.zip'
 const WORKING_DIR = '/tmp/submission/'
+const JASMINE_PORT = 8888
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -547,7 +550,7 @@ const _startJamsmineServer = async () => {
 
 const _runTests2 = async (jasmineServer, entryPath) => {
     const browser = await puppeteer.launch({ 
-        executablePath: '/usr/bin/chromium', 
+        executablePath: '/usr/bin/chromium',
         args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
 
@@ -597,26 +600,135 @@ const _runTests2 = async (jasmineServer, entryPath) => {
 	return {browser, jasmineResults}
 }
 
+const _writeFileToDisk = async (filePath, fileContent, WORKING_DIR) => {
+    const finalPathOnDisk = WORKING_DIR + filePath
+    const dirName = path.dirname(finalPathOnDisk)
+    if(!fs.existsSync(dirName)){
+        await fs.promises.mkdir(dirName, {recursive: true})
+    }
+    await fs.promises.writeFile(finalPathOnDisk, fileContent)
+}
+
+const _writeFilesToDisk = async (files, WORKING_DIR) => {
+    for (const file in files) {
+        const filePath = file
+        const fileContent = files[file]
+        await _writeFileToDisk(filePath, fileContent, WORKING_DIR)
+    }
+}
+
+const _killProcessOnPort = async (port) => {
+    return new Promise((resolve, reject) => {
+        let isRejected = false
+        const command = 'lsof';
+        const args = ['-i', `:${port}`];
+
+        const lsof = spawn(command, args);
+
+        let stdout = '';
+        let stderr = '';
+
+        lsof.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        lsof.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        lsof.on('close', (code) => {
+            if (code !== 0) {
+                console.error(`lsof command closed with code ${code}: ${stderr}`)
+                resolve()
+            }
+            else if (stdout) {
+                console.log(`Port ${port} is occupied. Attempting to kill the process...`);
+                console.log(`Command output:\n${stdout}`);
+
+                // Extract the process ID (PID)
+                let pid;
+
+                // For Unix-based systems, get the second part of the output line (PID)
+                const lines = stdout.trim().split('\n');
+                if (lines.length > 1) {
+                    const line = lines[1]; // Use the second line, since the first line is the header
+                    pid = line.trim().split(/\s+/)[1];
+                }
+
+                console.log(`Extracted PID: ${pid}`);
+
+                if (!pid || isNaN(pid)) {
+                    console.error(`Invalid PID: ${pid}`);
+                    if(!isRejected) {
+                        isRejected = true
+                        reject()
+                    }
+                }
+
+                // Command to kill the process
+                const killCommand = 'kill';
+                const killArgs = ['-9', pid];
+
+                const kill = spawn(killCommand, killArgs);
+
+                kill.stderr.on('data', (data) => {
+                    console.error(`Error killing process: ${data.toString()}`);
+                });
+
+                kill.on('exit', (exitCode) => {
+                    console.log(`kill command exited with code ${exitCode}`);
+                })
+
+                kill.on('close', (killCode) => {
+                    if (killCode !== 0) {
+                        console.error(`kill command closed with code ${killCode}`)
+                        if(!isRejected) {
+                            isRejected = true
+                            reject()
+                        }
+                    } else {
+                        console.log(`Process on port ${port} (PID: ${pid}) killed successfully.`)
+                        resolve()
+                    }
+                });
+            }
+        });
+
+    })
+}
+
+const _killChromiumProcesses = async () => {}
+const _killPuppeteer = async () => {}
+
+const _preCleanUp = async () => {
+    try {
+        await _killProcessOnPort(JASMINE_PORT)
+        await _killChromiumProcesses()
+        await _killPuppeteer()
+    } catch (err) {
+        // since there was an error in pre clean up which is mandatory for running test setup
+        // we kill the current process so that gcr spins up a new one.
+        process.exit(1)
+    }
+}
+
 const _executeMultiFile = async (req, res, response) => {
     try {
-        let timeTakenLog = ''
-        let previousTime = Date.now()
-
-        const fileLocalPath = await _getSubmission(req.url, SUBMISSION_FILE_DOWNLOAD_PATH)
-        if(!fileLocalPath) {
-            response.output = 'Failed to download submission';
-            response.statusCode = 404;
-            response.message = 'Failed to download submission';
-            return response;
+        await _preCleanUp()
+        if(req.isContentZipped){
+            const fileLocalPath = await _getSubmission(req.url, SUBMISSION_FILE_DOWNLOAD_PATH)
+            if(!fileLocalPath) {
+                response.output = 'Failed to download submission';
+                response.statusCode = 404;
+                response.message = 'Failed to download submission';
+                return response;
+            }
+    
+            await _unzipSubmission(fileLocalPath, WORKING_DIR)
+        } else {
+            const fileJson = req.files
+            await _writeFilesToDisk(fileJson, WORKING_DIR)
         }
-        let timeDiff = Date.now() - previousTime
-        previousTime = Date.now()
-        timeTakenLog = timeTakenLog + `\nTime taken to download submission : ${timeDiff} ms`
-
-        await _unzipSubmission(fileLocalPath, WORKING_DIR)
-        timeDiff = Date.now() - previousTime
-        previousTime = Date.now()
-        timeTakenLog = timeTakenLog + `\nTime taken to unzip submission : ${timeDiff} ms`
     
         let browser
         let jasmineResults
@@ -632,20 +744,11 @@ const _executeMultiFile = async (req, res, response) => {
         } else {
             if(fs.existsSync(WORKING_DIR + 'package.json')){
                 await _installDependencies(WORKING_DIR)
-                timeDiff = Date.now() - previousTime
-                previousTime = Date.now()
-                timeTakenLog = timeTakenLog + `\nTime taken to install dependencies : ${timeDiff} ms`
             }
             const jasmineServer = await _startJamsmineServer()
-            timeDiff = Date.now() - previousTime
-            previousTime = Date.now()
-            timeTakenLog = timeTakenLog + `\nTime taken to build files and start jasmine-browser-runner : ${timeDiff} ms`
 
             // await sleep(60000)
             let values = await _runTests2(jasmineServer, req.path)
-            timeDiff = Date.now() - previousTime
-            previousTime = Date.now()
-            timeTakenLog = timeTakenLog + `\nTime taken to start puppeteer with browser inside and scrape test result : ${timeDiff} ms`
 
             browser = values.browser
             jasmineResults = values.jasmineResults
@@ -656,11 +759,6 @@ const _executeMultiFile = async (req, res, response) => {
         const result = extractSpecsAndFailures(jasmineResults)
     
         await cleanUpDir(WORKING_DIR, SUBMISSION_FILE_DOWNLOAD_PATH)
-
-        timeDiff = Date.now() - previousTime
-        previousTime = Date.now()
-        timeTakenLog = timeTakenLog + `\nTime taken to clean up resources, parse, results, and clean up files : ${timeDiff} ms`
-        console.log(`🚀🚀 \n${timeTakenLog}`)
     
         response.output = result
         response.statusCode = 200
