@@ -3,6 +3,8 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
 const fs = require('fs')
+const path = require('path')
+const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
@@ -11,6 +13,8 @@ const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
+const supportedLanguages = require('../enums/supportedLanguages')
+const { default: axios } = require('axios')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -380,6 +384,99 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
     }
 }
 
+const _executeSqlQueries = async (dbPath, queries) => {
+    const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+        if (err) {
+            throw new Error(
+                'Was not able to connect to the SQLite database: ' + err.message,
+            )
+        }
+    })
+
+    const cleanedQueries = queries
+        .replace(/--.*$/gm, '') // Remove single-line comments
+        .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+        .split(';') // Split queries by semicolon
+        .map((query) => query.trim()) // Trim whitespace
+        .filter((query) => query.length) // Filter out empty queries
+
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run('BEGIN TRANSACTION;', (err) => {
+                if (err) {
+                    db.close()
+                    return reject(err)
+                }
+
+                const results = []
+                const processQuery = (index) => {
+                    if (index < cleanedQueries.length) {
+                        const query = cleanedQueries[index]
+                        db.all(query, (err, rows) => {
+                            if (err) {
+                                db.run('ROLLBACK;', () => {
+                                    db.close()
+                                    resolve(err.message)
+                                })
+                            } else {
+                                results.push(rows)
+                                processQuery(index + 1)
+                            }
+                        })
+                    } else {
+                        db.run('COMMIT;', (err) => {
+                            db.close()
+                            if (err) {
+                                reject(err)
+                            } else {
+                                resolve(results)
+                            }
+                        })
+                    }
+                }
+
+                processQuery(0)
+            })
+        })
+    })
+}
+
+const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
+    const writer = fs.createWriteStream(dbPath)
+    const response = await axios({
+        url: fileUrl,
+        method: 'GET',
+        responseType: 'stream',
+    })
+
+    response.data.pipe(writer)
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', resolve)
+        writer.on('error', reject)
+    })
+}
+
+const _executeSqlite3Query = async (req, res, response) => {
+    const dbPath = '/tmp/database.db'
+    try {
+        const dbDirectory = path.dirname(dbPath)
+        if (!fs.existsSync(dbDirectory)) {
+            fs.mkdirSync(dbDirectory, { recursive: true })
+        }
+        if (!fs.existsSync(dbPath)) {
+            fs.closeSync(fs.openSync(dbPath, 'w'))
+        }
+
+        await _downloadSqliteDatabase(req.stdin, dbPath)
+        const queryResults = await _executeSqlQueries(dbPath, req.script, response)
+        response.output = JSON.stringify(queryResults)
+    } catch (err) {
+        logger.error(err)
+        throw new Error('Unable to execute query.')
+    }
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -403,6 +500,8 @@ const execute = async (req, res) => {
             req.userAnswer,
             req.rubric,
         )
+    } else if (req.language === supportedLanguages.SQLITE3) {
+        await _executeSqlite3Query(req, res, response)
     } else {
         await _executeCode(req, res, response)
     }
