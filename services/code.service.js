@@ -456,7 +456,7 @@ const _getSubmissionDataFromGCS = async (url) => {
 
 
 const _startStaticServer = async (rootPath) => {
-	const submissionDir = rootPath
+    const submissionDir = rootPath
     const staticServer = express()
     staticServer.use(express.static(submissionDir))
     const staticServerInstance = http.createServer(staticServer)
@@ -486,11 +486,11 @@ function _extractSpecsAndFailures(summary) {
 
 const _cleanUpDir = async (dirPath, downloadedFilePath) => {
     await fs.promises.rm(dirPath, { recursive: true, force: true })
-    await fs.promises.rm(downloadedFilePath, {recursive: true, force: true})
+    await fs.promises.rm(downloadedFilePath, { recursive: true, force: true })
 }
 
 const _installDependencies = async (path) => {
-    return new Promise((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
         let isRejected = false
         const npmInstall = spawn('npm', ['install'], { cwd: path })
 
@@ -510,10 +510,10 @@ const _installDependencies = async (path) => {
 
         npmInstall.on('close', (code) => {
             logger.info(`npm install closed with code ${code}`)
-            if(code === 0) {
+            if (code === 0) {
                 resolve()
             } else {
-                if(!isRejected) {
+                if (!isRejected) {
                     isRejected = true
                     reject(new Error('Failed to install dependencies'))
                 }
@@ -522,7 +522,7 @@ const _installDependencies = async (path) => {
 
         npmInstall.on('error', (err) => {
             logger.error('Failed to start npm install process:', err)
-            if(!isRejected) {
+            if (!isRejected) {
                 isRejected = true
                 reject(err)
             }
@@ -531,8 +531,8 @@ const _installDependencies = async (path) => {
 }
 
 const _startJamsmineServer = async () => {
-    return new Promise((resolve, reject)=>{ 
-        const jasmineServer = spawn('npm', ['run', 'test:serve'], {cwd: appConfig.multifile.workingDir, detached: true}) // run independent of parent to prevent it from getting orphan
+    return new Promise((resolve, reject) => {
+        const jasmineServer = spawn('npm', ['run', 'test:serve'], { cwd: appConfig.multifile.workingDir, detached: true }) // run independent of parent to prevent it from getting orphan
         let isRejected = false
 
         let stdout = ''
@@ -544,22 +544,22 @@ const _startJamsmineServer = async () => {
                 resolve(jasmineServer)
             }
         });
-        let stderr =''
+        let stderr = ''
         jasmineServer.stderr.on('data', (data) => {
             stderr += data.toString()
         });
 
         jasmineServer.on('error', (err) => {
             logger.error('Failed to start jasmine server:', err)
-            if(!isRejected) {
+            if (!isRejected) {
                 isRejected = true
                 reject(err)
             }
         })
-        
+
         jasmineServer.on('close', (code) => {
-            if(code !== 0) {
-                if(!isRejected) {
+            if (code !== 0) {
+                if (!isRejected) {
                     isRejected = true
                     reject(new Error('Failed to start jasmine server'))
                 }
@@ -575,12 +575,13 @@ const _startJamsmineServer = async () => {
 // TODO : merge _runTestsStaticSetup and _runTestsReactSetup
 const _runTestsStaticSetup = async () => {
     let browser
-    try{
-        browser = await puppeteer.launch({ 
+    try {
+        browser = await puppeteer.launch({
             executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        })
         const page = await browser.newPage()
-    
+
         page.on('requestfailed', request => {
             logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
         })
@@ -591,29 +592,30 @@ const _runTestsStaticSetup = async () => {
         })
 
         let jasmineResults
-    	const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}`)
-        if(resp.status() !== 200){
+        const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}`)
+        if (resp.status() !== 200) {
             throw new Error('Failed to load the entry page')
         }
         await page.waitForFunction(() => // wait for a truthy value from the callback passed
             document.querySelector('.jasmine-duration')?.textContent.includes('finished')  // wait for finished to get printed
-          )
+        )
         jasmineResults = await page.evaluate(() => {  // evaluate the function in page's context and return the result
             return document.querySelector('.jasmine-bar').textContent
         });
         return { browser, jasmineResults }
-	} catch (error) {
-        if(browser) await browser.close()
-        throw(error)
-	}
+    } catch (error) {
+        if (browser) await browser.close()
+        throw (error)
+    }
 }
 
 const _runTestsReactSetup = async () => {
     let browser
-    try{
-        browser = await puppeteer.launch({ 
+    try {
+        browser = await puppeteer.launch({
             executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        })
         const page = await browser.newPage()
 
         page.on('requestfailed', request => {
@@ -624,23 +626,23 @@ const _runTestsReactSetup = async () => {
                 logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
             }
         });
-    
+
         let jasmineResults
-    	const resp = await page.goto('http://localhost:8888/')
-        if(resp.status() !== 200){
+        const resp = await page.goto('http://localhost:8888/')
+        if (resp.status() !== 200) {
             throw new Error('Failed to load the entry page')
         }
-        await page.waitForFunction(() => 
+        await page.waitForFunction(() =>
             document.querySelector('.jasmine-duration')?.textContent.includes('finished')
         );
         jasmineResults = await page.evaluate(() => {
-          return document.querySelector('.jasmine-bar').textContent
+            return document.querySelector('.jasmine-bar').textContent
         });
-        return {browser, jasmineResults}
-	} catch (error) {
-        if(browser) await browser.close()
-        throw(error)
-	}
+        return { browser, jasmineResults }
+    } catch (error) {
+        if (browser) await browser.close()
+        throw (error)
+    }
 }
 
 const _writeFileToDisk = async (filePath, fileContent, workingDir) => {
@@ -688,7 +690,7 @@ const _killProcessOnPort = async (port) => {
                 resolve()
             } else if (stderr) {
                 logger.error(stderr)
-                if(!isRejected) {
+                if (!isRejected) {
                     isRejected = true
                     reject()
                 }
@@ -706,7 +708,7 @@ const _killProcessOnPort = async (port) => {
                 logger.info('printing pid ', pid)
                 if (!pid || isNaN(pid)) {
                     logger.info(`Invalid PID: ${pid}`)
-                    if(!isRejected) {
+                    if (!isRejected) {
                         isRejected = true
                         reject()
                     }
@@ -722,7 +724,7 @@ const _killProcessOnPort = async (port) => {
                 kill.on('close', (killCode) => {
                     if (killCode !== 0) {
                         logger.info(`kill command closed with code ${killCode}`)
-                        if(!isRejected) {
+                        if (!isRejected) {
                             isRejected = true
                             reject()
                         }
@@ -752,15 +754,15 @@ const _executeMultiFile = async (req, res, response) => {
         await _preCleanUp()
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
-    
+
         let browser
         let jasmineResults
-        if(req.type === FRONTEND_STATIC_JASMINE){
+        if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
             let values = await _runTestsStaticSetup()
             browser = values.browser
             jasmineResults = values.jasmineResults
-            if(staticServerInstance) {
+            if (staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.error('Static server closed')
                 });
@@ -773,18 +775,18 @@ const _executeMultiFile = async (req, res, response) => {
             jasmineResults = values.jasmineResults
             process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
         }
-        
+
         await browser.close() // close browser and associated pages
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
         const result = _extractSpecsAndFailures(jasmineResults)
-        
+
         response.output = result
         response.statusCode = 200
         response.message = "Tests completed"
         return response
     } catch (err) {
         logger.error(err)
-        throw(new Error('Error in running multifile submission, check service logs for the issue'))
+        throw (new Error('Error in running multifile submission, check service logs for the issue'))
     }
 }
 
