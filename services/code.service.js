@@ -15,6 +15,8 @@ const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { default: axios } = require('axios')
+const { generate } = require('@builder.io/sqlgenerate')
+const parser = require('sqlite-parser')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -349,7 +351,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 points: scoreConfidence.points,
                 rationale: scoreConfidence.rationale,
                 confidence:
-                (scoreConfidence.frequency / scoreConfidence.total) * 100,
+                    (scoreConfidence.frequency / scoreConfidence.total) * 100,
             }
             return
         }
@@ -384,6 +386,18 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
     }
 }
 
+const _executeStatement = (db, sql) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, function(err, rows) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows)
+            }
+        })
+    })
+}
+
 const _executeSqlQueries = async (dbPath, queries) => {
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
         if (err) {
@@ -393,52 +407,26 @@ const _executeSqlQueries = async (dbPath, queries) => {
         }
     })
 
-    const cleanedQueries = queries
-        .replace(/--.*$/gm, '') // Remove single-line comments
-        .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-        .split(';') // Split queries by semicolon
-        .map((query) => query.trim()) // Trim whitespace
-        .filter((query) => query.length) // Filter out empty queries
+    const cleanedQueries = []
+    const ast = parser(queries);
+    if (!ast) {
+        return []
+    }
+    for (const statement of ast.statement) {
+        cleanedQueries.push(generate(statement))
+    }
 
-    return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.run('BEGIN TRANSACTION;', (err) => {
-                if (err) {
-                    db.close()
-                    return reject(err)
-                }
-
-                const results = []
-                const processQuery = (index) => {
-                    if (index < cleanedQueries.length) {
-                        const query = cleanedQueries[index]
-                        db.all(query, (err, rows) => {
-                            if (err) {
-                                db.run('ROLLBACK;', () => {
-                                    db.close()
-                                    resolve(err.message)
-                                })
-                            } else {
-                                results.push(rows)
-                                processQuery(index + 1)
-                            }
-                        })
-                    } else {
-                        db.run('COMMIT;', (err) => {
-                            db.close()
-                            if (err) {
-                                reject(err)
-                            } else {
-                                resolve(results)
-                            }
-                        })
-                    }
-                }
-
-                processQuery(0)
-            })
-        })
-    })
+    for (let i = 0; i < cleanedQueries.length; i++) {
+        try {
+            const res = await _executeStatement(db, cleanedQueries[i])
+            if (i == cleanedQueries.length - 1) {
+                return res
+            }
+        } catch (err) {
+            logger.error(err)
+            throw new Error(`Error: Unable to execute statement ${i + 1}`)
+        }
+    }
 }
 
 const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
@@ -467,13 +455,12 @@ const _executeSqlite3Query = async (req, res, response) => {
         if (!fs.existsSync(dbPath)) {
             fs.closeSync(fs.openSync(dbPath, 'w'))
         }
-
         await _downloadSqliteDatabase(req.stdin, dbPath)
         const queryResults = await _executeSqlQueries(dbPath, req.script, response)
         response.output = JSON.stringify(queryResults)
     } catch (err) {
         logger.error(err)
-        throw new Error('Unable to execute query.')
+        throw err
     }
 }
 
