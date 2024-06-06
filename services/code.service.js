@@ -408,23 +408,29 @@ const _executeSqlQueries = async (dbPath, queries) => {
     })
 
     const cleanedQueries = []
-    const ast = parser(queries);
-    if (!ast) {
-        return []
-    }
-    for (const statement of ast.statement) {
-        cleanedQueries.push(generate(statement))
+    try {
+        const ast = parser(queries);
+        if (!ast) {
+            return []
+        }
+        for (const statement of ast.statement) {
+            cleanedQueries.push(generate(statement))
+        }
+    } catch (err) {
+        return { error: true, data: err.message }
     }
 
     for (let i = 0; i < cleanedQueries.length; i++) {
         try {
             const res = await _executeStatement(db, cleanedQueries[i])
             if (i == cleanedQueries.length - 1) {
-                return res
+                return { data: res }
             }
         } catch (err) {
             logger.error(err)
-            throw new Error(`Error: Unable to execute statement ${i + 1}`)
+            return {
+                error: true, data: `${err.message} at statement ${i + 1}`
+            }
         }
     }
 }
@@ -457,7 +463,10 @@ const _executeSqlite3Query = async (req, res, response) => {
         }
         await _downloadSqliteDatabase(req.stdin, dbPath)
         const queryResults = await _executeSqlQueries(dbPath, req.script, response)
-        response.output = JSON.stringify(queryResults)
+        if (queryResults.error) {
+            response.error = 1
+        }
+        response.output = JSON.stringify(queryResults.data)
     } catch (err) {
         logger.error(err)
         throw err
