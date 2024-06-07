@@ -411,7 +411,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
     try {
         const ast = parser(queries);
         if (!ast) {
-            return []
+            return { data: [] }
         }
         for (const statement of ast.statement) {
             cleanedQueries.push(generate(statement))
