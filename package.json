@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@builder.io/sqlgenerate": "^1.2.9",
     "@supercharge/promise-pool": "^2.3.2",
     "axios": "^0.27.2",
     "compression": "^1.7.4",
@@ -21,6 +22,8 @@
     "morgan": "^1.10.0",
     "node-cache": "^5.1.2",
     "openai": "~4.24.1",
+    "sqlite-parser": "^1.0.1",
+    "sqlite3": "^5.1.7",
     "uuid": "^9.0.0",
     "winston": "^3.11.0"
   },

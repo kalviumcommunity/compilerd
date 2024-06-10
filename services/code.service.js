@@ -3,6 +3,8 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 const os = require('os')
 const fs = require('fs')
+const path = require('path')
+const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
@@ -11,6 +13,11 @@ const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
+const supportedLanguages = require('../enums/supportedLanguages')
+const { default: axios } = require('axios')
+const { generate } = require('@builder.io/sqlgenerate')
+const parser = require('sqlite-parser')
+const { dbConfig } = require('../configs/app.config')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -345,7 +352,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 points: scoreConfidence.points,
                 rationale: scoreConfidence.rationale,
                 confidence:
-                (scoreConfidence.frequency / scoreConfidence.total) * 100,
+                    (scoreConfidence.frequency / scoreConfidence.total) * 100,
             }
             return
         }
@@ -380,6 +387,102 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
     }
 }
 
+const _executeStatement = (db, sql) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, function(err, rows) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows)
+            }
+        })
+    })
+}
+
+const _executeSqlQueries = async (dbPath, queries) => {
+    const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+        if (err) {
+            throw new Error(
+                'Was not able to connect to the SQLite database: ' + err.message,
+            )
+        }
+    })
+
+    const sqlStatements = []
+    try {
+        const ast = parser(queries);
+        if (!ast) {
+            db.close()
+            return { data: [] }
+        }
+        for (const statement of ast.statement) {
+            sqlStatements.push(generate(statement))
+        }
+    } catch (err) {
+        db.close()
+        return { error: true, data: err.message }
+    }
+
+    for (let i = 0; i < sqlStatements.length; i++) {
+        try {
+            const res = await _executeStatement(db, sqlStatements[i])
+            if (i == sqlStatements.length - 1) {
+                db.close()
+                return { data: res }
+            }
+        } catch (err) {
+            logger.error(err)
+            db.close()
+            return {
+                error: true, data: `${err.message} at statement ${i + 1}`
+            }
+        }
+    }
+}
+
+const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
+    const writer = fs.createWriteStream(dbPath)
+    const response = await axios({
+        url: fileUrl,
+        method: 'GET',
+        responseType: 'stream',
+    })
+
+    response.data.pipe(writer)
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', resolve)
+        writer.on('error', reject)
+    })
+}
+
+const _executeSqlite3Query = async (req, res, response) => {
+    const dbPath = dbConfig.PATH
+    try {
+        const dbDirectory = path.dirname(dbPath)
+        if (!fs.existsSync(dbDirectory)) {
+            fs.mkdirSync(dbDirectory, { recursive: true })
+        }
+        if (!fs.existsSync(dbPath)) {
+            fs.closeSync(fs.openSync(dbPath, 'w'))
+        }
+        await _downloadSqliteDatabase(req.stdin, dbPath)
+        const queryResults = await _executeSqlQueries(dbPath, req.script, response)
+        if (queryResults.error) {
+            response.error = 1
+        }
+        response.output = JSON.stringify(queryResults.data)
+
+        fs.unlinkSync(dbPath)
+    } catch (err) {
+        if (fs.existsSync(dbPath)) {
+            fs.unlinkSync(dbPath)
+        }
+        logger.error(err)
+        throw err
+    }
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -403,6 +506,8 @@ const execute = async (req, res) => {
             req.userAnswer,
             req.rubric,
         )
+    } else if (req.language === supportedLanguages.SQLITE3) {
+        await _executeSqlite3Query(req, res, response)
     } else {
         await _executeCode(req, res, response)
     }
