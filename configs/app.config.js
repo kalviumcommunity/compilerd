@@ -1,5 +1,5 @@
 module.exports = {
-    DB_CONFIG: {
-        path: "/tmp/database.db",
+    db_config: {
+        PATH: "/tmp/database.db",
     }
 }

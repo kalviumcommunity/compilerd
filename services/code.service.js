@@ -17,7 +17,7 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { default: axios } = require('axios')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
-const { DB_CONFIG } = require('../configs/app.config')
+const { db_config } = require('../configs/app.config')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -457,7 +457,7 @@ const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
 }
 
 const _executeSqlite3Query = async (req, res, response) => {
-    const dbPath = DB_CONFIG.path
+    const dbPath = db_config.PATH
     try {
         const dbDirectory = path.dirname(dbPath)
         if (!fs.existsSync(dbDirectory)) {
