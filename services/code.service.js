@@ -17,6 +17,7 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { default: axios } = require('axios')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
+const { DB_CONFIG } = require('../configs/app.config')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -407,27 +408,31 @@ const _executeSqlQueries = async (dbPath, queries) => {
         }
     })
 
-    const cleanedQueries = []
+    const sqlStatements = []
     try {
         const ast = parser(queries);
         if (!ast) {
+            db.close()
             return { data: [] }
         }
         for (const statement of ast.statement) {
-            cleanedQueries.push(generate(statement))
+            sqlStatements.push(generate(statement))
         }
     } catch (err) {
+        db.close()
         return { error: true, data: err.message }
     }
 
-    for (let i = 0; i < cleanedQueries.length; i++) {
+    for (let i = 0; i < sqlStatements.length; i++) {
         try {
-            const res = await _executeStatement(db, cleanedQueries[i])
-            if (i == cleanedQueries.length - 1) {
+            const res = await _executeStatement(db, sqlStatements[i])
+            if (i == sqlStatements.length - 1) {
+                db.close()
                 return { data: res }
             }
         } catch (err) {
             logger.error(err)
+            db.close()
             return {
                 error: true, data: `${err.message} at statement ${i + 1}`
             }
@@ -452,7 +457,7 @@ const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
 }
 
 const _executeSqlite3Query = async (req, res, response) => {
-    const dbPath = '/tmp/database.db'
+    const dbPath = DB_CONFIG.path
     try {
         const dbDirectory = path.dirname(dbPath)
         if (!fs.existsSync(dbDirectory)) {
@@ -467,7 +472,12 @@ const _executeSqlite3Query = async (req, res, response) => {
             response.error = 1
         }
         response.output = JSON.stringify(queryResults.data)
+
+        fs.unlinkSync(dbPath)
     } catch (err) {
+        if (fs.existsSync(dbPath)) {
+            fs.unlinkSync(dbPath)
+        }
         logger.error(err)
         throw err
     }
