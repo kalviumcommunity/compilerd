@@ -539,67 +539,7 @@ const _startJasmineServer = async () => {
     })
 }
 
-// TODO : merge _runTestsStaticSetup and _runTestsReactSetup
-const _runTestsStaticSetup = async () => {
-    let browser
-    try {
-        browser = await puppeteer.launch({
-            executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        })
-        const page = await browser.newPage()
-
-        page.on('requestfailed', request => {
-            logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
-        })
-        page.on('response', response => {
-            if (!response.ok()) {
-                logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
-            }
-        })
-
-        let jasmineResults
-        const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}`)
-        if (resp.status() !== 200) {
-            throw new Error('Failed to load the entry page')
-        }
-        await page.waitForFunction(() => // wait for a truthy value from the callback passed
-            document.querySelector('.jasmine-duration')?.textContent.includes('finished')  // wait for finished to get printed
-        )
-
-        // Get the jasmine-summary element
-        const summaryElement = await page.$('.jasmine-summary')
-
-        // Parse the test results for all suites
-        jasmineResults = await page.evaluate((summaryElement) => {
-            const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
-            const results = {
-                'success': [],
-                'failed': []
-            };
-
-            suiteElements.forEach((suiteElement) => {
-                const specElements = suiteElement.querySelectorAll('.jasmine-specs');
-
-                specElements.forEach((specElement) => {
-                    const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
-                    const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
-
-                    results['success'].push(...passedTests)
-                    results['failed'].push(...failedTests)
-                });
-            });
-
-            return results
-        }, summaryElement)
-        return { browser, jasmineResults }
-    } catch (error) {
-        if (browser) await browser.close()
-        throw (error)
-    }
-}
-
-const _runTestsReactSetup = async () => {
+const _runTests = async () => {
     let browser
     try {
         browser = await puppeteer.launch({
@@ -649,7 +589,8 @@ const _runTestsReactSetup = async () => {
 
             return results
         }, summaryElement)
-        return { browser, jasmineResults }
+        await browser.close()
+        return jasmineResults
     } catch (error) {
         if (browser) await browser.close()
         throw (error)
@@ -772,13 +713,10 @@ const _executeMultiFile = async (req, res, response) => {
     }
 
     try {
-        let browser
         let jasmineResults
         if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
-            let values = await _runTestsStaticSetup()
-            browser = values.browser
-            jasmineResults = values.jasmineResults
+            jasmineResults = await _runTests()
             if (staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.error('Static server closed')
@@ -790,15 +728,11 @@ const _executeMultiFile = async (req, res, response) => {
             }
             await _installDependencies(appConfig.multifile.workingDir)
             const jasmineServer = await _startJasmineServer()
-            let values = await _runTestsReactSetup()
-            browser = values.browser
-            jasmineResults = values.jasmineResults
+            jasmineResults = await _runTests()
             process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
         }
 
-        await browser.close() // close browser and associated pages
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
-
         response.output = jasmineResults
     } catch (err) {
         if(err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
