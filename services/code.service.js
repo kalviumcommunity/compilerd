@@ -21,6 +21,7 @@ const path = require('path')
 const appConfig = require('../configs/app.config.js')
 const { PassThrough } = require('stream')
 const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
+const axios = require('axios')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -414,6 +415,10 @@ const execute = async (req, res) => {
             req.rubric,
         )
     } else if (['multifile'].includes(req.language)) {
+        response.output = {
+            success: [],
+            failed: [],
+        }
 		await _executeMultiFile(req, res, response)
 	} else {
         await _executeCode(req, res, response)
@@ -421,39 +426,17 @@ const execute = async (req, res) => {
     return response
 }
 
-const _extractBucketAndFileName = (url) => {
-    const urlParts = new URL(url)
-    const pathSegments = urlParts.pathname.substring(1).split('/')
-
-    const bucketName = pathSegments.shift()
-    const fileName = pathSegments.join('/')
-
-    return {
-        bucketName,
-        fileName
-    };
-}
-
 const _getSubmissionDataFromGCS = async (url) => {
-    const { bucketName, fileName } = _extractBucketAndFileName(url)
     try {
-        const file = storage.bucket(bucketName).file(fileName)
-        const passThroughStream = new PassThrough()
-
-        file.createReadStream().pipe(passThroughStream)
-        const chunks = []
-        for await (const chunk of passThroughStream) {
-            chunks.push(chunk)
-        }
-
-        const fileContent = Buffer.concat(chunks).toString('utf8')
-        const jsonData = JSON.parse(fileContent)
+        const response = await axios.get(url)
+        const jsonData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
+        // console.log('printing json data ', jsonData)
         return jsonData
     } catch (err) {
+        logger.error('Error fetching data from GCS:', err)
         throw err
     }
-};
-
+}
 
 const _startStaticServer = async (rootPath) => {
     const submissionDir = rootPath
@@ -468,20 +451,6 @@ const _startStaticServer = async (rootPath) => {
             reject(err)
         })
     })
-}
-
-function _extractSpecsAndFailures(summary) {
-    const specsRegex = /(\d+)\s+spec(s?)/
-    const failuresRegex = /(\d+)\s+failure(s?)/
-
-    const specsMatch = summary.match(specsRegex)
-    const failuresMatch = summary.match(failuresRegex)
-
-    const result = {
-        success: parseInt(specsMatch) - parseInt(failuresMatch),
-        failures: parseInt(failuresMatch)
-    };
-    return result
 }
 
 const _cleanUpDir = async (dirPath, downloadedFilePath) => {
@@ -530,7 +499,7 @@ const _installDependencies = async (path) => {
     })
 }
 
-const _startJamsmineServer = async () => {
+const _startJasmineServer = async () => {
     return new Promise((resolve, reject) => {
         const jasmineServer = spawn('npm', ['run', 'test:serve'], { cwd: appConfig.multifile.workingDir, detached: true }) // run independent of parent to prevent it from getting orphan
         let isRejected = false
@@ -599,9 +568,32 @@ const _runTestsStaticSetup = async () => {
         await page.waitForFunction(() => // wait for a truthy value from the callback passed
             document.querySelector('.jasmine-duration')?.textContent.includes('finished')  // wait for finished to get printed
         )
-        jasmineResults = await page.evaluate(() => {  // evaluate the function in page's context and return the result
-            return document.querySelector('.jasmine-bar').textContent
-        });
+
+        // Get the jasmine-summary element
+        const summaryElement = await page.$('.jasmine-summary')
+
+        // Parse the test results for all suites
+        jasmineResults = await page.evaluate((summaryElement) => {
+            const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
+            const results = {
+                'success': [],
+                'failed': []
+            };
+
+            suiteElements.forEach((suiteElement) => {
+                const specElements = suiteElement.querySelectorAll('.jasmine-specs');
+
+                specElements.forEach((specElement) => {
+                    const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
+                    const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
+
+                    results['success'].push(...passedTests)
+                    results['failed'].push(...failedTests)
+                });
+            });
+
+            return results
+        }, summaryElement)
         return { browser, jasmineResults }
     } catch (error) {
         if (browser) await browser.close()
@@ -634,10 +626,31 @@ const _runTestsReactSetup = async () => {
         }
         await page.waitForFunction(() =>
             document.querySelector('.jasmine-duration')?.textContent.includes('finished')
-        );
-        jasmineResults = await page.evaluate(() => {
-            return document.querySelector('.jasmine-bar').textContent
-        });
+        )
+        const summaryElement = await page.$('.jasmine-summary')
+
+        // Parse the test results for all suites
+        jasmineResults = await page.evaluate((summaryElement) => {
+            const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
+            const results = {
+                'success': [],
+                'failed': []
+            };
+
+            suiteElements.forEach((suiteElement) => {
+                const specElements = suiteElement.querySelectorAll('.jasmine-specs');
+
+                specElements.forEach((specElement) => {
+                    const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
+                    const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
+
+                    results['success'].push(...passedTests)
+                    results['failed'].push(...failedTests)
+                });
+            });
+
+            return results
+        }, summaryElement)
         return { browser, jasmineResults }
     } catch (error) {
         if (browser) await browser.close()
@@ -745,16 +758,22 @@ const _preCleanUp = async () => {
         // since there was an error in pre clean up which is mandatory for running test setup
         // we kill the current process and in turn container exits and new one is spun up.
         logger.info(`Error in pre cleanup: ${err.message}`, { stack: err?.stack })
-        // process.exit(1)
+        process.exit(1)
     }
 }
 
 const _executeMultiFile = async (req, res, response) => {
+    logger.info(`serving ${req.type}`)
     try {
         await _preCleanUp()
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
+    } catch (err) {
+        logger.error(err)
+        throw (new Error('Error in running multifile submission, check service logs for the issue'))
+    }
 
+    try {
         let browser
         let jasmineResults
         if (req.type === FRONTEND_STATIC_JASMINE) {
@@ -768,8 +787,11 @@ const _executeMultiFile = async (req, res, response) => {
                 });
             }
         } else {
+            if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                throw new Error(`No package.json found`)
+            }
             await _installDependencies(appConfig.multifile.workingDir)
-            const jasmineServer = await _startJamsmineServer()
+            const jasmineServer = await _startJasmineServer()
             let values = await _runTestsReactSetup()
             browser = values.browser
             jasmineResults = values.jasmineResults
@@ -778,15 +800,18 @@ const _executeMultiFile = async (req, res, response) => {
 
         await browser.close() // close browser and associated pages
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
-        const result = _extractSpecsAndFailures(jasmineResults)
 
-        response.output = result
-        response.statusCode = 200
-        response.message = "Tests completed"
-        return response
+        response.output = jasmineResults
     } catch (err) {
-        logger.error(err)
-        throw (new Error('Error in running multifile submission, check service logs for the issue'))
+        if(err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
+            throw err
+        } else {
+            // respond with empty success and failed array
+            logger.error(err)
+            response.errorMessage = "Error in running tests"
+            response.statusCode = 200
+            return response
+        }
     }
 }
 
