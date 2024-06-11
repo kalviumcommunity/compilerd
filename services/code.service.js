@@ -558,7 +558,7 @@ const _runTests = async () => {
         });
 
         let jasmineResults
-        const resp = await page.goto('http://localhost:8888/')
+        const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
         if (resp.status() !== 200) {
             throw new Error('Failed to load the entry page')
         }
