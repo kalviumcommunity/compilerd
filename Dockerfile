@@ -1,8 +1,11 @@
-FROM docker.io/library/node:16.17.0-alpine3.16
+FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
     apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+
+RUN set -ex && \
+    apk add --no-cache chromium lsof
 
 RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \

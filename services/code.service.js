@@ -13,11 +13,17 @@ const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
+const puppeteer = require('puppeteer');
+const express = require('express')
+const http = require('http')
+const { spawn } = require('child_process');
+const path = require('path')
+const appConfig = require('../configs/app.config.js')
+const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
+const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
-const { default: axios } = require('axios')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
-const { dbConfig } = require('../configs/app.config')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -457,7 +463,7 @@ const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
 }
 
 const _executeSqlite3Query = async (req, res, response) => {
-    const dbPath = dbConfig.PATH
+    const dbPath = appConfig.dbConfig.PATH
     try {
         const dbDirectory = path.dirname(dbPath)
         if (!fs.existsSync(dbDirectory)) {
@@ -506,12 +512,341 @@ const execute = async (req, res) => {
             req.userAnswer,
             req.rubric,
         )
+    } else if (['multifile'].includes(req.language)) {
+        response.output = {
+            success: [],
+            failed: [],
+        }
+		await _executeMultiFile(req, res, response)
     } else if (req.language === supportedLanguages.SQLITE3) {
         await _executeSqlite3Query(req, res, response)
     } else {
         await _executeCode(req, res, response)
     }
     return response
+}
+
+const _getSubmissionDataFromGCS = async (url) => {
+    try {
+        const response = await axios.get(url)
+        const jsonData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
+        // console.log('printing json data ', jsonData)
+        return jsonData
+    } catch (err) {
+        logger.error('Error fetching data from GCS:', err)
+        throw err
+    }
+}
+
+const _startStaticServer = async (rootPath) => {
+    const submissionDir = rootPath
+    const staticServer = express()
+    staticServer.use(express.static(submissionDir))
+    const staticServerInstance = http.createServer(staticServer)
+    return new Promise((resolve, reject) => {
+        staticServerInstance.listen(appConfig.multifile.jasminePort, () => {
+            resolve(staticServerInstance)
+        }).on('error', (err) => {
+            logger.error('Failed to start server:', err)
+            reject(err)
+        })
+    })
+}
+
+const _cleanUpDir = async (dirPath, downloadedFilePath) => {
+    await fs.promises.rm(dirPath, { recursive: true, force: true })
+    await fs.promises.rm(downloadedFilePath, { recursive: true, force: true })
+}
+
+const _installDependencies = async (path) => {
+    return new Promise((resolve, reject) => {
+        let isRejected = false
+        const npmInstall = spawn('npm', ['install'], { cwd: path })
+
+        let stdout = ''
+        npmInstall.stdout.on('data', (data) => {
+            stdout += data.toString()
+        })
+
+        let stderr = ''
+        npmInstall.stderr.on('data', (data) => {
+            stderr += data.toString()
+        })
+
+        npmInstall.on('exit', (code) => {
+            logger.info(`npm install exited with code ${code}`)
+        })
+
+        npmInstall.on('close', (code) => {
+            logger.info(`npm install closed with code ${code}`)
+            if (code === 0) {
+                resolve()
+            } else {
+                if (!isRejected) {
+                    isRejected = true
+                    reject(new Error('Failed to install dependencies'))
+                }
+            }
+        })
+
+        npmInstall.on('error', (err) => {
+            logger.error('Failed to start npm install process:', err)
+            if (!isRejected) {
+                isRejected = true
+                reject(err)
+            }
+        });
+    })
+}
+
+const _startJasmineServer = async () => {
+    return new Promise((resolve, reject) => {
+        const jasmineServer = spawn('npm', ['run', 'test:serve'], { cwd: appConfig.multifile.workingDir, detached: true }) // run independent of parent to prevent it from getting orphan
+        let isRejected = false
+
+        let stdout = ''
+        jasmineServer.stdout.on('data', (data) => {
+            const output = data.toString()
+            stdout += output
+
+            if (output.includes('Jasmine server is running here')) {
+                resolve(jasmineServer)
+            }
+        });
+        let stderr = ''
+        jasmineServer.stderr.on('data', (data) => {
+            stderr += data.toString()
+        });
+
+        jasmineServer.on('error', (err) => {
+            logger.error('Failed to start jasmine server:', err)
+            if (!isRejected) {
+                isRejected = true
+                reject(err)
+            }
+        })
+
+        jasmineServer.on('close', (code) => {
+            if (code !== 0) {
+                if (!isRejected) {
+                    isRejected = true
+                    reject(new Error('Failed to start jasmine server'))
+                }
+            }
+        })
+
+        jasmineServer.on('exit', (code) => {
+            logger.info(`Jasmine server exited with code ${code}`)
+        })
+    })
+}
+
+const _runTests = async () => {
+    let browser
+    try {
+        browser = await puppeteer.launch({
+            executablePath: '/usr/bin/chromium',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        })
+        const page = await browser.newPage()
+
+        page.on('requestfailed', request => {
+            logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
+        })
+        page.on('response', response => {
+            if (!response.ok()) {
+                logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
+            }
+        });
+
+        let jasmineResults
+        const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
+        if (resp.status() !== 200) {
+            throw new Error('Failed to load the entry page')
+        }
+        await page.waitForFunction(() =>
+            document.querySelector('.jasmine-duration')?.textContent.includes('finished')
+        )
+        const summaryElement = await page.$('.jasmine-summary')
+
+        // Parse the test results for all suites
+        jasmineResults = await page.evaluate((summaryElement) => {
+            const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
+            const results = {
+                'success': [],
+                'failed': []
+            };
+
+            suiteElements.forEach((suiteElement) => {
+                const specElements = suiteElement.querySelectorAll('.jasmine-specs');
+
+                specElements.forEach((specElement) => {
+                    const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
+                    const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
+
+                    results['success'].push(...passedTests)
+                    results['failed'].push(...failedTests)
+                });
+            });
+
+            return results
+        }, summaryElement)
+        await browser.close()
+        return jasmineResults
+    } catch (error) {
+        if (browser) await browser.close()
+        throw (error)
+    }
+}
+
+const _writeFileToDisk = async (filePath, fileContent, workingDir) => {
+    try {
+        const finalPathOnDisk = workingDir + filePath
+        const dirName = path.dirname(finalPathOnDisk)
+        if (!fs.existsSync(dirName)) {
+            await fs.promises.mkdir(dirName, { recursive: true })
+        }
+        await fs.promises.writeFile(finalPathOnDisk, fileContent)
+    } catch (err) {
+        logger.error(err)
+        throw err
+    }
+}
+
+const _writeFilesToDisk = async (files, workingDir) => {
+    for (const file in files) {
+        const filePath = file
+        const fileContent = files[file]
+        await _writeFileToDisk(filePath, fileContent, workingDir)
+    }
+}
+
+const _killProcessOnPort = async (port) => {
+    return new Promise((resolve, reject) => {
+        let isRejected = false
+        const lsof = spawn('lsof', ['-i', `:${port}`])
+
+        let stdout = ''
+        let stderr = ''
+
+        lsof.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        lsof.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        lsof.on('close', (code) => {
+            logger.info(stdout)
+            if (code === 1 && stderr.trim() === '') { // lsof returns 1 when the port is idle
+                logger.info(`port ${port} is free`)
+                resolve()
+            } else if (stderr) {
+                logger.error(stderr)
+                if (!isRejected) {
+                    isRejected = true
+                    reject()
+                }
+            }
+            else if (stdout) {
+                logger.info(`Port ${port} is occupied. Attempting to kill the process...`)
+
+                let pid
+                const lines = stdout.trim().split('\n') // For Unix-based systems, get the second part of the output line (PID)
+                if (lines.length > 1) {
+                    const line = lines[1]
+                    pid = line.trim().split(/\s+/)[1]
+                }
+
+                logger.info('printing pid ', pid)
+                if (!pid || isNaN(pid)) {
+                    logger.info(`Invalid PID: ${pid}`)
+                    if (!isRejected) {
+                        isRejected = true
+                        reject()
+                    }
+                }
+
+                const kill = spawn('kill', ['-15', pid], {
+                    detached: true,
+                    stdio: 'ignore',
+                });
+                kill.on('exit', (exitCode) => {
+                    logger.info(`kill command exited with code ${exitCode}`)
+                })
+                kill.on('close', (killCode) => {
+                    if (killCode !== 0) {
+                        logger.info(`kill command closed with code ${killCode}`)
+                        if (!isRejected) {
+                            isRejected = true
+                            reject()
+                        }
+                    } else {
+                        resolve()
+                    }
+                })
+            }
+        })
+    })
+}
+
+const _preCleanUp = async () => {
+    try {
+        await _killProcessOnPort(appConfig.multifile.jasminePort)
+        // TODO: add pre cleanup for puppeteer and jasmine server to prevent memory leak
+    } catch (err) {
+        // since there was an error in pre clean up which is mandatory for running test setup
+        // we kill the current process and in turn container exits and new one is spun up.
+        logger.info(`Error in pre cleanup: ${err.message}`, { stack: err?.stack })
+        process.exit(1)
+    }
+}
+
+const _executeMultiFile = async (req, res, response) => {
+    logger.info(`serving ${req.type}`)
+    try {
+        await _preCleanUp()
+        const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
+        await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
+    } catch (err) {
+        logger.error(err)
+        throw (new Error('Error in running multifile submission, check service logs for the issue'))
+    }
+
+    try {
+        let jasmineResults
+        if (req.type === FRONTEND_STATIC_JASMINE) {
+            const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+            jasmineResults = await _runTests()
+            if (staticServerInstance) {
+                staticServerInstance.close(() => {
+                    logger.error('Static server closed')
+                });
+            }
+        } else {
+            if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                throw new Error(`No package.json found`)
+            }
+            await _installDependencies(appConfig.multifile.workingDir)
+            const jasmineServer = await _startJasmineServer()
+            jasmineResults = await _runTests()
+            process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+        }
+
+        await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
+        response.output = jasmineResults
+    } catch (err) {
+        if(err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
+            throw err
+        } else {
+            // respond with empty success and failed array
+            logger.error(err)
+            response.errorMessage = "Error in running tests"
+            response.statusCode = 200
+            return response
+        }
+    }
 }
 
 module.exports = { execute }
