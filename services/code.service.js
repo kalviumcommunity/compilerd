@@ -17,7 +17,6 @@ const puppeteer = require('puppeteer');
 const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
-const path = require('path')
 const appConfig = require('../configs/app.config.js')
 const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
 const axios = require('axios')
@@ -517,7 +516,7 @@ const execute = async (req, res) => {
             success: [],
             failed: [],
         }
-		await _executeMultiFile(req, res, response)
+        await _executeMultiFile(req, res, response)
     } else if (req.language === supportedLanguages.SQLITE3) {
         await _executeSqlite3Query(req, res, response)
     } else {
@@ -837,7 +836,7 @@ const _executeMultiFile = async (req, res, response) => {
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
         response.output = jasmineResults
     } catch (err) {
-        if(err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
+        if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
             throw err
         } else {
             // respond with empty success and failed array
