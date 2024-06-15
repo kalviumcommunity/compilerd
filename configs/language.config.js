@@ -36,7 +36,7 @@ const LANGUAGES_CONFIG = {
         run: 'node solution.js',
         timeout: 10,
         filename: 'solution.js',
-        memory: ALLOWED_RAM * ONE_MB,
+        memory: 2 * ALLOWED_RAM * ONE_MB,
     },
     [RUBY]: {
         compile: 'ruby -c solution.rb',
