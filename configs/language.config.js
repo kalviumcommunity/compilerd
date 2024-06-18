@@ -32,7 +32,7 @@ const LANGUAGES_CONFIG = {
         memory: ALLOWED_RAM * ONE_MB,
     },
     [NODEJS]: {
-        compile: 'node --check solution.js',
+        compile: 'node --max-old-space-size=256 --check solution.js',
         run: 'node --max-old-space-size=256 solution.js',
         timeout: 10,
         filename: 'solution.js',
