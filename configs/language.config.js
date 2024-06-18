@@ -36,7 +36,7 @@ const LANGUAGES_CONFIG = {
         run: 'node solution.js',
         timeout: 10,
         filename: 'solution.js',
-        memory: ALLOWED_RAM * ONE_MB,
+        memory: 786432, // Node.js v20 requires more initial memory, so initialize it to around 780MB (1.5 * 512MB). This value is higher than the previous 512MB but below 1GB to ensure ulimit catches excessive memory use without the GCR container being killed.
     },
     [RUBY]: {
         compile: 'ruby -c solution.rb',
