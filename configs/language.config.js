@@ -32,11 +32,13 @@ const LANGUAGES_CONFIG = {
         memory: ALLOWED_RAM * ONE_MB,
     },
     [NODEJS]: {
-        compile: 'node --max-old-space-size=256 --check solution.js',
-        run: 'node --max-old-space-size=256 solution.js',
+        // compile: 'node --max-old-space-size=256 --check solution.js',
+        compile: 'node --check solution.js',
+        run: 'node solution.js',
         timeout: 10,
         filename: 'solution.js',
-        memory: ALLOWED_RAM * ONE_MB,
+        // memory: ALLOWED_RAM * ONE_MB,
+        memory: 768000,
     },
     [RUBY]: {
         compile: 'ruby -c solution.rb',
