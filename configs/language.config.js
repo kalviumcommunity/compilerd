@@ -1,6 +1,6 @@
 const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
-const ALLOWED_RAM = process.env.ALLOWED_RAM || 1000
+const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
     [C]: {
@@ -33,7 +33,7 @@ const LANGUAGES_CONFIG = {
     },
     [NODEJS]: {
         compile: 'node --check solution.js',
-        run: 'node solution.js',
+        run: 'node --max-old-space-size=256 solution.js',
         timeout: 10,
         filename: 'solution.js',
         memory: ALLOWED_RAM * ONE_MB,
