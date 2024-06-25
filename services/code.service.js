@@ -805,9 +805,8 @@ const _preCleanUp = async () => {
 
 const _checkIntegrity = async (non_editable_files) => {
     for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
-        const fullPath = path.join(appConfig.multifile.workingDir, filePath)
-        
         try {
+            const fullPath = path.join(appConfig.multifile.workingDir, filePath)
             const fileContent = await fs.promises.readFile(fullPath)
             const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
             if (actualHash !== expectedHash) {
@@ -835,11 +834,10 @@ const _executeMultiFile = async (req, res, response) => {
 
     try {
         let jasmineResults
-        let isValidSubmission = true
         if(req?.non_editable_files) {
-            isValidSubmission = await _checkIntegrity(req.non_editable_files)
+            const isValidSubmission = await _checkIntegrity(req.non_editable_files)
+            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
-        if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
             jasmineResults = await _runTests()
