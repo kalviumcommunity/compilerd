@@ -23,6 +23,7 @@ const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
+const crypto = require('crypto')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -802,6 +803,24 @@ const _preCleanUp = async () => {
     }
 }
 
+const _checkIntegrity = async (non_editable_files) => {
+    for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
+        try {
+            const fullPath = path.join(appConfig.multifile.workingDir, filePath)
+            const fileContent = await fs.promises.readFile(fullPath)
+            const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
+            if (actualHash !== expectedHash) {
+                logger.warn(`Integrity check failed for file: ${filePath}`)
+                return false
+            }
+        } catch (error) {
+            logger.error(`Error reading file ${filePath}: ${error.message}`)
+            return false
+        }
+    }
+    return true
+}
+
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
@@ -815,6 +834,10 @@ const _executeMultiFile = async (req, res, response) => {
 
     try {
         let jasmineResults
+        if(req?.non_editable_files) {
+            const isValidSubmission = await _checkIntegrity(req.non_editable_files)
+            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+        }
         if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
             jasmineResults = await _runTests()
