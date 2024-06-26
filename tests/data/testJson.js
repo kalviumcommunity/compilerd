@@ -5,6 +5,7 @@ const javaTests = require("./javaTests");
 const rubyTests = require("./rubyTests");
 const cTests = require("./cTests");
 const openAiTests = require("./openAiTests");
+const golangTests = require("./golangTests");
 
 const testCases = [
   ...pythonTests,
@@ -14,6 +15,7 @@ const testCases = [
   ...rubyTests,
   ...cTests,
   ...openAiTests,
+  ...golangTests,
 ];
 
 module.exports = { testCases };

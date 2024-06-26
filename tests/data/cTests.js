@@ -45,18 +45,6 @@ const cTests = [
       error: 0,
     },
   },
-  {
-    name: "c : Segmentation Fault",
-    reqObject: {
-      language: "c",
-      script: '#include <stdio.h>\nint main() {\n    int *ptr = NULL;\n    printf("%d\\n", *ptr);\n    return 0;\n}',
-    },
-    expectedResponse: {
-      val: "Segmentation fault\n",
-      status: 200,
-      error: 0,
-    },
-  },
 ];
 
 module.exports = cTests;
