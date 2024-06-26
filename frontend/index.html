@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCompile Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-code"></i> CodeCompile Pro</h1>
+        </header>
+        <main>
+            <div class="compiler-container">
+                <div class="top-controls">
+                    <div class="language-select">
+                        <select id="language">
+                            <option value="54">C++</option>
+                            <option value="50">C</option>
+                            <option value="62">Java</option>
+                            <option value="71">Python</option>
+                            <option value="72">Ruby</option>
+                            <option value="63">JavaScript</option>
+                            <option value="73">Rust</option>
+                            <option value="51">Dart</option>
+                        </select>
+                    </div>
+                    <button onclick="compileAndRun()" class="run-btn"><i class="fas fa-play"></i> Run</button>
+                </div>
+                <div class="code-area">
+                    <textarea id="code" placeholder="Enter your code here..."></textarea>
+                </div>
+                <div class="bottom-panel">
+                    <div class="input-section">
+                        <h3>Input</h3>
+                        <textarea id="userInput" placeholder="Enter input for your program (if needed)..."></textarea>
+                    </div>
+                    <div class="output-section">
+                        <h3>Output</h3>
+                        <pre id="output"></pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <p>&copy; 2024 CodeCompile Pro. All rights reserved.</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
