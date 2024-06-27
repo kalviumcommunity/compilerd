@@ -10,4 +10,6 @@ module.exports = {
     MULTIFILE: 'multifile',
     SQLITE3: 'sqlite3',
     GO: 'go',
+    TYPESCRIPT: "typescript",
+    PHP: "php",
 }

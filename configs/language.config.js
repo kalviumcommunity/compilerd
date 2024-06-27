@@ -1,4 +1,4 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, GO } = require('../enums/supportedLanguages')
+const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, GO, TYPESCRIPT, PHP } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
@@ -56,6 +56,20 @@ const LANGUAGES_CONFIG = {
         run: './solution',
         timeout: 2,
         filename: 'solution.go',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [TYPESCRIPT]: {
+        compile: "tsc solution.ts",
+        run: "ts-node solution.ts",
+        timeout: 10,
+        filename: "solution.ts",
+        memory: 786432,
+    },
+    [PHP]: {
+        compile: "php -l solution.php",
+        run: "php solution.php",
+        timeout: 10,
+        filename: "solution.php",
         memory: ALLOWED_RAM * ONE_MB,
     },
 }

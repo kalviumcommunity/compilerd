@@ -8,6 +8,8 @@ const langMap = {
   CPP: langs.cpp(),
   GO: langs.go(),
   RUBY: langs.ruby(),
+  TYPESCRIPT: langs.typescript(),
+  PHP: langs.php(),
 };
 
 export { langMap };

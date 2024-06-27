@@ -11,7 +11,7 @@ const executeCode = async (data) => {
   try {
     const { data: resData } = await axios.post(API_URL, data);
 
-    if (compileLangs.includes(data.language) && resData.error > 0) {
+    if (resData.error > 0) {
       return { result: resData, showValue: resData.compile_message };
     }
 
