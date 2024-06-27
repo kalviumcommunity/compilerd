@@ -1,34 +1,50 @@
 import React from "react";
-import { Button } from "flowbite-react";
-import { LoaderCircle, ChevronDown } from "lucide-react";
+import { LoaderCircle, ChevronDown, Check } from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 import { langMap } from "../utils/langMap";
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function CodeNav({ value, handleOnChange, handleOnRun }) {
   const languages = Object.keys(langMap);
 
   return (
     <div className="w-full px-4 pt-2 pb-3 flex items-center justify-start flex-wrap gap-4">
-      <button
-        id="dropdownDefaultButton"
-        data-dropdown-toggle="dropdown"
-        className="text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700"
-        type="button"
-      >
-        {value.language}
-        <ChevronDown />
-      </button>
-      <div id="dropdown" className="z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-36 bg-gray-700">
-        <ul className="py-2 text-sm text-gray-200" aria-labelledby="dropdownDefaultButton">
-          {languages.map((lang) => (
-            <li key={lang}>
-              <button className="block w-full px-3 py-1.5 hover:bg-gray-600 hover:text-white" onClick={() => handleOnChange(lang, "language")}>
-                {lang}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Menu as="div" className="relative inline-block text-left">
+        <div>
+          <MenuButton className="text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700">
+            {value.language}
+            <ChevronDown className="-mr-1 h-5 w-5" aria-hidden="true" />
+          </MenuButton>
+        </div>
+        <MenuItems
+          transition
+          className="absolute z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+        >
+          <div className="py-2 text-sm text-gray-200 bg-gray-800">
+            {languages.map((lang) => (
+              <MenuItem key={lang}>
+                {
+                  <a
+                    className={classNames(
+                      value.language === lang ? "bg-gray-900" : "bg-gray-800 pl-9 hover:bg-gray-700",
+                      "block w-full px-3 py-1.5 hover:text-white cursor-pointer"
+                    )}
+                    onClick={() => handleOnChange(lang, "language")}
+                  >
+                    <span className="flex items-center justify-start gap-1">
+                      {value.language === lang && <Check size={18} />} {lang}
+                    </span>
+                  </a>
+                }
+              </MenuItem>
+            ))}
+          </div>
+        </MenuItems>
+      </Menu>
 
       <button className="font-medium rounded-lg text-sm px-5 py-2.5 bg-blue-700 hover:bg-blue-800" onClick={handleOnRun}>
         {value.isLoading ? <LoaderCircle className=" animate-spin" /> : "RUN"}

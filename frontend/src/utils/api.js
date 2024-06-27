@@ -12,7 +12,11 @@ const executeCode = async (data) => {
     const { data: resData } = await axios.post(API_URL, data);
 
     if (resData.error > 0) {
-      return { result: resData, showValue: resData.compile_message };
+      const compile_message = resData.compile_message;
+      const output = resData.output;
+
+      if (compile_message !== "") return { result: resData, showValue: resData.compile_message };
+      else if (output !== "" ) return { result: resData, showValue: resData.output };
     }
 
     return { result: resData, showValue: resData.output };
