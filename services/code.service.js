@@ -678,7 +678,7 @@ const _runTests = async () => {
             };
 
             suiteElements.forEach((suiteElement) => {
-                const specElements = suiteElement.querySelectorAll('.jasmine-specs');
+                const specElements = suiteElement.querySelectorAll(':scope > .jasmine-specs'); // only look at direct children to avoid duplicates
 
                 specElements.forEach((specElement) => {
                     const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
