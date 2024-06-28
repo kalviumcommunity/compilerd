@@ -45,6 +45,29 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.rb',
         memory: ALLOWED_RAM * ONE_MB,
     },
+     // adding additional languages
+     PHP: {
+        compile: '',
+        run: 'php solution.php',
+        timeout: 10,
+        filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    GO: {
+        compile: '',
+        run: 'go run solution.go',
+        timeout: 10,
+        filename: 'solution.go',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    R: {
+        compile: '',
+        run: 'Rscript solution.R',
+        timeout: 10,
+        filename: 'solution.R',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    // end of additional languages
     [PROMPTV1]: {
         model: 'gpt-4-1106-preview',
     },

@@ -211,6 +211,119 @@ const testCases = [
             error: 0,
         },
     },
+    //Support for 3 additional languages, including tests
+
+    // PHP Test Cases
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "hello world"; ?>',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'php : print stdin',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                '$input = fopen("php://stdin", "r");\n' +
+                'while ($line = fgets($input)) {\n' +
+                '    echo $line;\n' +
+                '}\n' +
+                'fclose($input);\n' +
+                '?>',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // Go Test Cases
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script: 'package main\n' +
+                'import "fmt"\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script: 'package main\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // R Test Cases
+    {
+        name: 'r : hello world',
+        reqObject: {
+            language: 'r',
+            script: 'cat("hello world")',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'r : print stdin',
+        reqObject: {
+            language: 'r',
+            script: 'input <- file("stdin", "r")\n' +
+                'lines <- readLines(input)\n' +
+                'cat(lines, sep = "\n")\n' +
+                'close(input)',
+            stdin: '1\n2\n3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // end of additional languages
+
     {
         name: 'TLE test',
         reqObject: {
