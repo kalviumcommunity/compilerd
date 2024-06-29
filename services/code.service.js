@@ -1,3 +1,6 @@
+/* eslint-disable dot-notation */
+/* eslint-disable prefer-const */
+/* eslint-disable no-unused-vars */
 /* globals gc */
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
@@ -395,9 +398,9 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
-                reject(err);
+                reject(err)
             } else {
                 resolve(rows)
             }
@@ -416,7 +419,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
 
     const sqlStatements = []
     try {
-        const ast = parser(queries);
+        const ast = parser(queries)
         if (!ast) {
             db.close()
             return { data: [] }
@@ -432,7 +435,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
     for (let i = 0; i < sqlStatements.length; i++) {
         try {
             const res = await _executeStatement(db, sqlStatements[i])
-            if (i == sqlStatements.length - 1) {
+            if (i === sqlStatements.length - 1) {
                 db.close()
                 return { data: res }
             }
@@ -440,7 +443,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
             logger.error(err)
             db.close()
             return {
-                error: true, data: `${err.message} at statement ${i + 1}`
+                error: true, data: `${err.message} at statement ${i + 1}`,
             }
         }
     }
@@ -595,7 +598,7 @@ const _installDependencies = async (path) => {
                 isRejected = true
                 reject(err)
             }
-        });
+        })
     })
 }
 
@@ -612,12 +615,11 @@ const _startJasmineServer = async () => {
             if (output.includes('Jasmine server is running here')) {
                 resolve(jasmineServer)
             }
-        });
+        })
         let stderr = ''
         jasmineServer.stderr.on('data', (data) => {
             stderr += data.toString()
-        });
-
+        })
         jasmineServer.on('error', (err) => {
             logger.error('Failed to start jasmine server:', err)
             if (!isRejected) {
@@ -646,7 +648,7 @@ const _runTests = async () => {
     try {
         browser = await puppeteer.launch({
             executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
         })
         const page = await browser.newPage()
 
@@ -657,7 +659,7 @@ const _runTests = async () => {
             if (!response.ok()) {
                 logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
             }
-        });
+        })
 
         let jasmineResults
         const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
@@ -665,7 +667,7 @@ const _runTests = async () => {
             throw new Error('Failed to load the entry page')
         }
         await page.waitForFunction(() =>
-            document.querySelector('.jasmine-duration')?.textContent.includes('finished')
+            document.querySelector('.jasmine-duration')?.textContent.includes('finished'),
         )
         const summaryElement = await page.$('.jasmine-summary')
 
@@ -673,8 +675,8 @@ const _runTests = async () => {
         jasmineResults = await page.evaluate((summaryElement) => {
             const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
             const results = {
-                'success': [],
-                'failed': []
+                success: [],
+                failed: [],
             };
 
             suiteElements.forEach((suiteElement) => {
@@ -684,6 +686,7 @@ const _runTests = async () => {
                     const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
                     const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
 
+                    // eslint-disable-next-line dot-notation
                     results['success'].push(...passedTests)
                     results['failed'].push(...failedTests)
                 });
@@ -771,7 +774,7 @@ const _killProcessOnPort = async (port) => {
                 const kill = spawn('kill', ['-15', pid], {
                     detached: true,
                     stdio: 'ignore',
-                });
+                })
                 kill.on('exit', (exitCode) => {
                     logger.info(`kill command exited with code ${exitCode}`)
                 })
@@ -834,9 +837,9 @@ const _executeMultiFile = async (req, res, response) => {
 
     try {
         let jasmineResults
-        if(req?.non_editable_files) {
+        if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if (!isValidSubmission) throw new Error('`A non editable file has been modified, exiting...`')
         }
         if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
@@ -848,7 +851,7 @@ const _executeMultiFile = async (req, res, response) => {
             }
         } else {
             if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                throw new Error(`No package.json found`)
+                throw new Error('No package.json found')
             }
             await _installDependencies(appConfig.multifile.workingDir)
             const jasmineServer = await _startJasmineServer()
@@ -864,7 +867,7 @@ const _executeMultiFile = async (req, res, response) => {
         } else {
             // respond with empty success and failed array
             logger.error(err)
-            response.errorMessage = "Error in running tests"
+            response.errorMessage = 'Error in running tests'
             response.statusCode = 200
             return response
         }
