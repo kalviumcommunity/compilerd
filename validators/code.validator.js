@@ -1,22 +1,29 @@
-const validateCodeInput = (req, res, next) => {
-    const { language, script } = req.body;
+// Example: Validate code execution request
+function validateExecutionRequest(reqObject) {
+    const validLanguages = ['cpp', 'nodejs', 'python', 'c', 'java', 'ruby']; // List of supported languages
 
-    // Validate language and script presence
-    if (!language || !script) {
-        return res.status(400).send({ message: 'Language and script are required' });
+    // Check if language is provided and supported
+    if (!reqObject.language || !validLanguages.includes(reqObject.language)) {
+        throw new Error('Invalid or unsupported language.');
     }
 
-    // Example: Validate script length or specific language requirements
-    if (script.length > 1000) {
-        return res.status(400).send({ message: 'Script length exceeds maximum allowed' });
+    // Check if script is provided and not empty
+    if (!reqObject.script || reqObject.script.trim() === '') {
+        throw new Error('Script is required and cannot be empty.');
     }
 
-    // Add more specific validations as needed
+    // Additional validation for specific languages or inputs can be added here
 
-    // Proceed to next middleware (controller) if validation passes
-    next();
-};
+    // Optional: Validate stdin if provided
+    if (reqObject.stdin && typeof reqObject.stdin !== 'string') {
+        throw new Error('Invalid stdin format. Expected a string.');
+    }
+
+    // Validation passed
+    return true;
+}
 
 module.exports = {
-    validateCodeInput,
-}
+    validateExecutionRequest,
+    // Add more validation functions as needed
+};
