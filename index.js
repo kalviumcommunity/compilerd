@@ -1,10 +1,15 @@
 const express = require('express');
 const app = express();
-const codeRoutes = require('./routes/code.routes');
+const router = require('./router');
 
-app.use(express.json());
-app.use('/api', codeRoutes);
+// Middleware
+app.use(express.json()); // JSON body parser
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+// Use the router
+app.use(router);
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(Server is running on port ${PORT});
 });
