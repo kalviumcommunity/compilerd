@@ -1,0 +1,97 @@
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 5px 100px 5px 20px;
+    color: #DB005B
+}
+
+.Navbar {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 60px;
+    width: 100%;
+    text-align: center;
+    color: #DB005B;
+    background-color: #eeeeee;
+    gap: 10px;
+    /* border-bottom: 3px solid #8d8b8b; */
+}
+
+.leftDiv {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.rightDiv {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.Navbar label {
+    margin-left: 80px;
+    font-weight: bold;
+}
+
+.Navbar input {
+    accent-color: #DB005B;
+}
+
+#no {
+    height: 34px;
+    width: 120px;
+    font-size: 16px;
+    color: black;
+    border: 1px solid #DB005B;
+    border-radius: 8px;
+    background-color: white;
+}
+
+#no:focus {
+    outline: none;
+}
+
+.css-b62m3t-container {
+    width: 170px;
+    color: #DB005B;
+    background-color: #eeeeee;
+}
+
+.css-13cymwt-control {
+    background-color: #eeeeee !important;
+    border: 2px solid #DB005B !important;
+}
+
+.css-1jqq78o-placeholder {
+    color: #DB005B !important
+}
+
+/* Media queries for tablet */
+@media only screen and (max-width: 1024px) {
+    .title {
+      font-size: 24px;
+      margin: 5px 50px 5px 10px;
+    }
+  
+    .Navbar label {
+      margin-left: 20px;
+    }
+  }
+  
+  /* Media queries for phone */
+  @media only screen and (max-width: 600px) {
+    .title {
+      font-size: 20px;
+      margin: 5px 20px 5px 10px;
+    }
+  
+    .Navbar label {
+      margin-left: 20px;
+    }
+  
+    .Navbar input {
+      margin-left: 20px;
+    }
+  }

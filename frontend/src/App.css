@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&display=swap');
+
+.App {
+  width: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  background-color: #eeeeee;
+  font-family: 'Source Code Pro';
+}
+
+.main {
+  display: flex;
+  max-height: calc(100vh - 50px);
+}
+
+.left-container {
+  display: flex;
+  position: relative;
+  margin: 12px 20px 20px 20px;
+  flex: 70%;
+  height: calc(100vh - 100px);
+  border-radius: 12px;
+}
+
+.right-container {
+  flex: 30%;
+  max-height: calc(100vh - 95px);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background-color: #eeeeee;
+  /* border: 3px solid #474747; */
+}
+
+.right-container h4 {
+  margin-top: 0.4rem;
+  margin-left: 10px;
+  font-size: 16px;
+  margin-bottom: 0px;
+}
+
+.input-box {
+  margin: 3rem 1rem 0 0;
+  width: 25rem;
+  background-color: #eeeeee;
+  position: relative;
+  overflow-y: hidden;
+  color: white;
+  height: calc(40% - 2rem);
+  border: none;
+  box-shadow: 0 4px 35px rgba(0,0,0,.1);
+  border-radius: 16px;
+}
+
+.input-box textarea {
+  font-size: 16px;
+  border: none
+  /* border-bottom: 2px solid #474747; */
+}
+
+.spinner-box {
+  background-color: #eeeeee;
+  overflow-y: auto;
+  display: flex;
+  flex: 50%;
+  justify-content: center;
+  align-items: center;
+  height: calc(70% - 2rem);
+  overflow-y:hidden;
+}
+
+.spinner-box img {
+  width: 200px
+}
+
+.output-box {
+  width: 25rem;
+  background-color: #eeeeee;
+  position: relative;
+  overflow-y: auto;
+  color: white;
+  height: calc(70% - 2rem);
+  border-radius: 16px;
+  box-shadow: 0 4px 35px rgba(0,0,0,.1);
+}
+
+.clear-btn {
+  position: absolute;
+  width: 70px;
+  height: 32px;
+  bottom: 8px;
+  right: 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #DB005B;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 10px;
+  font-family: 'Source Code Pro';
+}
+
+.clear-btn:hover {
+  transform: scale(1.1);
+}
+
+.output-box pre {
+  font-size: 15px;
+  white-space: pre-wrap;
+  color: #DB005B;
+  padding-left: 0.5rem;
+} 
+
+h4 {
+  color: #DB005B;
+}
+
+#code-input {
+  box-sizing: border-box;
+  width: 100%;
+  height : 100%;
+  resize: none;
+  background-color: #eeeeee;
+  color: #DB005B;
+  padding: 5px;
+}
+
+#code-input:focus {
+  outline: none;
+}
+
+.run-btn {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  width: 70px;
+  height: 32px;
+  font-size: 18px;
+  color:white;
+  font-weight: bold;
+  background-color: #DB005B;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 10px;
+  font-family: 'Source Code Pro';
+}
+
+.run-btn:hover {
+  transform: scale(1.1);
+}
+
+.editor-container {
+  width: 100%;
+  height: calc(100vh - 100px);
+  border-radius: 16px;
+  overflow: hidden;
+}
