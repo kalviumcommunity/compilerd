@@ -502,6 +502,7 @@ const execute = async (req, res) => {
         stdin: req?.stdin,
         errorMessage: '',
     }
+    const startTime = new Date().getTime();
 
     if ([PROMPTV1, PROMPTV2].includes(req.language)) {
         await _getAiScore(
@@ -523,6 +524,10 @@ const execute = async (req, res) => {
     } else {
         await _executeCode(req, res, response)
     }
+
+    const endTime = new Date().getTime();
+    response.executeTime = endTime - startTime;
+
     return response
 }
 

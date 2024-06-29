@@ -20,6 +20,10 @@ function App() {
       compile_message: "",
       error: 0,
     },
+    constraints: {
+      TLE: 0,
+      MLE: 0,
+    },
     showValue: "Hello, World!",
     errorMessage: "",
     isLoading: false,
@@ -28,8 +32,10 @@ function App() {
   const onCodeChange = useCallback((val, type = "script") => {
     if (type === "script") {
       setValue((prev) => ({ ...prev, script: val }));
-    } else {
+    } else if (type === "language") {
       setValue((prev) => ({ ...prev, language: val }));
+    } else if (type === "constraints") {
+      setValue((prev) => ({ ...prev, constraints: val }));
     }
   }, []);
 
@@ -42,6 +48,7 @@ function App() {
     const data = {
       language: value.language.toLowerCase(),
       script: value.script,
+      constraints: value.constraints,
     };
     try {
       const response = await executeCode(data);
@@ -52,12 +59,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pb-5">
       <div className="flex justify-center items-center flex-col pt-5 pb-2 gap-2">
         <h1 className="text-5xl font-extrabold leading-none">CompilerD</h1>
         <p className="text-lg font-normal text-gray-400">Your Online Code Judge</p>
       </div>
-      <CodeNav value={value} handleOnChange={onCodeChange} handleOnRun={onCodeRun} />
+      <CodeNav value={value} handleOnChange={onCodeChange} handleOnRun={onCodeRun} theme={"dark"} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-1 px-4">
         <CodeMirror
           value={value.script}
@@ -67,7 +74,14 @@ function App() {
           onChange={(val, viewUpdate) => onCodeChange(val)}
           theme={"dark"}
         />
-        <CodeMirror value={value.showValue} className="w-full" height="500px" theme={"dark"} basicSetup={false} />
+        <div>
+          <CodeMirror value={value.showValue} className="w-full" height="500px" theme={"dark"} basicSetup={false} />
+
+          <div className="flex items-end justify-end md:justify-start flex-wrap gap-4 font-thin opacity-80 ml-1">
+            <span>Time Taken: {value.result.execute_time}ms</span>
+            <span>Memory: {value.result.memory}KB</span>
+          </div>
+        </div>
       </div>
     </div>
   );

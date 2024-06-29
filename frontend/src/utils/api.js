@@ -1,25 +1,18 @@
 import axios from "axios";
+import { checkConstraints } from "./constraints";
 
 const API_URL = "http://localhost:3000/api/execute";
-
-const compileLangs = ["c", "cpp", "java", "go"];
 
 const executeCode = async (data) => {
   if (data.language === "javascript") {
     data.language = "nodejs";
   }
+
   try {
-    const { data: resData } = await axios.post(API_URL, data);
+    const { data: resData } = await axios.post(API_URL, { script: data.script, language: data.language, constraints: data.constraints});
+    const result = checkConstraints(resData, data.constraints);
 
-    if (resData.error > 0) {
-      const compile_message = resData.compile_message;
-      const output = resData.output;
-
-      if (compile_message !== "") return { result: resData, showValue: resData.compile_message };
-      else if (output !== "" ) return { result: resData, showValue: resData.output };
-    }
-
-    return { result: resData, showValue: resData.output };
+    return result;
   } catch (error) {
     throw new Error(error.response ? error.response.data : "Server error");
   }
