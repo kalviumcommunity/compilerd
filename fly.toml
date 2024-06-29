@@ -1,22 +1,33 @@
-# fly.toml app configuration file generated for compilerd on 2024-02-27T08:38:17+05:30
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
+# fly.toml file for Code Judge Project
 
-app = 'compilerd'
-primary_region = 'sin'
+# App configuration
+app = "code-judge-project"
 
-[build]
+# Define the services (containers)
+[[services]]
+  internal_port = 3000  # Internal port where your Node.js app runs
 
-[http_service]
-  internal_port = 3000
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+  # Service configuration
+  [services.concurrency]
+    hard_limit = 10  # Maximum number of instances running
 
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  [services.config]
+    NODE_ENV = "production"  # Set environment variables
+    PORT = 3000              # Set port to 3000 (or use process.env.PORT)
+
+# Configure deployment targets
+[[deploy.targets]]
+  name = "production"
+  app_id = "your-production-app-id"
+  release_command = "npm start"  # Command to start your Node.js application
+
+  [deploy.targets.env]
+    NODE_ENV = "production"
+
+[[deploy.targets]]
+  name = "staging"
+  app_id = "your-staging-app-id"
+  release_command = "npm start"
+
+  [deploy.targets.env]
+    NODE_ENV = "staging"
