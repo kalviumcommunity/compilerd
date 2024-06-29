@@ -14,7 +14,11 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className="title">Online Code Compiler</h1>
+        <h1 className="title">
+          <span className="text-[#852bf4]">Online </span>
+          <span className="">Code </span>
+          <span className="text-[#852bf4]">Compiler</span>
+        </h1>
         <CodeEditor />
       </main>
 

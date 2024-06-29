@@ -11,6 +11,7 @@ import {
   saveToLocalStorage,
   loadFromLocalStorage,
 } from "../utils/localStorage";
+import { LuSun, LuMoon } from "react-icons/lu";
 
 const MonacoEditor = dynamic(import("@monaco-editor/react"), { ssr: false });
 
@@ -72,6 +73,10 @@ const CodeEditor = () => {
     }
   }, []);
 
+  const handleToggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "vs-dark" ? "light" : "vs-dark"));
+  };
+
   const handleSubmit = async () => {
     setIsLoading(true);
     setOutputDetails(null);
@@ -106,20 +111,35 @@ const CodeEditor = () => {
   }
 
   return (
-    <div className="compiler-container">
-      <div className="editor-header">
+    // <div className="compiler-container">
+    //   <div className="editor-header">
+    <div
+      className={`compiler-container ${
+        theme === "vs-dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+      }`}
+    >
+      <div className="editor-header flex justify-between items-center mb-4">
         <LanguageSelector
           language={language}
           onLanguageChange={handleLanguageChange}
         />
-        <label className="auto-run-label">
-          <input
-            type="checkbox"
-            checked={autoRun}
-            onChange={(e) => setAutoRun(e.target.checked)}
-          />
-          Auto-run
-        </label>
+        <div className="flex items-center space-x-4">
+          <label className="auto-run-label flex items-center">
+            <input
+              type="checkbox"
+              checked={autoRun}
+              onChange={(e) => setAutoRun(e.target.checked)}
+              className="mr-2"
+            />
+            Auto-run
+          </label>
+          <button
+            onClick={handleToggleTheme}
+            className="bg-transparent text-white px-4 py-2 rounded hover:bg-transparent"
+          >
+            {theme === "vs-dark" ? <LuSun /> : <LuMoon />}
+          </button>
+        </div>
       </div>
       <MonacoEditor
         height="400px"
@@ -151,6 +171,8 @@ const CodeEditor = () => {
         <OutputDisplay outputDetails={outputDetails} />
       )}
     </div>
+    //   </div>
+    // </div>
   );
 };
 

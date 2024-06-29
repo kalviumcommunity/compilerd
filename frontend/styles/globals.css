@@ -5,8 +5,8 @@
 :root {
   --primary-color: #3498db;
   --secondary-color: #2c3e50;
-  --background-color: #ecf0f1;
-  --text-color: #34495e;
+  --background-color: #0d0229;
+  --text-color: #9da2a7;
   --error-color: #e74c3c;
   --success-color: #2ecc71;
 }
@@ -32,16 +32,20 @@ body {
 
 .title {
   text-align: center;
-  margin-bottom: 30px;
-  color: var(--secondary-color);
+  margin-bottom: 10px;
+  color: whitesmoke;
+  font-size: xx-large;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .compiler-container {
-  background-color: white;
-  border-radius: 8px;
+  background-color: #080121;
+  border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
+  z-index: 10;
 }
 
 .language-select {
@@ -53,8 +57,8 @@ body {
   width: 100%;
   padding: 12px;
   margin-top: 20px;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: #852bf4;
+  color: whitesmoke;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -64,7 +68,7 @@ body {
 }
 
 .submit-btn:hover {
-  background-color: #2980b9;
+  background-color: #500ca2;
 }
 
 .submit-btn:disabled {
@@ -84,6 +88,7 @@ body {
   color: var(--error-color);
   white-space: pre-wrap;
   word-wrap: break-word;
+  margin-top: 10px;
 }
 
 .success-output {
@@ -108,29 +113,32 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 2px;
 }
 
 .language-select {
-  flex: 1;
+  /* flex: 1; */
   margin-right: 20px;
+  display: flex;
+  align-items: end;
 }
 
 .auto-run-label {
   display: flex;
   align-items: center;
-  font-size: 14px;
-  color: var(--secondary-color);
+  font-size: 16px;
+  color: #bdc3c7;
 }
 
 .auto-run-label input {
   margin-right: 5px;
+  color: #bdc3c7;
 }
 
 footer {
   text-align: center;
-  margin-top: 40px;
-  color: var(--secondary-color);
+  margin-top: 20px;
+  color: #bdc3c7;
 }
 
 .loading-spinner {

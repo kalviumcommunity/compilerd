@@ -16,11 +16,11 @@ const OutputDisplay = ({ outputDetails, isLoading }) => {
   return (
     <div className="output-display">
       <pre className="success-output">{outputDetails.output}</pre>
-      <div className="metrics">
+      {/*<div className="metrics">
         <p>Execution Time: {outputDetails.execute_time || "N/A"}</p>
         <p>Memory Used: {outputDetails.memory || "N/A"}</p>
         <p>CPU Time: {outputDetails.cpu_time || "N/A"}</p>
-      </div>
+      </div>*/}
     </div>
   );
 };
