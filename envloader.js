@@ -1,8 +1,10 @@
-const fs = require('fs')
+const dotenv = require('dotenv');
+const path = require('path');
 
-const initializeENV = () => {
-    const path = '/env/.env'
-    if (fs.existsSync(path)) { require('dotenv').config({ path }) } else { require('dotenv').config() }
-}
+// Load environment variables from .env file
+const loadEnvVariables = () => {
+    const envPath = path.resolve(__dirname, '.env');
+    dotenv.config({ path: envPath });
+};
 
-module.exports = initializeENV
+module.exports = { loadEnvVariables };
