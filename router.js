@@ -1,8 +1,15 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
+const CodeController = require('./controllers/code.controller');
+const path = require('path');
 
-const codeRouter = require('./routers/code.router')
+// Serve frontend files (assuming they are in a 'frontend' folder)
+router.use(express.static(path.join(__dirname, 'frontend')));
 
-router.use('/', codeRouter)
+// Define routes for code judging
+router.post('/api/execute', CodeController.executeCode);
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
-module.exports = router
+module.exports = router;
