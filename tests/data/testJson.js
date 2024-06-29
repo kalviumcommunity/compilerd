@@ -17,6 +17,21 @@ const testCases = [
             error: 0,
         },
     },
+    // adding a test case of arithmetic operation - one can input 2 values 'a' and 'b' and we get the answer in solution
+    {
+        name: "cpp : arithmetic operation",
+        reqObject: {
+            language: "cpp",
+            script: "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    int result = a + b;\n    cout << result;\n    return 0;\n}\n"
+        },
+        "expectedResponse": {
+            "val": "<sum of a and b>",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
+    
     {
         name: 'cpp : print stdin',
         reqObject: {
@@ -40,6 +55,20 @@ const testCases = [
         },
 
     },
+    {
+        "name": "cpp : print multiple lines stdin",
+        "reqObject": {
+            "language": "cpp",
+            "script": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line;\n    while (getline(cin, line)) {\n        cout << line << endl;\n    }\n    return 0;\n}\n",
+            "stdin": "first line\nsecond line\nthird line"
+        },
+        "expectedResponse": {
+            "val": "first line\nsecond line\nthird line\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
     {
         name: 'nodejs : hello world',
         reqObject: {
@@ -71,6 +100,20 @@ const testCases = [
         },
     },
     {
+        "name": "nodejs : print multiple lines stdin",
+        "reqObject": {
+            "language": "nodejs",
+            "script": "process.stdin.setEncoding('utf8');\nprocess.stdin.on('data', (input) => {\n  process.stdout.write(input);\n});\n",
+            "stdin": "first line\nsecond line\nthird line"
+        },
+        "expectedResponse": {
+            "val": "first line\nsecond line\nthird line",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
+    {
         name: 'python : hello world',
         reqObject: {
             language: 'python',
@@ -82,6 +125,20 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        "name": "python : print multiple lines stdin",
+        "reqObject": {
+            "language": "python",
+            "script": "import sys\nfor line in sys.stdin:\n    print(line)",
+            "stdin": "first line\nsecond line\nthird line"
+        },
+        "expectedResponse": {
+            "val": "first line\nsecond line\nthird line\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
     {
         name: 'python : print stdin',
         reqObject: {
@@ -142,7 +199,7 @@ const testCases = [
         },
     },
     {
-        name: 'java : print stdin',
+        name: 'java : print hello world',
         reqObject: {
             language: 'java',
             script:
@@ -159,6 +216,33 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        "name": "c : arithmetic operation",
+        "reqObject": {
+            "language": "c",
+            "script": "#include <stdio.h>\nint main() {\n    int a = 5;\n    int b = 10;\n    int result = a + b;\n    printf(\"%d\\n\", result);\n    return 0;\n}"
+        },
+        "expectedResponse": {
+            "val": "15\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    {
+        "name": "c : print multiple lines stdin",
+        "reqObject": {
+            "language": "c",
+            "script": "#include <stdio.h>\nint main() {\n    char line[100];\n    while (fgets(line, sizeof(line), stdin)) {\n        printf(\"%s\", line);\n    }\n    return 0;\n}",
+            "stdin": "first line\nsecond line\nthird line"
+        },
+        "expectedResponse": {
+            "val": "first line\nsecond line\nthird line",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
+    
     {
         name: 'java : print stdin',
         reqObject: {
@@ -183,6 +267,19 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        "name": "java : print multiple lines stdin",
+        "reqObject": {
+            "language": "java",
+            "script": "import java.util.Scanner;\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        while (scanner.hasNextLine()) {\n            System.out.println(scanner.nextLine());\n        }\n        scanner.close();\n    }\n}"
+        },
+        "expectedResponse": {
+            "val": "first line\nsecond line\nthird line\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
     {
         name: 'ruby : print hello world',
         reqObject: {
@@ -298,6 +395,20 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        "name": "ruby : arithmetic operation",
+        "reqObject": {
+            "language": "ruby",
+            "script": "a = 5\nb = 10\nresult = a + b\nputs result"
+        },
+        "expectedResponse": {
+            "val": "15\n",
+            "status": 200,
+            "error": 0
+        }
+    },
+    
+
 ]
 
 module.exports = { testCases }
