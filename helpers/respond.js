@@ -1,41 +1,32 @@
-const { logger } = require('./logger')
-const { ValidationError } = require('joi')
-
-const _logNon200Codes = (code, body) => {
-    if (code < 200 || code >= 300) { logger.info(body) }
+// Function to send success response
+function sendSuccessResponse(res, data) {
+    res.status(200).json(data);
 }
 
-const respond = (res, code, body = null) => {
-    /**
-     * Logger seems to append data to the payload
-     * Stringify to avoid log info getting appended to the response body
-     */
-    _logNon200Codes(code, body ? JSON.parse(JSON.stringify(body)) : null)
-
-    return res.status(code).send(body)
+// Function to send error response
+function sendErrorResponse(res, errorMessage, status = 500) {
+    res.status(status).json({ error: errorMessage });
 }
 
-const respondWithException = (res, error) => {
-    logger.error(error)
+module.exports = {
+    sendSuccessResponse,
+    sendErrorResponse,
+};
+const { sendSuccessResponse, sendErrorResponse } = require('./respond');
+// Example usage in a route handler
+const express = require('express');
+const router = express.Router();
+const { sendSuccessResponse, sendErrorResponse } = require('./respond');
+const { executeCode } = require('./code.service');
 
-    let errorCode = 401
-
-    if (error instanceof ValidationError || error.isJoi) {
-        errorCode = 400
-        error.message = error.message?.replaceAll('"', '\'')
+router.post('/execute', async (req, res) => {
+    try {
+        const executionObject = prepareExecution(req.body);
+        const result = await executeCode(executionObject);
+        sendSuccessResponse(res, result);
+    } catch (error) {
+        sendErrorResponse(res, error.message);
     }
+});
 
-    if (error.name === 'NotFoundError') errorCode = 404
-
-    const body = { message: error.message }
-
-    /**
-     * Logger seems to append data to the payload
-     * Stringify to avoid log info getting appended to the response body
-     */
-    _logNon200Codes(errorCode, JSON.parse(JSON.stringify(body)))
-
-    return res.status(errorCode).send(body)
-}
-
-module.exports = { respond, respondWithException }
+module.exports = router;
