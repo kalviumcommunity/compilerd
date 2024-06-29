@@ -1,13 +1,28 @@
 const express = require('express');
+const { validateExecutionRequest } = require('./code.validator');
+const { prepareExecution } = require('./code.transformer');
+const { executeCode } = require('./code.executor');
+
 const router = express.Router();
-const codeController = require('../controllers/code.controller');
 
-// Import the validator middleware
-const { validateCodeInput } = require('../controllers/code.controller');
+// Endpoint to execute code
+router.post('/execute', async (req, res) => {
+    try {
+        // Validate execution request
+        validateExecutionRequest(req.body);
 
-router.post('/execute', validateCodeInput, codeController.executeCode);
-router.post('/save', codeController.saveVersion);
-router.get('/versions', codeController.getVersions);
-router.post('/retrieve', codeController.retrieveVersion);
+        // Prepare execution parameters
+        const executionObject = await prepareExecution(req.body);
+
+        // Execute code
+        const result = await executeCode(executionObject);
+
+        // Return execution result
+        res.status(200).json(result);
+    } catch (err) {
+        console.error('Execution error:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
 
 module.exports = router;
