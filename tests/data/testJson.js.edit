@@ -3,13 +3,7 @@ const testCases = [
         name: 'cpp : hello world',
         reqObject: {
             language: 'cpp',
-            script:
-                '#include<bits/stdc++.h>\n' +
-                'using namespace std;\n' +
-                'int main(){\n' +
-                '    cout << "hello world";\n' +
-                'return 0;\n' +
-                '}\n',
+            script: '#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    cout << "hello world";\nreturn 0;\n}\n',
         },
         expectedResponse: {
             val: 'hello world',
@@ -21,16 +15,7 @@ const testCases = [
         name: 'cpp : print stdin',
         reqObject: {
             language: 'cpp',
-            script:
-                '#include<bits/stdc++.h>\n\n' +
-                'using namespace std;\n' +
-                'int main(){\n\n' +
-                '    int a;\n' +
-                '    while(cin >> a){\n' +
-                '        cout << a << endl;\n' +
-                '    }\n' +
-                '    return 0;\n\n' +
-                '}\n',
+            script: '#include<bits/stdc++.h>\n\nusing namespace std;\nint main(){\n\n    int a;\n    while(cin >> a){\n        cout << a << endl;\n    }\n    return 0;\n\n}\n',
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -38,7 +23,6 @@ const testCases = [
             status: 200,
             error: 0,
         },
-
     },
     {
         name: 'nodejs : hello world',
@@ -56,12 +40,7 @@ const testCases = [
         name: 'nodejs : print stdin',
         reqObject: {
             language: 'nodejs',
-            script:
-                'process.stdin.setEncoding(\'utf8\'); \n ' +
-                'process.stdin.on(\'data\', (input) => { \n ' +
-                '  console.log(input); \n ' +
-                ' \n ' +
-                '}); \n ',
+            script: 'process.stdin.setEncoding(\'utf8\'); \n process.stdin.on(\'data\', (input) => { \n   console.log(input); \n  \n }); \n ',
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -86,15 +65,7 @@ const testCases = [
         name: 'python : print stdin',
         reqObject: {
             language: 'python',
-            script:
-                'try:\n' +
-                '    while(True):\n' +
-                '        line = input()\n' +
-                '        if not line:\n' +
-                '            break\n' +
-                '        print(line)\n' +
-                'except EOFError:\n' +
-                '    pass',
+            script: 'try:\n    while(True):\n        line = input()\n        if not line:\n            break\n        print(line)\nexcept EOFError:\n    pass',
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -107,12 +78,7 @@ const testCases = [
         name: 'c : hello world',
         reqObject: {
             language: 'c',
-            script:
-                '#include<stdio.h>\n\n' +
-                'int main(){\n\n' +
-                '    printf("hello world");\n' +
-                '    return 0;\n' +
-                '}\n',
+            script: '#include<stdio.h>\n\nint main(){\n\n    printf("hello world");\n    return 0;\n}\n',
         },
         expectedResponse: {
             val: 'hello world',
@@ -124,15 +90,7 @@ const testCases = [
         name: 'c : print stdin',
         reqObject: {
             language: 'c',
-            script:
-                '#include <stdio.h>\n' +
-                'int main() {\n' +
-                '    int number;\n' +
-                '    while (scanf("%d", &number) == 1) {\n' +
-                '        printf("%d\\n", number);\n' +
-                '    } \n' +
-                '    return 0;\n' +
-                '}',
+            script: '#include <stdio.h>\nint main() {\n    int number;\n    while (scanf("%d", &number) == 1) {\n        printf("%d\\n", number);\n    } \n    return 0;\n}',
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -145,13 +103,7 @@ const testCases = [
         name: 'java : print stdin',
         reqObject: {
             language: 'java',
-            script:
-                'import java.util.Scanner;\n' +
-                'public class Solution {\n' +
-                '    public static void main(String[] args) {\n' +
-                '        System.out.println("hello world");\n' +
-                '    }\n' +
-                '}\n',
+            script: 'import java.util.Scanner;\npublic class Solution {\n    public static void main(String[] args) {\n        System.out.println("hello world");\n    }\n}\n',
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -163,18 +115,7 @@ const testCases = [
         name: 'java : print stdin',
         reqObject: {
             language: 'java',
-            script:
-                'import java.util.Scanner;\n' +
-                'public class Solution {\n' +
-                '    public static void main(String[] args) {\n' +
-                '        Scanner scanner = new Scanner(System.in);\n' +
-                '        while (scanner.hasNextInt()) {\n' +
-                '            int number = scanner.nextInt();\n' +
-                '            System.out.println(number);\n' +
-                '        } \n' +
-                '        scanner.close();\n' +
-                '    }\n' +
-                '}\n',
+            script: 'import java.util.Scanner;\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        while (scanner.hasNextInt()) {\n            int number = scanner.nextInt();\n            System.out.println(number);\n        } \n        scanner.close();\n    }\n}\n',
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -187,8 +128,7 @@ const testCases = [
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
-            script:
-                'print "hello world"'
+            script: 'print "hello world"'
         },
         expectedResponse: {
             val: 'hello world',
@@ -200,9 +140,7 @@ const testCases = [
         name: 'ruby : print stdin',
         reqObject: {
             language: 'ruby',
-            script:
-                'user_input = gets.chomp\n' +
-                'puts user_input',
+            script: 'user_input = gets.chomp\nputs user_input',
             stdin: '10\n'
         },
         expectedResponse: {
@@ -239,19 +177,7 @@ const testCases = [
         name: 'MLE test 2',
         reqObject: {
             language: 'python',
-            script:
-                'import time\n' +
-                'def consume_memory(target_mb, duration_sec):\n' +
-                '    float_size = 8\n' +
-                '    floats_per_mb = (1024 * 1024) // float_size\n' +
-                '    total_floats = target_mb * floats_per_mb\n' +
-                '    iterations = int(duration_sec / 0.1)\n' +
-                '    floats_per_iteration = total_floats // iterations\n' +
-                '    memory_hog = []\n' +
-                '    for _ in range(iterations):\n' +
-                '        memory_hog.extend([0.0] * floats_per_iteration)\n' +
-                '        time.sleep(0.1)\n' +
-                'consume_memory(1000, 1)\n',
+            script: 'import time\ndef consume_memory(target_mb, duration_sec):\n    float_size = 8\n    floats_per_mb = (1024 * 1024) // float_size\n    total_floats = target_mb * floats_per_mb\n    iterations = int(duration_sec / 0.1)\n    floats_per_iteration = total_floats // iterations\n    memory_hog = []\n    for _ in range(iterations):\n        memory_hog.extend([0.0] * floats_per_iteration)\n        time.sleep(0.1)\nconsume_memory(1000, 1)\n',
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -263,10 +189,7 @@ const testCases = [
         name: 'MLE test 3',
         reqObject: {
             language: 'python',
-            script:
-                'a = [100]\n' +
-                'for i in a:\n' +
-                '    a.append(i)\n',
+            script: 'a = [100]\nfor i in a:\n    a.append(i)\n',
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -298,6 +221,6 @@ const testCases = [
             error: 0,
         },
     },
-]
+];
 
-module.exports = { testCases }
+module.exports = { testCases };
