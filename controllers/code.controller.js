@@ -1,19 +1,34 @@
-const { respond, respondWithException } = require('../loader').helpers
-const { codeTransformer } = require('../transformers/code.transformer')
-const codeService = require('../services/code.service')
-const { isValidForExecute } = require('../validators/code.validator')
+const versions = [];
 
-const execute = async (req, res) => {
-    try {
-        const validatedData = await isValidForExecute(req.body)
+const executeCode = (req, res) => {
+    const { language, script, stdin } = req.body;
+    // Mock response for demonstration
+    res.send({ output: Executed ${language} code });
+};
 
-        const responseBody = await codeService.execute(validatedData, res)
-        return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody))
-    } catch (error) {
-        respondWithException(res, error)
+const saveVersion = (req, res) => {
+    const { versionName, code } = req.body;
+    versions.push({ versionName, code });
+    res.send({ message: 'Version saved successfully' });
+};
+
+const getVersions = (req, res) => {
+    res.send(versions);
+};
+
+const retrieveVersion = (req, res) => {
+    const { versionName } = req.body;
+    const version = versions.find(v => v.versionName === versionName);
+    if (version) {
+        res.send(version);
+    } else {
+        res.status(404).send({ message: 'Version not found' });
     }
-}
+};
 
 module.exports = {
-    execute,
-}
+    executeCode,
+    saveVersion,
+    getVersions,
+    retrieveVersion,
+};
