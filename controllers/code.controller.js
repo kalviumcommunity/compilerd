@@ -1,9 +1,15 @@
+const { transformCode } = require('../transformers/code.transformer');
+const { validateCodeInput } = require('../validators/code.validator');
 const versions = [];
 
 const executeCode = (req, res) => {
     const { language, script, stdin } = req.body;
+
+    // Transform the code before execution
+    const transformedScript = transformCode(language, script);
+
     // Mock response for demonstration
-    res.send({ output: Executed ${language} code });
+    res.send({ output: Executed ${language} code, script: transformedScript });
 };
 
 const saveVersion = (req, res) => {
@@ -31,4 +37,5 @@ module.exports = {
     saveVersion,
     getVersions,
     retrieveVersion,
+    validateCodeInput, // Export the validator for use in routes
 };
