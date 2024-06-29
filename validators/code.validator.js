@@ -41,7 +41,7 @@ const isValidForExecute = async (body) => {
             }),
         non_editable_files: Joi.object().pattern(
             Joi.string(),
-            Joi.string().pattern(/^[a-fA-F0-9]{64}$/)
+            Joi.string().pattern(/^[a-fA-F0-9]{64}$/),
         ).optional(),
         points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),

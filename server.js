@@ -6,7 +6,7 @@ const cors = require('cors')
 const compression = require('compression')
 const helmet = require('helmet')
 const baseRouter = require('./router.js')
-const morgan = require('morgan')
+// const morgan = require('morgan')
 const PORT = process.env.PORT || 3000
 const { respond, l } = require('./loader.js').helpers
 
@@ -21,15 +21,15 @@ app.use((err, req, res, next) => {
     next()
 })
 // Log all api requests
-app.use(
-    morgan(
-        'REQUEST [:date[clf]] ":method :url HTTP/:http-version" :status :user-agent',
-        {
-            immediate: true,
-            skip: function (req) { return (req.path === '/api/') },
-        },
-    ),
-)
+// app.use(
+//     morgan(
+//         'REQUEST [:date[clf]] ":method :url HTTP/:http-version" :status :user-agent',
+//         {
+//             immediate: true,
+//             skip: function (req) { return (req.path === '/api/') },
+//         },
+//     ),
+// )
 app.use(
     express.urlencoded({
         extended: true,
