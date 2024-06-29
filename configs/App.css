@@ -1,0 +1,35 @@
+.App {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+form {
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 600px;
+    margin: 20px auto;
+}
