@@ -1,3 +1,0 @@
-mkdir frontend
-cd frontend
-npx create-react-app .
