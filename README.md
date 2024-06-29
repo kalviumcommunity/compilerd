@@ -60,9 +60,7 @@ We will run the project locally and try to make a request to see a sample use ca
         {
             "language" : "nodejs", 
             "script" : "console.log('hello world')"
-        } 
-        //sk-proj-deqtVfcjJv22VX6fgl0aT3BlbkFJjt347mUIseD73ieXgb7L
-    ```
+        }     ```
   - You should see something like this in the response : 
     ```json
         {
