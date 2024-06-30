@@ -298,6 +298,52 @@ const testCases = [
     //         error: 0,
     //     },
     // },
+
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'TypeScript: Hello World',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log("Hello, World!");',
+        },
+        expectedResponse: {
+            val: 'Hello, World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'PHP: Hello World',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "Hello, world!"; ?>',
+        },
+        expectedResponse: {
+            val: 'Hello, world!',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    
     
 ]
 
