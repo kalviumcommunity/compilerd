@@ -70,7 +70,7 @@ const LANGUAGES_CONFIG = {
         run: './solution',
         timeout: 5,
         filename: 'solution.go',
-        memory: 1024 * ONE_MB, // GO required more initial memory so we have added 1024MB instead of 512MB
+        memory: 1024 * ONE_MB, // GO required more initial memory so we have added 1024MB instead of 512MB.
     },
     // Added Php (Task)
     [PHP]: {
