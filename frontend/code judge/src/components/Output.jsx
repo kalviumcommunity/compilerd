@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Box, Button, Text, useToast } from "@chakra-ui/react";
+import { Box, Button, Text, Textarea, useToast } from "@chakra-ui/react";
 import { executeCode } from "../api";
 
 const Output = ({ editorRef, language }) => {
   const toast = useToast();
-  const [output, setOutput] = useState(null);
+  const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -27,6 +27,10 @@ const Output = ({ editorRef, language }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOutputChange = (e) => {
+    setOutput(e.target.value);
   };
 
   return (
@@ -53,7 +57,16 @@ const Output = ({ editorRef, language }) => {
         whiteSpace="pre"
         fontFamily="monospace"
       >
-        {output ? output : 'Click "Run Code" to see the output here'}
+        <Textarea
+          value={output}
+          onChange={handleOutputChange}
+          placeholder='Click "Run Code" to see the output here'
+          height="100%"
+          border="none"
+          resize="none"
+          _focus={{ outline: "none" }}
+          _hover={{ border: "none" }}
+        />
       </Box>
     </Box>
   );
