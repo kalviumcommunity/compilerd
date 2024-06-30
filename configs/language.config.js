@@ -47,7 +47,7 @@ const LANGUAGES_CONFIG = {
     },
     [JAVA]: {
         compile: 'javac Solution.java',
-        run: 'java Solution.class',
+        run: 'java Solution',
         timeout: 4,
         filename: 'Solution.java',
         memory: ALLOWED_RAM * ONE_MB,
