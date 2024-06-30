@@ -1,0 +1,48 @@
+.codeInput {
+    max-width: 97vw;
+    padding: 0 1vw;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.editor {
+    display: flex;
+    max-width: 96vw;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.codeEditor {
+    width: 46vw;
+    padding: 0 1vw;
+    resize: none;
+    height: 80vh;
+    overflow: auto;
+    font-size: 1rem;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 10px;
+    background-color: #343434;
+}
+
+.codeEditor:focus {
+    outline: none;
+    border-color: none;
+}
+
+.codeEditor::selection {
+    background-color: #007bff;
+    color: white;
+}
+
+.codeEditor:hover {
+    border-color: none;
+}
+
+.output-error {
+    transition: height 0.3s ease;
+}
+
+.output {
+    padding: 1%;
+}
