@@ -1,0 +1,11 @@
+import unittest
+from compilerd import compile_and_run
+
+class TestRuby(unittest.TestCase):
+    def test_hello_world(self):
+        code = 'puts "Hello, world!"'
+        result = compile_and_run('ruby', code)
+        self.assertEqual(result.output, "Hello, world!\n")
+
+if __name__ == '__main__':
+    unittest.main()

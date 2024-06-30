@@ -1,0 +1,25 @@
+version: '3'
+services:
+  ruby:
+    build:
+      context: .
+      dockerfile: ./runners/ruby/Dockerfile
+    volumes:
+      - .:/app
+    command: ruby Main.rb
+
+  rust:
+    build:
+      context: .
+      dockerfile: ./runners/rust/Dockerfile
+    volumes:
+      - .:/app
+    command: sh -c "rustc main.rs -o main && ./main"
+
+  php:
+    build:
+      context: .
+      dockerfile: ./runners/php/Dockerfile
+    volumes:
+      - .:/app
+    command: php main.php
