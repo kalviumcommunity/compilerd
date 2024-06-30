@@ -305,7 +305,7 @@ const testCases = [
             script: '<?php echo "hello world"; ?>',
         },
         expectedResponse: {
-            val: 'hello world',
+            val: 'hello world\n',
             status: 200,
             error: 0,
         },
