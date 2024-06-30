@@ -275,6 +275,119 @@ const testCases = [
         },
     },
     {
+        name: 'csharp : hello world',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n' +
+                'class Program {\n' +
+                '    static void Main() {\n' +
+                '        Console.WriteLine("hello world");\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'csharp : print stdin',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n' +
+                'class Program {\n' +
+                '    static void Main() {\n' +
+                '        string input;\n' +
+                '        while ((input = Console.ReadLine()) != null) {\n' +
+                '            Console.WriteLine(input);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : hello world',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            data: {
+                output: 'hello world\n',  
+            },
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : print stdin',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    val input = generateSequence(::readLine).joinToString(" ")\n' +
+                '    println(input)\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            data: {
+                output: '1 2 3\n', 
+            },
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'dart : hello world',
+        reqObject: {
+            language: 'dart',
+            script:
+                'void main() {\n' +
+                '    print("hello world");\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            data: {
+                output: 'hello world\n', 
+            },
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'dart : print stdin',
+        reqObject: {
+            language: 'dart',
+            script:
+                'import \'dart:io\';\n' +
+                'void main() {\n' +
+                '    String input = stdin.readLineSync()!;\n' +
+                '    print(input);\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            data: {
+                output: '1 2 3\n', 
+            },
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'OPEN AI test promptv1',
         reqObject: {
             language: 'promptv1',
