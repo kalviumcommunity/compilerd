@@ -447,6 +447,48 @@ const testCases = [
       error: 1,
     },
   },
+  {
+    name: "go : hello world",
+    reqObject: {
+      language: "go",
+      script:
+        "package main\n\n" +
+        'import "fmt"\n\n' +
+        "func main() {\n" +
+        '    fmt.Println("hello world")\n' +
+        "}\n",
+    },
+    expectedResponse: {
+      val: "hello world\n",
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: "cpp : empty script",
+    reqObject: {
+      language: "cpp",
+      script: "",
+    },
+    expectedResponse: {
+      val: "",
+      status: 200,
+      error: 0,
+    },
+  },
+
+  {
+    name: "python : invalid syntax",
+    reqObject: {
+      language: "python",
+      script: "for i in range(10)\n" + "    print(i)\n",
+    },
+    expectedResponse: {
+      val: "SyntaxError: invalid syntax",
+      status: 200,
+      error: 1,
+    },
+  },
 ];
 
 module.exports = { testCases };
