@@ -6,12 +6,14 @@ function App() {
 
   const [script, setScript] = useState('');
   const [language, setLanguage] = useState('c');
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
 
   const handleSubmit = async () => {
     const payload =  {
         language, 
-        script
+        script,
+        stdin
   };
   try {
     const {data} = await axios.post("http://localhost:3000/api/execute",payload)
@@ -44,7 +46,7 @@ function App() {
       <br />
       <textarea 
         rows = '20' 
-        cols = '75' 
+        cols = '90' 
         value={script} 
         onChange={(e) => {
           setScript(e.target.value);
@@ -54,6 +56,20 @@ function App() {
       <br />
       <button onClick={handleSubmit}> Submit </button>
       <br />
+      <br />
+      <label> Stdin: </label>
+      <br />
+      <textarea 
+        rows = '5' 
+        cols = '90' 
+        value={stdin} 
+        onChange={(e) => {
+          setStdin(e.target.value);
+        }}
+      ></textarea>
+      <br />
+      <br />
+      <label> Output: </label>
       <br />
       <p>{output}</p>
     </div>
