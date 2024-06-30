@@ -2,25 +2,37 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #1a1a1a;
+    background-color: #333;
     padding: 10px;
     color: white;
-  }
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
   
-  .left-section {
+.left-section {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-left: 1rem;
-  }
+}
   
-  .right-section {
+.right-section {
     display: flex;
     align-items: center;
-  }
+}
   
-  #language-select {
-    padding: 8px;
-    font-size: 14px;
-  }
+.action-text {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
 
+img{
+    margin-top: 3px;
+    margin-left: 2px;
+}
+  
+.action-text:hover{
+    color: #39aa4c;
+    transform: scale(1.1);
+}

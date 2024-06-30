@@ -1,14 +1,13 @@
-import React, {useContext} from 'react';
-import '../styles/Navbar.css';  
+import React, { useContext } from 'react';
+import '../styles/Navbar.css';
 import { Select } from "antd";
 import { LanguageContext } from '../context/LanguageContext';
+import runButton from '../run-button.png';
 
 const { Option } = Select;
 
 function Navbar() {
-
   const { selectedLanguage, setSelectedLanguage, handleRunCode } = useContext(LanguageContext);
-
 
   const handleLanguageChange = (value) => {
     setSelectedLanguage(value);
@@ -17,11 +16,12 @@ function Navbar() {
   return (
     <div className='navbar'>
       <div className='left-section'>
-        <span className='action-text' >Save File</span>
-        <span className='action-text' style={{cursor: 'pointer'}} onClick={handleRunCode}>Run Code</span>
+        <span className='action-text' onClick={handleRunCode}>
+          Run Code <img src={runButton} width={'25px'} alt="Run Button" />
+        </span>
       </div>
 
-      <div className='right-section'>   
+      <div className='right-section'>
         <Select
           placeholder="Select a Language"
           value={selectedLanguage}

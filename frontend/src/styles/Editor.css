@@ -1,0 +1,25 @@
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0 0.5rem;
+    height: 100vh; 
+  }
+  
+  .editor-section,
+  .output-section {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .editor-header,
+  .output-header {
+    background-color: #333;  
+    color: whitesmoke   ;  
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+ 

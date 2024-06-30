@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import Editor from '@monaco-editor/react';
 import { LanguageContext } from '../context/LanguageContext';
 import { executeCode } from '../api/api';
+import OutputComponent from './OutputComponent';
+import '../styles/Editor.css';
 
 function CodeEditor() {
   const { selectedLanguage, runCode, resetRunCode } = useContext(LanguageContext);
@@ -72,33 +74,30 @@ function CodeEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runCode]);
 
-  // Handle changes in the editor
   const handleEditorChange = (value) => {
     setCode(value);
   };
 
   return (
-    <div className='editor'>
-      <Editor
-        height="60vh"
-        theme="vs-dark"
-        language={selectedLanguage}
-        value={code}
-        onChange={handleEditorChange}
-        defaultValue="// Start coding..."
-      />
-      <div>
-        <h2>Output:</h2>
-        <pre>{output}</pre>
+    <div className='editor-container'>
+      <div className='editor-section'>
+        <div className='editor-header'>Your Code</div>
+        <Editor
+          height="60vh"
+          theme="vs-dark"
+          language={selectedLanguage}
+          value={code}
+          onChange={handleEditorChange}
+        />
       </div>
-      {error && (
-        <div>
-          <h2>Error:</h2>
-          <p>{error}</p>
-        </div>
-      )}
+      
+      <div className='output-section'>
+        <div className='output-header'>Output</div>
+        <OutputComponent output={output} error={error} />
+      </div>
     </div>
   );
+
 }
 
 export default CodeEditor;
