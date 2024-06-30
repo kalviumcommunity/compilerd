@@ -1,0 +1,39 @@
+.header{
+    width: 100%;
+    margin: 10px;
+    border-radius: 10px;
+    background-color: #10151d;
+}
+.components{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+img{
+    height: 24px;
+}
+.buttons{
+    display: flex;
+    gap: 20px;
+}
+select{ 
+    height: 40px;
+    width: 150px;
+    background: #080a0e;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    padding-left: 8px;
+    border-style: none;
+}
+button{
+    height: 40px;
+    width: 120px;
+    border-style: none;
+    border-radius: 10px;
+    color: black;
+    font-size: 14px;
+    padding-left: 8px;
+    cursor: pointer;
+}
