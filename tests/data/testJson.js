@@ -298,6 +298,66 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'cpp : array manipulation',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include <iostream>\n' +
+                'using namespace std;\n' +
+                'int main() {\n' +
+                '    int arr[] = {1, 2, 3, 4, 5};\n' +
+                '    for (int i = 0; i < 5; ++i) {\n' +
+                '        cout << arr[i] << " ";\n' +
+                '    }\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '1 2 3 4 5 ',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'python : factorial calculation',
+        reqObject: {
+            language: 'python',
+            script:
+                'def factorial(n):\n' +
+                '    if n == 0:\n' +
+                '        return 1\n' +
+                '    else:\n' +
+                '        return n * factorial(n-1)\n' +
+                'print(factorial(5))\n',
+        },
+        expectedResponse: {
+            val: '120\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : basic exception handling',
+        reqObject: {
+            language: 'java',
+            script:
+                'public class Main {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        try {\n' +
+                '            int result = 10 / 0;\n' +
+                '        } catch (ArithmeticException e) {\n' +
+                '            System.out.println("Exception caught: " + e);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Exception caught: java.lang.ArithmeticException: / by zero\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
