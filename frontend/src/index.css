@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.output-container {
+  max-height: 60vh;
+  overflow-y: auto;
+}

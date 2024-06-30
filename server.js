@@ -47,6 +47,14 @@ app.use('/api/', baseRouter)
 app.get('/', (req, res) => {
     return res.send('Compiler is up and working')
 })
+app.post('/api/execute', (req, res) => {
+    const { language, script, stdin } = req.body
+    res.json({
+        val: `Executed code in ${language} with stdin: ${stdin}`,
+        status: 200,
+        error: 0,
+    })
+})
 
 app.listen(PORT, () => {
     l.info(`Server started at port: ${PORT}`)
