@@ -7,6 +7,9 @@ RUN set -ex && \
 RUN apk add --no-cache rust cargo
 RUN apk add --no-cache go
 RUN apk add --no-cache php php-cli
+RUN apk add --no-cache R R-dev
+RUN apk add --no-cache perl
+RUN apk add --no-cache mono --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing 
 
 RUN set -ex && \
     apk add --no-cache chromium lsof

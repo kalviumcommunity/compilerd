@@ -55,7 +55,7 @@
 
 // module.exports = { LANGUAGES_CONFIG }
 
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, RUST, GO, PHP } = require('../enums/supportedLanguages');
+const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, RUST, GO, PHP, R, PERL, CSHARP } = require('../enums/supportedLanguages');
 const ONE_MB = 1024; // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512;
 
@@ -127,6 +127,27 @@ const LANGUAGES_CONFIG = {
         run: 'php -f solution.php',
         timeout: 10,
         filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [CSHARP]: {
+        compile: 'mcs -out:solution.exe solution.cs',
+        run: 'mono solution.exe',
+        timeout: 10,
+        filename: 'solution.cs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [R]: {
+        compile: null,
+        run: 'Rscript solution.R',
+        timeout: 10,
+        filename: 'solution.R',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PERL]: {
+        compile: null,
+        run: 'perl solution.pl',
+        timeout: 10,
+        filename: 'solution.pl',
         memory: ALLOWED_RAM * ONE_MB,
     },
 };

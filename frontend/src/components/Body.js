@@ -90,6 +90,9 @@ const Body = () => {
                         <option value="rust">Rust</option>
                         <option value="go">Go</option>
                         <option value="php">PHP</option>
+                        <option value="r">R</option>
+                        <option value="perl">Perl</option>
+                        <option value="csharp">C#</option>
                     </select>
                 </div>
                 <textarea

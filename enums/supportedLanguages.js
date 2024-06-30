@@ -12,4 +12,7 @@ module.exports = {
     RUST: 'rust',
     GO: 'go',
     PHP: 'php',
+    R: 'r',
+    PERL: 'perl',
+    CSHARP: 'csharp'
 }

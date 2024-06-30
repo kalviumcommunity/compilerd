@@ -410,6 +410,102 @@ echo $input;
         error: 0,
     },
 },
+
+{
+    name: 'csharp : hello world',
+    reqObject: {
+        language: 'csharp',
+        script: 
+            'using System;\n' +
+            'class Program {\n' +
+            '    static void Main(string[] args) {\n' +
+            '        Console.WriteLine("hello world");\n' +
+            '    }\n' +
+            '}\n',
+    },
+    expectedResponse: {
+        val: 'hello world\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'csharp : print stdin',
+    reqObject: {
+        language: 'csharp',
+        script: 
+            'using System;\n' +
+            'class Program {\n' +
+            '    static void Main(string[] args) {\n' +
+            '        string line;\n' +
+            '        while ((line = Console.ReadLine()) != null) {\n' +
+            '            Console.WriteLine(line);\n' +
+            '        }\n' +
+            '    }\n' +
+            '}\n',
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'r : hello world',
+    reqObject: {
+        language: 'r',
+        script: 'cat("hello world\\n")',
+    },
+    expectedResponse: {
+        val: 'hello world\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'r : print stdin',
+    reqObject: {
+        language: 'r',
+        script: 
+            'input <- readLines("stdin")\n' +
+            'cat(input, sep = "\\n")',
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'perl : hello world',
+    reqObject: {
+        language: 'perl',
+        script: 'print "hello world\\n";',
+    },
+    expectedResponse: {
+        val: 'hello world\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'perl : print stdin',
+    reqObject: {
+        language: 'perl',
+        script: 
+            'while (<STDIN>) {\n' +
+            '    print $_;\n' +
+            '}',
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3',
+        status: 200,
+        error: 0,
+    },
+},
 ];
 
 module.exports = { testCases }
