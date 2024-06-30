@@ -6,10 +6,6 @@ const { isValidForExecute } = require('../validators/code.validator')
 const execute = async (req, res) => {
     try {
         const validatedData = await isValidForExecute(req.body)
-
-        // eslint-disable-next-line no-console
-        console.log(validatedData)
-
         const responseBody = await codeService.execute(validatedData, res)
         return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody))
     } catch (error) {

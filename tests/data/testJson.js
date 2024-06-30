@@ -298,6 +298,81 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "hello world"; ?>',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : print stdin',
+        reqObject: {
+            language: 'php',
+            script: '<?php\n$input = trim(fgets(STDIN));\necho $input;\n?>',
+            stdin: 'Hello from PHP',
+        },
+        expectedResponse: {
+            val: 'Hello from PHP',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : hello world',
+        reqObject: {
+            language: 'rust',
+            script: 'fn main() {\n    println!("hello world");\n}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : print stdin',
+        reqObject: {
+            language: 'rust',
+            script: 'use std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    for line in stdin.lock().lines() {\n        println!("{}", line.unwrap());\n    }\n}',
+            stdin: 'Hello from Rust',
+        },
+        expectedResponse: {
+            val: 'Hello from Rust\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello world\\n";',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script: 'while (<STDIN>) { print; }',
+            stdin: 'Hello from Perl',
+        },
+        expectedResponse: {
+            val: 'Hello from Perl',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
