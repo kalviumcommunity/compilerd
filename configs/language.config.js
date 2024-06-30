@@ -51,6 +51,27 @@ const LANGUAGES_CONFIG = {
     [PROMPTV2]: {
         model: 'gpt-3.5-turbo-1106',
     },
+    [TYPESCRIPT]: {
+        compile: 'tsc --outDir ./dist solution.ts',
+        run: 'node ./dist/solution.js',
+        timeout: 10,
+        filename: 'solution.ts',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [RUST]: {
+        compile: 'rustc -o solution solution.rs',
+        run: './solution',
+        timeout: 5,
+        filename: 'solution.rs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PHP]: {
+        compile: 'php -l solution.php',
+        run: 'php solution.php',
+        timeout: 10,
+        filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
 }
 
 module.exports = { LANGUAGES_CONFIG }
