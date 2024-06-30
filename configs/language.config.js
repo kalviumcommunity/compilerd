@@ -1,4 +1,4 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const { CPP, C, KOTLIN, CSHARP, GO, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
@@ -17,6 +17,27 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.cpp',
         memory: ALLOWED_RAM * ONE_MB,
     },
+    [GO]: {
+        compile: 'go build -o a.out solution.go',
+        run: './a.out',
+        timeout: 2,
+        filename: 'solution.go',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [CSHARP]: {
+        compile: 'dotnet new console -o myapp && mv Program.cs myapp/Program.cs && dotnet build myapp',
+        run: 'dotnet myapp/bin/Debug/net7.0/myapp.dll',
+        timeout: 10,
+        filename: 'Program.cs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [KOTLIN]: {
+        compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
+        run: 'java -jar solution.jar',
+        timeout: 4,
+        filename: 'solution.kt',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
     [PYTHON]: {
         compile: 'python -m compileall -q solution.py',
         run: 'python solution.py',
@@ -26,7 +47,7 @@ const LANGUAGES_CONFIG = {
     },
     [JAVA]: {
         compile: 'javac Solution.java',
-        run: 'java Solution',
+        run: 'java Solution.class',
         timeout: 4,
         filename: 'Solution.java',
         memory: ALLOWED_RAM * ONE_MB,

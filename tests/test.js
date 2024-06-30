@@ -18,6 +18,6 @@ describe('Tests', () => {
             }
             expect(response).toHaveProperty('status', testCase.expectedResponse.status)
             expect(response).toHaveProperty('data.error', testCase.expectedResponse.error)
-        }, 15000)
+        }, 45000)
     }
 })

@@ -41,6 +41,42 @@ const testCases = [
 
     },
     {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script: 'package main\nimport "fmt"\nfunc main() {\n    fmt.Println("hello world")\n}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : hello world',
+        reqObject: {
+            language: 'kotlin',
+            script: 'fun main() {\n    println("hello world")\n}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'csharp : hello world',
+        reqObject: {
+            language: 'c#',
+            script: 'using System;\n\nclass Program\n{\n    static void Main()\n    {\n        Console.WriteLine("hello world");\n    }\n}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
@@ -188,7 +224,7 @@ const testCases = [
         reqObject: {
             language: 'ruby',
             script:
-                'print "hello world"'
+                'print "hello world"',
         },
         expectedResponse: {
             val: 'hello world',
@@ -203,7 +239,7 @@ const testCases = [
             script:
                 'user_input = gets.chomp\n' +
                 'puts user_input',
-            stdin: '10\n'
+            stdin: '10\n',
         },
         expectedResponse: {
             val: '10\n',
@@ -272,6 +308,308 @@ const testCases = [
             val: 'Memory limit exceeded',
             status: 200,
             error: 1,
+        },
+    },
+    {
+        name: 'java : arithmetic operations',
+        reqObject: {
+            language: 'java',
+            script: `
+                public class Solution {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+    
+                        int a = 5;
+                        int b = 10;
+    
+                        int sum = a + b;
+                        int difference = b - a;
+                        int product = a * b;
+                        int quotient = b / a;
+    
+                        System.out.println("Sum: " + sum);
+                        System.out.println("Difference: " + difference);
+                        System.out.println("Product: " + product);
+                        System.out.println("Quotient: " + quotient);
+                    }
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Hello, World!\nSum: 15\nDifference: 5\nProduct: 50\nQuotient: 2\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : arithmetic operations',
+        reqObject: {
+            language: 'kotlin',
+            script: `
+                fun main() {
+                    println("Hello, World!")
+                    
+                    val a = 5
+                    val b = 10
+    
+                    val sum = a + b
+                    val difference = b - a
+                    val product = a * b
+                    val quotient = b / a
+    
+                    println("Sum: $sum")
+                    println("Difference: $difference")
+                    println("Product: $product")
+                    println("Quotient: $quotient")
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Hello, World!\nSum: 15\nDifference: 5\nProduct: 50\nQuotient: 2\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : list sum',
+        reqObject: {
+            language: 'kotlin',
+            script: `
+                fun main() {
+                    val nums = listOf(1, 2, 3, 4, 5)
+                    val sum = nums.sum()
+                    println("Sum: $sum")
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Sum: 15\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : string manipulation',
+        reqObject: {
+            language: 'java',
+            script: `
+                public class Solution {
+                    public static void main(String[] args) {
+                        String text = "Hello, World!";
+                        String upper = text.toUpperCase();
+                        String lower = text.toLowerCase();
+                        System.out.println("Uppercase: " + upper);
+                        System.out.println("Lowercase: " + lower);
+                    }
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Uppercase: HELLO, WORLD!\nLowercase: hello, world!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'javascript : string reverse',
+        reqObject: {
+            language: 'nodejs',
+            script: `
+                const str = 'hello';
+                const reversed = str.split('').reverse().join('');
+                console.log(reversed);
+            `,
+        },
+        expectedResponse: {
+            val: 'olleh\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : array sum',
+        reqObject: {
+            language: 'ruby',
+            script: `
+                arr = [1, 2, 3, 4, 5]
+                sum = arr.reduce(0, :+)
+                puts sum
+            `,
+        },
+        expectedResponse: {
+            val: '15\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : find max',
+        reqObject: {
+            language: 'c',
+            script: `
+                #include <stdio.h>
+
+                int main() {
+                    int nums[] = {10, 20, 30, 40, 50};
+                    int max = nums[0];
+                    for (int i = 1; i < 5; i++) {
+                        if (nums[i] > max) {
+                            max = nums[i];
+                        }
+                    }
+                    printf("Max: %d\\n", max);
+                    return 0;
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Max: 50\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : list sum',
+        reqObject: {
+            language: 'kotlin',
+            script: `
+                fun main() {
+                    val nums = listOf(1, 2, 3, 4, 5)
+                    val sum = nums.sum()
+                    println("Sum: $sum")
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'Sum: 15\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : sum of array',
+        reqObject: {
+            language: 'go',
+            script: `
+                package main
+                import "fmt"
+                
+                func main() {
+                    arr := []int{1, 2, 3, 4, 5}
+                    sum := 0
+                    for _, num := range arr {
+                        sum += num
+                    }
+                    fmt.Println(sum)
+                }
+            `,
+        },
+        expectedResponse: {
+            val: '15\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'nodejs : async/await',
+        reqObject: {
+            language: 'nodejs',
+            script: `
+                async function fetchData() {
+                    return 'data received';
+                }
+
+                (async () => {
+                    const data = await fetchData();
+                    console.log(data);
+                })();
+            `,
+        },
+        expectedResponse: {
+            val: 'data received\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : loop through range',
+        reqObject: {
+            language: 'ruby',
+            script: `
+                (1..5).each do |i|
+                    puts i
+                end
+            `,
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n4\n5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : factorial',
+        reqObject: {
+            language: 'c',
+            script: `
+                #include <stdio.h>
+
+                int factorial(int n) {
+                    if (n <= 1) return 1;
+                    return n * factorial(n - 1);
+                }
+
+                int main() {
+                    printf("%d\\n", factorial(5));
+                    return 0;
+                }
+            `,
+        },
+        expectedResponse: {
+            val: '120\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : filter list',
+        reqObject: {
+            language: 'kotlin',
+            script: `
+                fun main() {
+                    val nums = listOf(1, 2, 3, 4, 5)
+                    val evenNums = nums.filter { it % 2 == 0 }
+                    println(evenNums)
+                }
+            `,
+        },
+        expectedResponse: {
+            val: '[2, 4]\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : reverse array',
+        reqObject: {
+            language: 'java',
+            script: `
+                import java.util.Arrays;
+                import java.util.Collections;
+
+                public class Solution {
+                    public static void main(String[] args) {
+                        Integer[] arr = {1, 2, 3, 4, 5};
+                        Collections.reverse(Arrays.asList(arr));
+                        System.out.println(Arrays.toString(arr));
+                    }
+                }
+            `,
+        },
+        expectedResponse: {
+            val: '[5, 4, 3, 2, 1]\n',
+            status: 200,
+            error: 0,
         },
     },
     {

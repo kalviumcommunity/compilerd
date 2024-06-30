@@ -1,8 +1,10 @@
 FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
+
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+    apk update && \
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables go bash
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
@@ -15,13 +17,29 @@ RUN set -ex && \
 
 RUN ln -sf python3 /usr/bin/python
 
+# Install Kotlin
+RUN set -ex && \
+    wget -O kotlin-compiler.zip https://github.com/JetBrains/kotlin/releases/download/v1.8.21/kotlin-compiler-1.8.21.zip && \
+    unzip kotlin-compiler.zip -d /usr/local && \
+    rm kotlin-compiler.zip && \
+    ln -s /usr/local/kotlinc/bin/kotlinc /usr/bin/kotlinc && \
+    ln -s /usr/local/kotlinc/bin/kotlin /usr/bin/kotlin
+
+# Install .NET SDK for C#
+RUN set -ex && \
+    wget https://dot.net/v1/dotnet-install.sh && \
+    chmod +x dotnet-install.sh && \
+    ./dotnet-install.sh -c 7.0 --install-dir /usr/share/dotnet && \
+    ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
+    rm dotnet-install.sh
+
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
 RUN npm --prefix /usr/bin/ install
 EXPOSE 8080
 
-# add a dummy user that will run the server, hence sandboxing the rest of the container
+# Add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
-#   USER runner
+# USER runner
 CMD sh /usr/bin/start.sh

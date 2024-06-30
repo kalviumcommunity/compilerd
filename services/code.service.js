@@ -8,15 +8,16 @@ const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
+// const openai = new OpenAI()
 const openai = new OpenAI()
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer')
 const express = require('express')
 const http = require('http')
-const { spawn } = require('child_process');
+const { spawn } = require('child_process')
 const appConfig = require('../configs/app.config.js')
 const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
 const axios = require('axios')
@@ -228,7 +229,10 @@ const _executeCode = async (req, res, response) => {
                 // Remove ulimit as a temp fix
                 command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                // command = `cd /tmp && ${langConfig.run}`
+                command = `cd /tmp && timeout ${langConfig.timeout}s ${langConfig.run}`
+
+                // command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
             }
 
             // Check if there is any input that is to be provided to code execution
@@ -612,11 +616,11 @@ const _startJasmineServer = async () => {
             if (output.includes('Jasmine server is running here')) {
                 resolve(jasmineServer)
             }
-        });
+        })
         let stderr = ''
         jasmineServer.stderr.on('data', (data) => {
             stderr += data.toString()
-        });
+        })
 
         jasmineServer.on('error', (err) => {
             logger.error('Failed to start jasmine server:', err)
@@ -657,7 +661,7 @@ const _runTests = async () => {
             if (!response.ok()) {
                 logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
             }
-        });
+        })
 
         let jasmineResults
         const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
@@ -670,12 +674,12 @@ const _runTests = async () => {
         const summaryElement = await page.$('.jasmine-summary')
 
         // Parse the test results for all suites
-        jasmineResults = await page.evaluate((summaryElement) => {
+         jasmineResults = await page.evaluate((summaryElement) => {
             const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
             const results = {
                 'success': [],
                 'failed': []
-            };
+            }
 
             suiteElements.forEach((suiteElement) => {
                 const specElements = suiteElement.querySelectorAll(':scope > .jasmine-specs'); // only look at direct children to avoid duplicates
@@ -686,8 +690,8 @@ const _runTests = async () => {
 
                     results['success'].push(...passedTests)
                     results['failed'].push(...failedTests)
-                });
-            });
+                })
+            })
 
             return results
         }, summaryElement)
