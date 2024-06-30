@@ -1,0 +1,21 @@
+.code-editor {
+  height: 500px;
+  color: white; 
+}
+
+.code-editor-light .cm-editor,
+.code-editor-light .cm-scroller {
+  background-color: #e7e5e5;
+  color: black!important;
+}
+
+.code-editor-dark .cm-editor,
+.code-editor-dark .cm-scroller {
+  background-color: #2f2f2f;
+  color: white;
+}
+
+.cm-content {
+  font-family: 'Fira Code', monospace; /* Example font family */
+  font-size: 14px; /* Example font size */
+}

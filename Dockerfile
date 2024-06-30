@@ -2,7 +2,7 @@ FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables go php rust cargo perl
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
@@ -19,6 +19,7 @@ ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
 RUN npm --prefix /usr/bin/ install
+RUN npm install -g typescript ts-node
 EXPOSE 8080
 
 # add a dummy user that will run the server, hence sandboxing the rest of the container
