@@ -4,16 +4,13 @@ import { LoaderCircle, ChevronDown, Play, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { langMap } from "../utils/langMap";
+import { langMap } from "../lib/langMap";
 
 export default function CodeNav({ value, handleOnChange, handleOnRun }) {
   const languages = Object.keys(langMap);
@@ -38,7 +35,7 @@ export default function CodeNav({ value, handleOnChange, handleOnRun }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-44">
           {languages.map((lang) => (
-            <DropdownMenuCheckboxItem checked={value.language == lang} onClick={() => handleOnChange(lang, "language")}>
+            <DropdownMenuCheckboxItem key={lang} checked={value.language == lang} onClick={() => handleOnChange(lang, "language")}>
               {lang}
             </DropdownMenuCheckboxItem>
           ))}

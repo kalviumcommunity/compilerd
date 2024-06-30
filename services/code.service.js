@@ -24,9 +24,16 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
 const crypto = require('crypto')
+const pidusage = require("pidusage");
+
+const _getScriptMemory = async (childProcess) => {
+    const stats = await pidusage(childProcess.pid);
+    return stats.memory / 1024;
+}
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
+    let usedMemory = 0
     let memoryCheckInterval
     let childProcess
     let isChildKilled = false
@@ -64,6 +71,7 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
 
         const execPromise = exec(cmd)
         childProcess = execPromise.child
+        usedMemory = await _getScriptMemory(childProcess);
 
         const result = await execPromise
 
@@ -71,7 +79,7 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
             clearInterval(memoryCheckInterval); childProcess = undefined
         }
 
-        return { result }
+        return { result, usedMemory }
     } catch (e) {
         if (memoryCheckInterval) {
             clearInterval(memoryCheckInterval); childProcess = undefined
@@ -220,6 +228,11 @@ const _executeCode = async (req, res, response) => {
         const compileLog = await _runScript(compileCommand, res, true)
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+        
+        response.memory = compileLog.usedMemory
+        if (response.memory > req.constraints.MLE && req.constraints.MLE !== 0) {
+            response.compileMessage = 'Memory limit exceeded'
+        }
 
         // Check if there is no compilation error
         if (response.compileMessage === '') {

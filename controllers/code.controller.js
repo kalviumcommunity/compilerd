@@ -3,57 +3,49 @@ const { codeTransformer } = require("../transformers/code.transformer");
 const codeService = require("../services/code.service");
 const { isValidForExecute } = require("../validators/code.validator");
 
+const createConstraints = (validatedData) => {
+  return validatedData.constraints || { TLE: 0, MLE: 0 };
+};
+
+const createTimeoutPromise = (TLE) => {
+  return TLE > 0 ? new Promise((_, reject) => setTimeout(() => reject(new Error("Time Limit Exceeded")), TLE)) : null;
+};
+
+const handleExecution = async (validatedData, res, constraints) => {
+  try {
+    const promises = [codeService.execute(validatedData, res), createTimeoutPromise(constraints.TLE)].filter(Boolean);
+
+    return await Promise.race(promises);
+  } catch (error) {
+    if (error.message === "Time Limit Exceeded") {
+      return {
+        statusCode: 200,
+        error: 1,
+        output: "",
+        executeTime: null,
+        memory: null,
+        cpuTime: null,
+        outputFiles: [],
+        compileMessage: "",
+        errorMessage: error.message,
+      };
+    } else {
+      throw error;
+    }
+  }
+};
+
 const execute = async (req, res) => {
   try {
-    let constraints = {
-      TLE: 0,
-      MLE: 0,
-    };
-    let responseBody;
-
     const validatedData = await isValidForExecute(req.body);
-    if (validatedData.constraints) constraints = validatedData.constraints;
+    const constraints = createConstraints(validatedData);
 
-    if (constraints.TLE > 0) {
-      
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Time Limit Exceeded")), constraints.TLE));
+    let responseBody = await handleExecution(validatedData, res, constraints);
 
-      const executionPromise = async () => {
-        return await codeService.execute(validatedData, res);
-      };
-      
-      try {
-        responseBody = await Promise.race([executionPromise(), timeoutPromise]);
-      } catch (error) {
-        if (error.message === "Time Limit Exceeded") {
-          responseBody = {
-            statusCode: 200,
-            error: 1,
-            output: "",
-            executeTime: null,
-            memory: null,
-            cpuTime: null,
-            outputFiles: [],
-            compileMessage: "",
-            errorMessage: "Time Limit Exceeded",
-          };
-        } else {
-          return respondWithException(res, error);
-        }
-      }
-
-      return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody));
-    } 
-    
-    else {
-      const responseBody = await codeService.execute(validatedData, res);
-      return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody));
-    }
+    return respond(res, responseBody.statusCode, codeTransformer.transform(responseBody));
   } catch (error) {
     respondWithException(res, error);
   }
 };
 
-module.exports = {
-  execute,
-};
+module.exports = { execute };

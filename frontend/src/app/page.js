@@ -2,11 +2,10 @@
 import { useState, useCallback } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 
-import { Button } from "@/components/ui/button";
 import CodeNav from "@/components/CodeNav";
 
-import { langMap } from "@/utils/langMap";
-import { executeCode } from "@/utils/api";
+import { langMap } from "@/lib/langMap";
+import { executeCode } from "@/lib/api";
 
 export default function Home() {
   const [value, setValue] = useState({
@@ -86,7 +85,7 @@ export default function Home() {
           <div className="w-full text-center whitespace-nowrap rounded-md rounded-b-none text-sm font-medium border p-2 border-zinc-800 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-50">
             Output
           </div>
-          <CodeMirror value={value.showValue} className="w-full" height="500px" theme={"dark"} basicSetup={false} />
+          <CodeMirror value={value.showValue} height="500px" theme={"dark"} basicSetup={false} />
           <div className="flex items-end justify-end flex-wrap gap-4 font-thin opacity-80 mt-1">
             <span>Time Taken: {value.result.execute_time}ms</span>
             <span>Memory: {value.result.memory}KB</span>

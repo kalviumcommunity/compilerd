@@ -10,9 +10,9 @@ const checkErrors = (data) => {
 };
 
 const checkConstraints = (data, constraints) => {
-  const { execute_time } = data;
-  const { MLE } = constraints;
-  
+  //round to 4 deicmal points
+  data.memory = Math.round(data.memory);
+
   const res = checkErrors(data);
   return res;
 };
