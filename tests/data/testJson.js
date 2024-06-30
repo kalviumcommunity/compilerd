@@ -298,6 +298,66 @@ const testCases = [
             error: 0,
         },
     },
+
+    {
+        name: 'python : calculate factorial',
+        reqObject: {
+            language: 'python',
+            script:
+                'def factorial(n):\n' +
+                '    if n == 0:\n' +
+                '        return 1\n' +
+                '    else:\n' +
+                '        return n * factorial(n - 1)\n' +
+                'print(factorial(5))\n',
+        },
+        expectedResponse: {
+            val: '120\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : calculate sum of numbers',
+        reqObject: {
+            language: 'java',
+            script:
+                'import java.util.Scanner;\n' +
+                'public class Solution {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        Scanner scanner = new Scanner(System.in);\n' +
+                '        int sum = 0;\n' +
+                '        while (scanner.hasNextInt()) {\n' +
+                '            sum += scanner.nextInt();\n' +
+                '        }\n' +
+                '        System.out.println(sum);\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3 4 5',
+        },
+        expectedResponse: {
+            val: '15\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : calculate power of a number',
+        reqObject: {
+            language: 'ruby',
+            script:
+                'def power(base, exp)\n' +
+                '  return 1 if exp == 0\n' +
+                '  base * power(base, exp - 1)\n' +
+                'end\n' +
+                'puts power(2, 5)\n',
+        },
+        expectedResponse: {
+            val: '32\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
