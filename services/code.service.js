@@ -130,7 +130,7 @@ const _prepareErrorMessage = (outputLog, language, command) => {
     return errorMsg.trim()
 }
 
-const _executePrompt = async (
+const _executePrompt = async ( 
     count,
     langConfig,
     prompt,

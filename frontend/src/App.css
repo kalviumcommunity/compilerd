@@ -1,0 +1,16 @@
+.App {
+  text-align: center;
+}
+
+.language-selector, .code-editor, .execution-result {
+  margin: 20px;
+}
+
+button {
+  margin: 20px;
+  padding: 10px 20px;
+}
+
+.code-editor2{
+  text-align: left;
+}

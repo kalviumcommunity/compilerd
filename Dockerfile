@@ -2,16 +2,11 @@ FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables lsof
 
-RUN set -ex && \
-    apk add --no-cache chromium lsof
-
-RUN set -ex && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto1 && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
-    rm -f /usr/bin/x86_64-alpine-linux-musl-gcj
+# Allow container to bind to privileged ports (like 3000) without root
+RUN apk add --no-cache libcap && \
+    setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
 
 RUN ln -sf python3 /usr/bin/python
 

@@ -9,4 +9,7 @@ module.exports = {
     PROMPTV2: 'promptv2',
     MULTIFILE: 'multifile',
     SQLITE3: 'sqlite3',
-}
+    JAVASCRIPT: 'javascript', // Add JavaScript with its identifier
+    PHP: 'php', // Add PHP with its identifier
+    RUST: 'rust', // Add Rust with its identifier
+};
