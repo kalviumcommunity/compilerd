@@ -12,4 +12,7 @@ module.exports = {
     RUST: 'rust',
     GO: 'go',
     PHP: 'php',
+    CSHARP:'csharp',
+    SWIFT:'swift',
+    KOTLIN:'kotlin',
 }

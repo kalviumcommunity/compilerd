@@ -9,7 +9,16 @@ RUN set -ex && \
 RUN apk add --no-cache rust cargo
 RUN apk add --no-cache go
 RUN apk add --no-cache php php-cli
-RUN apk add --no-cache gfortran
+
+# Add C# (Mono) support
+RUN apk add --no-cache mono --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+
+# # Add Swift support
+# RUN apk add --no-cache swift --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+# # Add Kotlin support
+# RUN apk add --no-cache kotlin --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
@@ -30,3 +39,4 @@ EXPOSE 8080
 
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
 CMD sh /usr/bin/start.sh
+

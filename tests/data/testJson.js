@@ -410,6 +410,144 @@ echo $input;
             error: 0,
         },
     },
+
+    {
+        name: 'csharp : hello world',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n' +
+                'class Program {\n' +
+                '    static void Main(string[] args) {\n' +
+                '        Console.WriteLine("hello world");\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'csharp : print stdin',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n' +
+                'class Program {\n' +
+                '    static void Main(string[] args) {\n' +
+                '        string line;\n' +
+                '        while ((line = Console.ReadLine()) != null) {\n' +
+                '            Console.WriteLine(line);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'swift : hello world',
+        reqObject: {
+            language: 'swift',
+            script: 'print("hello world")\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'swift : print stdin',
+        reqObject: {
+            language: 'swift',
+            script:
+                'if let input = readLine() {\n' +
+                '    print(input)\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : hello world',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : print stdin',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    val input = readLine()\n' +
+                '    if (input != null) {\n' +
+                '        println(input)\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'fortran : hello world',
+        reqObject: {
+            language: 'fortran',
+            script:
+                'program HelloWorld\n' +
+                '    print *, "hello world"\n' +
+                'end program HelloWorld\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'fortran : print stdin',
+        reqObject: {
+            language: 'fortran',
+            script:
+                'program PrintStdin\n' +
+                '    character(len=100) :: line\n' +
+                '    read *, line\n' +
+                '    print *, trim(line)\n' +
+                'end program PrintStdin\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    }
+
+
 ];
 
 module.exports = { testCases }
