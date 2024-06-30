@@ -38,7 +38,8 @@ function App() {
 
       setTextAreaContent(prevContent => ({
         ...prevContent,
-        textArea2: result.output
+        textArea2: result.output + result.compile_message
+
       }));
     } catch (error) {
       console.error('Error:', error);

@@ -20,6 +20,7 @@ const Navbar = ({ onLanguageChange, onSubmit }) => {
                         <option value="java">Java</option>
                         <option value="python">Python</option>
                         <option value="nodejs">JavaScript</option>
+                        <option value="ruby">Ruby</option>
                     </select>
                     <button onClick={onSubmit}>Compile & Run</button>
                 </div>

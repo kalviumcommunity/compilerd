@@ -228,7 +228,7 @@ const _executeCode = async (req, res, response) => {
                 // Remove ulimit as a temp fix
                 command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
             }
 
             // Check if there is any input that is to be provided to code execution
