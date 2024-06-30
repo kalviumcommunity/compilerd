@@ -13,7 +13,15 @@ RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
     rm -f /usr/bin/x86_64-alpine-linux-musl-gcj
 
+# Install Go,
+RUN apk add --no-cache go
+# Install PHP
+RUN apk add --no-cache php
+# Install Rust
+RUN apk add --no-cache rust
+
 RUN ln -sf python3 /usr/bin/python
+
 
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
