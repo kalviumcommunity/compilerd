@@ -35,7 +35,7 @@ function CodeEditor() {
         setCode(`# Start coding in Ruby\nputs 'Hello, world!'`);
         break;
       case 'php':
-        setCode(`// Start coding in PHP\necho "Hello, world!";`);
+        setCode(`// Start coding in PHP \n<?php \necho "Hello World"; \n?> `);
         break;
       case 'rust':
         setCode(`// Start coding in Rust\nfn main() {\n    println!("Hello, world!");\n}`);
