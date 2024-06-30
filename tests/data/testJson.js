@@ -211,6 +211,90 @@ const testCases = [
             error: 0,
         },
     },
+    {   // *** adding test cases ***
+        name: 'perl : print hello world',
+        reqObject: {
+            language: 'perl',
+            script:
+                'print "hello world"'
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'my $input = <STDIN>;' +
+                'chomp($input);',
+            stdin: '10\n'
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {   // *** adding test cases ***
+        name: 'bash : print hello world',
+        reqObject: {
+            language: 'bash',
+            script:
+                'echo "hello world"'
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'bash : print stdin',
+        reqObject: {
+            language: 'bash',
+            script:
+                'read input' +
+                'echo $input"',
+            stdin: '10\n'
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {   // *** adding test cases ***
+        name: 'swift : print hello world',
+        reqObject: {
+            language: 'swift',
+            script:
+                'print("hello world")'
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'swift : print stdin',
+        reqObject: {
+            language: 'swift',
+            script:
+                'let var = readLine()' +
+                'print(var)',
+            stdin: '10\n'
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
     {
         name: 'TLE test',
         reqObject: {
