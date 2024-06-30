@@ -1,0 +1,38 @@
+[
+    {
+        "name": "C",
+        "extension": "c",
+        "comment": "// you are using c",
+        "value": "c"
+    },
+    {
+        "name": "CPP",
+        "extension": "c++",
+        "comment": "// you are using cpp",
+        "value": "cpp"
+    },
+    {
+        "name": "PYTHON",
+        "extension": "py",
+        "comment": "# you are using python",
+        "value": "python"
+    },
+    {
+        "name": "JAVA",
+        "extension": "java",
+        "comment": "// you are using java",
+        "value": "java"
+    },
+    {
+        "name": "NODEJS",
+        "extension": "js",
+        "comment": "// you are using nodejs",
+        "value": "nodejs"
+    },
+    {
+        "name": "RUBY",
+        "extension": "rb",
+        "comment": "# you are using ruby",
+        "value": "ruby"
+    }
+]
