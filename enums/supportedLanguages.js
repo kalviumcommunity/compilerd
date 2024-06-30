@@ -9,5 +9,6 @@ module.exports = {
     PROMPTV2: 'promptv2',
     MULTIFILE: 'multifile',
     SQLITE3: 'sqlite3',
-    GOLANG: 'golang', // Added Golang (Task)
+    GO: 'go', // Added Golang (Task)
+    PHP: 'php', // Added Php (Task)
 }

@@ -4,5 +4,6 @@ export const languageOptions = [
     { value: 'ruby', label: 'Ruby', monaco: 'ruby' },
     { value: 'java', label: 'Java', monaco: 'java' },
     { value: 'nodejs', label: 'Node.js', monaco: 'javascript' },
-    { value: 'golang', label: 'GoLang', monaco: 'golang' },
+    { value: 'go', label: 'GoLang', monaco: 'go' },
+    { value: 'php', label: 'PHP', monaco: 'php' },
 ]

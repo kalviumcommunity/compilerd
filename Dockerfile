@@ -17,6 +17,7 @@ RUN ln -sf python3 /usr/bin/python
 
 # (Task) Install Go,
 RUN apk add --no-cache go
+RUN apk add --no-cache php
 
 ADD . /usr/bin/
 ADD start.sh /usr/bin/

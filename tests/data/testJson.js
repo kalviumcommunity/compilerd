@@ -292,9 +292,9 @@ const testCases = [
         },
     },
     {
-        name: 'golang : hello world',
+        name: 'go : hello world',
         reqObject: {
-            language: 'golang',
+            language: 'go',
             script:
                 'package main\n' +
                 'import "fmt"\n' +
@@ -309,9 +309,9 @@ const testCases = [
         },
     },
     {
-        name: 'golang : print stdin',
+        name: 'go : print stdin',
         reqObject: {
-            language: 'golang',
+            language: 'go',
             script:
                 'package main\n' +
                 'import "fmt"\n' +
@@ -327,6 +327,34 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php\n' + 'echo "hello world";\n',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : print stdin',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                '$input = file_get_contents("php://stdin");\n' +
+                'echo $input;\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3',
             status: 200,
             error: 0,
         },
