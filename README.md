@@ -11,6 +11,12 @@
 FrontEnd interface link : https://front-endinterface.netlify.app/
 Implemented a well-designed frontend named 'frontend' within the project repository. This interface allows users to input code in various programming languages and execute it. The frontend interacts seamlessly with the backend API, enabling users to compile and run code snippets with real-time output display. It supports multiple languages such as Rust, Swift, and TypeScript, providing a user-friendly experience for testing and debugging code.
 
+Backend: Node.js with Express for API development.
+Frontend: HTML, CSS, and JavaScript for the user interface.
+Testing: Jest framework for unit testing across multiple languages.
+Deployment: GitHub Pages for frontend deployment and local development environment setup.
+
+Developed backend API endpoints (/api/run_code) to handle code execution requests securely, supporting CORS for seamless frontend-backend communication , Simple Frontend Interface: Designed and integrated a user-friendly frontend interface (located in the frontend folder) where users can input code in various languages and view the output , implemented a total of 10 test cases across all supported languages to ensure robust functionality and reliability and added support for Rust, Swift, and TypeScript, including compiler configurations and runtime execution setups.
 
 
 ## Table of contents : 
