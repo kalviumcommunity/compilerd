@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Judge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Compilerd</h1>
+        <div>
+            <label for="language">Select Language:</label>
+            <select id="language">
+                <option value="c">C</option>
+                <option value="java">Java</option>
+                <option value="python">Python</option>
+                <option value="cpp">C++</option>
+                <option value="rust">Rust</option>
+                <option value="php">Php</option>
+                <option value="go">Go</option>
+                <option value="pearl">Pearl</option>
+                <option value="ruby">Ruby</option>
+                
+            </select>
+        </div>
+        <div>
+            <label for="code">Enter Your Code:</label>
+            <textarea id="code" rows="10"></textarea>
+        </div>
+        <button onclick="runCode()">Run Code</button>
+        <div id="output" class="output-container"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

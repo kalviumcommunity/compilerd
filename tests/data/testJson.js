@@ -104,6 +104,71 @@ const testCases = [
         },
     },
     {
+        name: 'python : syntax error',
+        reqObject: {
+            language: 'python',
+            script: 'print("hello world"\n',  
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    {
+        name: 'python : runtime error',
+        reqObject: {
+            language: 'python',
+            script:
+                'a = 0\n' +
+                'b = 5 / a\n' + 
+                'print(b)\n',
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    
+    {
+        name: 'c : syntax error',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n' +
+                '    printf("hello world"\n' +  
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : runtime error',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n' +
+                '    int a = 0;\n' +
+                '    int b = 5 / a;\n' +  
+                '    printf("%d", b);\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    
+    {
         name: 'c : hello world',
         reqObject: {
             language: 'c',
@@ -120,6 +185,7 @@ const testCases = [
             error: 0,
         },
     },
+    
     {
         name: 'c : print stdin',
         reqObject: {
@@ -141,8 +207,9 @@ const testCases = [
             error: 0,
         },
     },
+
     {
-        name: 'java : print stdin',
+        name: 'java : print hello world',
         reqObject: {
             language: 'java',
             script:
@@ -183,6 +250,44 @@ const testCases = [
             error: 0,
         },
     },
+
+    {
+        name: 'java : syntax error',
+        reqObject: {
+            language: 'java',
+            script:
+                'public class Solution {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        System.out.println("hello world"\n' + 
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : runtime error',
+        reqObject: {
+            language: 'java',
+            script:
+                'public class Solution {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        int a = 0;\n' +
+                '        int b = 5 / a;\n' +  
+                '        System.out.println(b);\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '',
+            status: 400,
+            error: 1,
+        },
+    },
+    
     {
         name: 'ruby : print hello world',
         reqObject: {
@@ -207,6 +312,144 @@ const testCases = [
         },
         expectedResponse: {
             val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "hello world"; ?>',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : print stdin',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                '$input = file_get_contents("php://stdin");\n' +
+                'echo $input;\n' +
+                '?>',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello world\\n";',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'while (<STDIN>) {\n' +
+                '    print $_;\n' +
+                '}',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'R : hello world',
+        reqObject: {
+            language: 'r',
+            script: 'cat("hello world\\n")',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'R : print stdin',
+        reqObject: {
+            language: 'r',
+            script:
+                'input <- file("stdin", "r")\n' +
+                'data <- readLines(input)\n' +
+                'close(input)\n' +
+                'cat(data, sep="\\n")',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("hello world")\n}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script: 
+                'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc main() {\n    scanner := bufio.NewScanner(os.Stdin)\n    for scanner.Scan() {\n        fmt.Println(scanner.Text())\n    }\n}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : hello world',
+        reqObject: {
+            language: 'rust',
+            script: 'fn main() {\n    println!("hello world");\n}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : print stdin',
+        reqObject: {
+            language: 'rust',
+            script: 
+                'use std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    for line in stdin.lock().lines() {\n        println!("{}", line.unwrap());\n    }\n}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
             status: 200,
             error: 0,
         },
