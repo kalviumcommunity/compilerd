@@ -11,5 +11,5 @@ module.exports = {
     SQLITE3: 'sqlite3',
     GO: 'go', // Added Golang (Task)
     PHP: 'php', // Added Php (Task)
-    SWIFT: 'swift', // Added Swift (Task)
+    RUST: 'rust', // Added Rust (Task)
 }

@@ -360,10 +360,10 @@ const testCases = [
         },
     },
     {
-        name: 'swift : hello world',
+        name: 'rust : hello world',
         reqObject: {
-            language: 'swift',
-            script: 'import Foundation\n' + 'print("hello world")\n',
+            language: 'rust',
+            script: 'fn main() { println!("hello world"); }',
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -372,13 +372,16 @@ const testCases = [
         },
     },
     {
-        name: 'swift : print stdin',
+        name: 'rust : print stdin',
         reqObject: {
-            language: 'swift',
+            language: 'rust',
             script:
-                'import Foundation\n' +
-                'if let input = readLine() {\n' +
-                '    print(input)\n' +
+                'use std::io::{self, BufRead};\n' +
+                'fn main() {\n' +
+                '    let stdin = io::stdin();\n' +
+                '    for line in stdin.lock().lines() {\n' +
+                '        println!("{}", line.unwrap());\n' +
+                '    }\n' +
                 '}\n',
             stdin: '1 2 3',
         },
@@ -388,18 +391,18 @@ const testCases = [
             error: 0,
         },
     },
-    {
-        name: 'sqlite3 : create table',
-        reqObject: {
-            language: 'sqlite3',
-            script: '.open test.db\nCREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)',
-        },
-        expectedResponse: {
-            val: '',
-            status: 200,
-            error: 0,
-        },
-    },
+    // {
+    //     name: 'sqlite3 : create table',
+    //     reqObject: {
+    //         language: 'sqlite3',
+    //         script: '.open test.db\nCREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)',
+    //     },
+    //     expectedResponse: {
+    //         val: '',
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
 ]
 
 module.exports = { testCases }

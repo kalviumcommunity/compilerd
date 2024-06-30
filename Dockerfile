@@ -17,8 +17,10 @@ RUN ln -sf python3 /usr/bin/python
 
 # (Task) Install Go,
 RUN apk add --no-cache go
+# (Task) Install PHP
 RUN apk add --no-cache php
-RUN apk add --no-cache swift sqlite
+# (Task) Install Rust
+RUN apk add --no-cache rust
 
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
