@@ -41,6 +41,45 @@ const testCases = [
 
     },
     {
+        name: 'cpp : simple calculation',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int a = 5, b = 3;\n' +
+                '    cout << (a + b);\n' +
+                'return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'cpp : string manipulation',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    string s = "Hello";\n' +
+                '    s += " World!";\n' +
+                '    cout << s;\n' +
+                'return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Hello World!',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
@@ -66,6 +105,36 @@ const testCases = [
         },
         expectedResponse: {
             val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'nodejs : array manipulation',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'let arr = [1, 2, 3];\n' +
+                'arr.push(4);\n' +
+                'console.log(arr.join(","));\n',
+        },
+        expectedResponse: {
+            val: '1,2,3,4\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'nodejs : asynchronous operation',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'setTimeout(() => {\n' +
+                '  console.log("Done!");\n' +
+                '}, 1000);\n',
+        },
+        expectedResponse: {
+            val: 'Done!\n',
             status: 200,
             error: 0,
         },
@@ -104,6 +173,33 @@ const testCases = [
         },
     },
     {
+        name: 'python : simple calculation',
+        reqObject: {
+            language: 'python',
+            script: 'print(5 + 3)',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'python : list manipulation',
+        reqObject: {
+            language: 'python',
+            script:
+                'lst = [1, 2, 3]\n' +
+                'lst.append(4)\n' +
+                'print(lst)\n',
+        },
+        expectedResponse: {
+            val: '[1, 2, 3, 4]\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'c : hello world',
         reqObject: {
             language: 'c',
@@ -137,6 +233,41 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : simple addition',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n' +
+                'int main(){\n' +
+                '    int a = 5, b = 3;\n' +
+                '    printf("%d", a + b);\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : string output',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n' +
+                'int main(){\n' +
+                '    printf("This is a string");\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'This is a string',
             status: 200,
             error: 0,
         },
@@ -192,6 +323,18 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : simple addition',
+        reqObject: {
+            language: 'ruby',
+            script: 'puts 5 + 3',
+        },
+        expectedResponse: {
+            val: '8\n',
             status: 200,
             error: 0,
         },
@@ -275,25 +418,167 @@ const testCases = [
         },
     },
     {
-        name: 'OPEN AI test promptv1',
+        name: 'go : hello world',
         reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: {},
+            val: 'hello world\n',
             status: 200,
             error: 0,
         },
     },
     {
-        name: 'OPEN AI test promptv2',
+        name: 'go : print stdin',
         reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1\n2\n3',
         },
         expectedResponse: {
-            val: {},
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : simple addition',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println(5 + 3)\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : string concatenation',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("Hello" + " " + "World!")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Hello World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    // TypeScript test cases
+    {
+        name: 'TypeScript: Hello World',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log("Hello, World!");',
+        },
+        expectedResponse: {
+            val: 'Hello, World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'TypeScript: Addition',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log(5 + 3);',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'TypeScript: String Concatenation',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log("Hello" + " " + "World!");',
+        },
+        expectedResponse: {
+            val: 'Hello World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'TypeScript: Array Manipulation',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'let arr: number[] = [1, 2, 3];\n' +
+                'arr.push(4);\n' +
+                'console.log(arr.join(","));\n',
+        },
+        expectedResponse: {
+            val: '1,2,3,4\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // PHP test cases
+    {
+        name: 'PHP: Hello World',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "Hello, world!"; ?>',
+        },
+        expectedResponse: {
+            val: 'Hello, world!',
+            status: 200,
+            error: 0,
+        },
+    } ,
+    {
+        name: 'PHP: Simple Addition',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo 5 + 3; ?>',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'PHP: String Concatenation',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "Hello" . " " . "World!"; ?>',
+        },
+        expectedResponse: {
+            val: 'Hello World!',
             status: 200,
             error: 0,
         },
