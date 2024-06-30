@@ -11,15 +11,15 @@ import {
   ChakraProvider,
   IconButton,
 } from "@chakra-ui/react";
-import { MdMenu, MdClose } from "react-icons/md"; // Import hamburger and close icons
+import { MdMenu, MdClose } from "react-icons/md";
 
 const Assistant = () => {
   const [response, setResponse] = useState("");
   const [prompt, setPrompt] = useState("");
   const [chat, setChat] = useState([]);
-  const [isOpen, setIsOpen] = useState(false); // State for chat box visibility
+  const [isOpen, setIsOpen] = useState(false);
 
-  const apiKey = "AIzaSyAEzFqg2PDBVbgzMay8XyX3cXUkmrxZVpg"; // Replace with your actual API key
+  const apiKey = "your api key";
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const handleSubmit = async () => {
@@ -32,7 +32,7 @@ const Assistant = () => {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const result = await model.generateContent(prompt);
-      const text = result.response.text(); // Ensure to call the function to get text
+      const text = result.response.text();
 
       const botMessage = { type: "bot", text };
       setChat([...chat, userMessage, botMessage]);
@@ -61,14 +61,14 @@ const Assistant = () => {
         position="fixed"
         bottom="10px"
         right="10px"
-        width={isOpen ? "300px" : "50px"} // Adjust width based on isOpen state
-        height={isOpen ? "400px" : "50px"} // Adjust height based on isOpen state
+        width={isOpen ? "300px" : "50px"}
+        height={isOpen ? "400px" : "50px"}
         padding="10px"
         boxShadow="0 4px 8px rgba(0,0,0,0.2)"
         backgroundColor="black"
         borderRadius="8px"
         fontFamily="Arial, sans-serif"
-        transition="all 0.3s ease" // Smooth transition animation
+        transition="all 0.3s ease"
       >
         {isOpen ? (
           <VStack spacing="4" height="100%">
