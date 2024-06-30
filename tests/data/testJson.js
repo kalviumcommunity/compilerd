@@ -38,13 +38,12 @@ const testCases = [
             status: 200,
             error: 0,
         },
-
     },
     {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
-            script: 'console.log(\'hello world\')',
+            script: "console.log('hello world')",
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -57,8 +56,8 @@ const testCases = [
         reqObject: {
             language: 'nodejs',
             script:
-                'process.stdin.setEncoding(\'utf8\'); \n ' +
-                'process.stdin.on(\'data\', (input) => { \n ' +
+                "process.stdin.setEncoding('utf8'); \n " +
+                "process.stdin.on('data', (input) => { \n " +
                 '  console.log(input); \n ' +
                 ' \n ' +
                 '}); \n ',
@@ -74,7 +73,7 @@ const testCases = [
         name: 'python : hello world',
         reqObject: {
             language: 'python',
-            script: 'print(\'hello world\')',
+            script: "print('hello world')",
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -187,8 +186,7 @@ const testCases = [
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
-            script:
-                'print "hello world"'
+            script: 'print "hello world"',
         },
         expectedResponse: {
             val: 'hello world',
@@ -200,10 +198,8 @@ const testCases = [
         name: 'ruby : print stdin',
         reqObject: {
             language: 'ruby',
-            script:
-                'user_input = gets.chomp\n' +
-                'puts user_input',
-            stdin: '10\n'
+            script: 'user_input = gets.chomp\n' + 'puts user_input',
+            stdin: '10\n',
         },
         expectedResponse: {
             val: '10\n',
@@ -263,10 +259,7 @@ const testCases = [
         name: 'MLE test 3',
         reqObject: {
             language: 'python',
-            script:
-                'a = [100]\n' +
-                'for i in a:\n' +
-                '    a.append(i)\n',
+            script: 'a = [100]\n' + 'for i in a:\n' + '    a.append(i)\n',
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -294,6 +287,46 @@ const testCases = [
         },
         expectedResponse: {
             val: {},
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'golang : hello world',
+        reqObject: {
+            language: 'golang',
+            script:
+                'package main\n' +
+                'import "fmt"\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'golang : print stdin',
+        reqObject: {
+            language: 'golang',
+            script:
+                'package main\n' +
+                'import "fmt"\n' +
+                'import "bufio"\n' +
+                'import "os"\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1\n2\n3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
             status: 200,
             error: 0,
         },

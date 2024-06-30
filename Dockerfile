@@ -15,6 +15,9 @@ RUN set -ex && \
 
 RUN ln -sf python3 /usr/bin/python
 
+# (Task) Install Go,
+RUN apk add --no-cache go
+
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
