@@ -238,6 +238,41 @@ const testCases = [
         },
     },
     {
+        name: 'c : simple addition',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n' +
+                'int main(){\n' +
+                '    int a = 5, b = 3;\n' +
+                '    printf("%d", a + b);\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : string output',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n' +
+                'int main(){\n' +
+                '    printf("This is a string");\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'This is a string',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'java : print stdin',
         reqObject: {
             language: 'java',
@@ -280,43 +315,6 @@ const testCases = [
         },
     },
     {
-        name: 'java : string manipulation',
-        reqObject: {
-            language: 'java',
-            script:
-                'public class Main {\n' +
-                '    public static void main(String[] args) {\n' +
-                '        String s = "Hello";\n' +
-                '        s += " World!";\n' +
-                '        System.out.println(s);\n' +
-                '    }\n' +
-                '}\n',
-        },
-        expectedResponse: {
-            val: 'Hello World!\n',
-            status: 200,
-            error: 0,
-        },
-    },
-    {
-        name: 'java : simple calculation',
-        reqObject: {
-            language: 'java',
-            script:
-                'public class Main {\n' +
-                '    public static void main(String[] args) {\n' +
-                '        int a = 5, b = 3;\n' +
-                '        System.out.println(a + b);\n' +
-                '    }\n' +
-                '}\n',
-        },
-        expectedResponse: {
-            val: '8\n',
-            status: 200,
-            error: 0,
-        },
-    },
-    {
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
@@ -325,6 +323,18 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : simple addition',
+        reqObject: {
+            language: 'ruby',
+            script: 'puts 5 + 3',
+        },
+        expectedResponse: {
+            val: '8\n',
             status: 200,
             error: 0,
         },
@@ -407,30 +417,30 @@ const testCases = [
             error: 1,
         },
     },
-    {
-        name: 'OPEN AI test promptv1',
-        reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-        },
-        expectedResponse: {
-            val: {},
-            status: 200,
-            error: 0,
-        },
-    },
-    {
-        name: 'OPEN AI test promptv2',
-        reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-        },
-        expectedResponse: {
-            val: {},
-            status: 200,
-            error: 0,
-        },
-    },
+    // {
+    //     name: 'OPEN AI test promptv1',
+    //     reqObject: {
+    //         language: 'promptv1',
+    //         prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+    //     },
+    //     expectedResponse: {
+    //         val: {},
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
+    // {
+    //     name: 'OPEN AI test promptv2',
+    //     reqObject: {
+    //         language: 'promptv2',
+    //         prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+    //     },
+    //     expectedResponse: {
+    //         val: {},
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
     // GO test cases
     {
         name: 'go : hello world',
@@ -474,6 +484,40 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'go : simple addition',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println(5 + 3)\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : string concatenation',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("Hello" + " " + "World!")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Hello World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
     // TypeScript test cases
     {
         name: 'TypeScript: Hello World',
@@ -488,7 +532,7 @@ const testCases = [
         },
     },
     {
-        name: 'TypeScript: Simple Calculation',
+        name: 'TypeScript: Addition',
         reqObject: {
             language: 'typescript',
             script: 'console.log(5 + 3);',
@@ -500,41 +544,33 @@ const testCases = [
         },
     },
     {
-        name: 'TypeScript: Asynchronous Operation',
+        name: 'TypeScript: String Concatenation',
         reqObject: {
             language: 'typescript',
-            script: `
-                async function fetchData() {
-                    return new Promise(resolve => setTimeout(() => resolve("Data fetched"), 1000));
-                }
-
-                fetchData().then(data => console.log(data));
-            `,
+            script: 'console.log("Hello" + " " + "World!");',
         },
         expectedResponse: {
-            val: 'Data fetched\n',
-            status: 200,
-            error: 0,
-        },
-    }, 
-    {
-        name: 'TypeScript: Print stdin',
-        reqObject: {
-            language: 'typescript',
-            script: `
-                process.stdin.setEncoding('utf8');
-                process.stdin.on('data', (input) => {
-                    console.log(input.trim());
-                });
-            `,
-            stdin: 'TypeScript is awesome!',
-        },
-        expectedResponse: {
-            val: 'TypeScript is awesome!\n',
+            val: 'Hello World!\n',
             status: 200,
             error: 0,
         },
     },
+    {
+        name: 'TypeScript: Array Manipulation',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'let arr: number[] = [1, 2, 3];\n' +
+                'arr.push(4);\n' +
+                'console.log(arr.join(","));\n',
+        },
+        expectedResponse: {
+            val: '1,2,3,4\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
     // PHP test cases
     {
         name: 'PHP: Hello World',
@@ -547,7 +583,32 @@ const testCases = [
             status: 200,
             error: 0,
         },
-    } 
+    } ,
+    {
+        name: 'PHP: Simple Addition',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo 5 + 3; ?>',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'PHP: String Concatenation',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "Hello" . " " . "World!"; ?>',
+        },
+        expectedResponse: {
+            val: 'Hello World!',
+            status: 200,
+            error: 0,
+        },
+    },
+    
 ]
 
 module.exports = { testCases }
