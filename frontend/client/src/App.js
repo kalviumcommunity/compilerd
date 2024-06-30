@@ -6,18 +6,17 @@ function App() {
 
   const [script, setScript] = useState('');
   const [language, setLanguage] = useState('c');
-  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
 
   const handleSubmit = async () => {
     const payload =  {
         language, 
-        script,
-        stdin
+        script
   };
   try {
     const {data} = await axios.post("http://localhost:3000/api/execute",payload)
     setOutput(data.output);
+    console.log({data});
   } catch (err) {
     console.log(err.response);
   }
@@ -41,6 +40,9 @@ function App() {
             <option value = "java"> Java </option>
             <option value = "nodejs"> Node.js </option>
             <option value = "ruby"> Ruby </option>
+            <option value = "go">  Go  </option>
+            <option value = "php">  PHP  </option>
+            <option value = "typescript">  TypeScript  </option>
       </select>
       <br />
       <br />
@@ -57,21 +59,9 @@ function App() {
       <button onClick={handleSubmit}> Submit </button>
       <br />
       <br />
-      <label> Stdin: </label>
-      <br />
-      <textarea 
-        rows = '5' 
-        cols = '90' 
-        value={stdin} 
-        onChange={(e) => {
-          setStdin(e.target.value);
-        }}
-      ></textarea>
-      <br />
-      <br />
       <label> Output: </label>
       <br />
-      <p>{output}</p>
+      <pre dangerouslySetInnerHTML={{ __html: output }} />
     </div>
   );
 }

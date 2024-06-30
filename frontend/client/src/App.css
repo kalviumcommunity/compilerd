@@ -1,4 +1,6 @@
-
+.App pre {
+  white-space: pre-wrap; /* or pre-line */
+}
 
 .App-logo {
   height: 40vmin;

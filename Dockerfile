@@ -1,8 +1,10 @@
 FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
-RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+RUN apk update && \
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby go php iptables ip6tables
+
+RUN npm install -g ts-node typescript
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
