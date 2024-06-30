@@ -18,6 +18,68 @@ const testCases = [
         },
     },
     {
+        name: "cpp : simple arithmetic",
+        reqObject: {
+            language: "cpp",
+            script: 
+                "#include<bits/stdc++.h>\n" +
+                "using namespace std;\n" +
+                "int main(){\n" +
+                "    int a = 5, b = 10;\n" +
+                "    cout << (a + b);\n" +
+                "    return 0;\n" +
+                "}\n"
+        },
+        expectedResponse: {
+            val: "15",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "cpp : conditional statements",
+        reqObject: {
+            language: "cpp",
+            script: 
+                "#include<bits/stdc++.h>\n" +
+                "using namespace std;\n" +
+                "int main(){\n" +
+                "    int a = 10;\n" +
+                "    if (a > 5) {\n" +
+                "        cout << \"a is greater than 5\";\n" +
+                "    } else {\n" +
+                "        cout << \"a is not greater than 5\";\n" +
+                "    }\n" +
+                "    return 0;\n" +
+                "}\n"
+        },
+        expectedResponse: {
+            val: "a is greater than 5",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "cpp : for loop",
+        reqObject: {
+            language: "cpp",
+            script: 
+                "#include<bits/stdc++.h>\n" +
+                "using namespace std;\n" +
+                "int main(){\n" +
+                "    for (int i = 0; i < 5; ++i) {\n" +
+                "        cout << i << \" \";\n" +
+                "    }\n" +
+                "    return 0;\n" +
+                "}\n"
+        },
+        expectedResponse: {
+            val: "0 1 2 3 4 ",
+            status: 200,
+            error: 0
+        }
+    },
+    {
         name: 'cpp : print stdin',
         reqObject: {
             language: 'cpp',
@@ -51,6 +113,61 @@ const testCases = [
             status: 200,
             error: 0,
         },
+    },
+    {
+        name: "nodejs : Module Import Test",
+        reqObject: {
+            language: "nodejs",
+            script: "const os = require('os'); console.log(os.platform());"
+        },
+        expectedResponse: {
+            val: "(platform name)",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "nodejs : Async/Await Test",
+        reqObject: {
+            language: "nodejs",
+            script: "\
+const asyncFunction = async () => { \
+    return 'Async Function Working'; \
+}; \
+(async function runTest() { \
+    try { \
+        const result = await asyncFunction(); \
+        console.log(result); \
+    } catch (err) { \
+        console.error('Async/Await Test Failed', err); \
+    } \
+})();"
+        },
+        expectedResponse: {
+            val: "Async Function Working",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "nodejs : Child Process Test",
+        reqObject: {
+            language: "nodejs",
+            script: "\
+const { exec } = require('child_process'); \
+exec('node -v', (err, stdout, stderr) => { \
+    if (err) { \
+        console.error('Child Process Test Failed', err); \
+        return; \
+    } \
+    console.log('Node.js Version:', stdout.trim()); \
+});"
+        },
+        expectedResponse: {
+            val: "Node.js Version: (version)",
+            status: 200,
+            error: 0
+        }
     },
     {
         name: 'nodejs : print stdin',
@@ -104,6 +221,60 @@ const testCases = [
         },
     },
     {
+        name: "python : File System Test",
+        reqObject: {
+            language: "python",
+            script: "\
+import os\n\
+path = 'test.txt'\n\
+with open(path, 'w') as file:\n\
+    file.write('Hello, file system!')\n\
+with open(path, 'r') as file:\n\
+    data = file.read()\n\
+    print('File Content:', data)\n\
+os.remove(path)"
+        },
+        expectedResponse: {
+            val: "File Content: Hello, file system!",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "python : Async/Await Test",
+        reqObject: {
+            language: "python",
+            script: "\
+import asyncio\n\
+async def async_function():\n\
+    return 'Async Function Working'\n\
+async def run_test():\n\
+    result = await async_function()\n\
+    print(result)\n\
+asyncio.run(run_test())"
+        },
+        expectedResponse: {
+            val: "Async Function Working",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "python : Subprocess Test",
+        reqObject: {
+            "language": "python",
+            "script": "\
+import subprocess\n\
+result = subprocess.run(['python', '--version'], stdout=subprocess.PIPE)\n\
+print('Python Version:', result.stdout.decode().strip())"
+        },
+        "expectedResponse": {
+            "val": "Python Version: (version)",
+            "status": 200,
+            "error": 0
+        }
+    },
+    {
         name: 'c : hello world',
         reqObject: {
             language: 'c',
@@ -141,6 +312,55 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: "c : Conditional Test",
+        reqObject: {
+            language: "c",
+            script: "#include <stdio.h>\nint main() {\n    int x = 10;\n    if (x > 5) {\n        printf(\"x is greater than 5\\n\");\n    } else {\n        printf(\"x is not greater than 5\\n\");\n    }\n    return 0;\n}"
+        },
+        expectedResponse: {
+            val: "x is greater than 5\n",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "c : Loop Test",
+        reqObject: {
+            language: "c",
+            script: "#include <stdio.h>\nint main() {\n    for (int i = 0; i < 5; i++) {\n        printf(\"%d \", i);\n    }\n    return 0;\n}"
+        },
+        expectedResponse: {
+            val: "0 1 2 3 4 ",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "c : Function Test",
+        reqObject: {
+            language: "c",
+            script: "#include <stdio.h>\nint add(int a, int b) {\n    return a + b;\n}\nint main() {\n    int result = add(3, 4);\n    printf(\"%d\\n\", result);\n    return 0;\n}"
+        },
+        expectedResponse: {
+            val: "7\n",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "c : File I/O Test",
+        reqObject: {
+            language: "c",
+            script: "#include <stdio.h>\nint main() {\n    FILE *file = fopen(\"test.txt\", \"w\");\n    if (file) {\n        fprintf(file, \"Hello, file system!\\n\");\n        fclose(file);\n    }\n    file = fopen(\"test.txt\", \"r\");\n    if (file) {\n        char buffer[50];\n        fgets(buffer, 50, file);\n        printf(\"%s\", buffer);\n        fclose(file);\n        remove(\"test.txt\");\n    }\n    return 0;\n}"
+        },
+        expectedResponse: {
+            val: "Hello, file system!\n",
+            status: 200,
+            error: 0
+        }
+    },
+    
     {
         name: 'java : print stdin',
         reqObject: {
@@ -184,6 +404,42 @@ const testCases = [
         },
     },
     {
+        name: "java : Conditional Test",
+        reqObject: {
+            language: "java",
+            script: "public class Main {\n    public static void main(String[] args) {\n        int x = 10;\n        if (x > 5) {\n            System.out.println(\"x is greater than 5\");\n        } else {\n            System.out.println(\"x is not greater than 5\");\n        }\n    }\n}"
+        },
+        expectedResponse: {
+            val: "x is greater than 5\n",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "java : Loop Test",
+        reqObject: {
+            language: "java",
+            script: "public class Main {\n    public static void main(String[] args) {\n        for (int i = 0; i < 5; i++) {\n            System.out.print(i + \" \");\n        }\n    }\n}"
+        },
+        expectedResponse: {
+            val: "0 1 2 3 4 ",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "java : Function Test",
+        reqObject: {
+            language: "java",
+            script: "public class Main {\n    public static int add(int a, int b) {\n        return a + b;\n    }\n    public static void main(String[] args) {\n        int result = add(3, 4);\n        System.out.println(result);\n    }\n}"
+        },
+        expectedResponse: {
+            val: "7\n",
+            status: 200,
+            error: 0
+        }
+    },    
+    {
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
@@ -211,6 +467,42 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: "ruby : Conditional Test",
+        reqObject: {
+            language: "ruby",
+            script: "x = 10\nif x > 5\n  puts 'x is greater than 5'\nelse\n  puts 'x is not greater than 5'\nend"
+        },
+        expectedResponse: {
+            val: "x is greater than 5\n",
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: "ruby : Loop Test",
+        reqObject: {
+            language: "ruby",
+            script: "5.times do |i|\n  print i, ' '\nend"
+        },
+        expectedResponse: {
+            val: "0 1 2 3 4 ",
+            status: 200,
+            error: 0
+        }
+    },    
+    {
+        name: "ruby : Function Test",
+        reqObject: {
+            language: "ruby",
+            script: "def add(a, b)\n  a + b\nend\nresult = add(3, 4)\nputs result"
+        },
+        expectedResponse: {
+            val: "7\n",
+            status: 200,
+            error: 0
+        }
+    },    
     {
         name: 'TLE test',
         reqObject: {
