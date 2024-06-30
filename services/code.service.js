@@ -5,7 +5,7 @@ const os = require('os')
 const fs = require('fs')
 const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
-const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const { PYTHON, PROMPTV1, PROMPTV2, RUST, GO, PHP } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
 const openai = new OpenAI()
@@ -26,69 +26,63 @@ const parser = require('sqlite-parser')
 const crypto = require('crypto')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
-    let initialMemory = 0
-    let memoryCheckInterval
-    let childProcess
-    let isChildKilled = false
+    let initialMemory = 0;
+    let memoryCheckInterval;
+    let childProcess;
+    let isChildKilled = false;
+
     try {
         if (runMemoryCheck) {
             memoryCheckInterval = setInterval(async () => {
                 if (!initialMemory) {
-                    initialMemory = Math.round((os.freemem() / 1024 / 1024))
+                    initialMemory = Math.round((os.freemem() / 1024 / 1024));
                     logger.info({
                         initial_memory: initialMemory,
-                    })
+                    });
                 }
 
                 if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
-                    /**
-                     * detection logic of memory limit exceeded
-                     */
                     logger.info({
                         use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
                         free_mem: Math.round((os.freemem() / 1024 / 1024)),
                         total_mem: Math.round((os.totalmem() / 1024 / 1024)),
-                    })
-                    logger.warn('Memory exceeded')
+                    });
+                    logger.warn('Memory exceeded');
 
                     if (childProcess) {
-                        childProcess.kill('SIGKILL')
-                        isChildKilled = true
+                        childProcess.kill('SIGKILL');
+                        isChildKilled = true;
                     } else {
-                        logger.warn('Child process is undefined and response is on way, trying to send another response')
-                        _respondWithMemoryExceeded(res)
+                        logger.warn('Child process is undefined and response is on way, trying to send another response');
+                        _respondWithMemoryExceeded(res);
                     }
                 }
-            }, 50)
+            }, 50);
         }
 
-        const execPromise = exec(cmd)
-        childProcess = execPromise.child
+        const execPromise = exec(cmd);
+        childProcess = execPromise.child;
 
-        const result = await execPromise
+        const result = await execPromise;
 
         if (memoryCheckInterval) {
-            clearInterval(memoryCheckInterval); childProcess = undefined
+            clearInterval(memoryCheckInterval);
+            childProcess = undefined;
         }
 
-        return { result }
+        return { result };
     } catch (e) {
         if (memoryCheckInterval) {
-            clearInterval(memoryCheckInterval); childProcess = undefined
+            clearInterval(memoryCheckInterval);
+            childProcess = undefined;
         }
 
         if (isChildKilled) {
-            /**
-             * Logic for doing proper garbage collection once child process is killed
-             * 2 sec delay is added just to give enough time for GC to happen
-             */
-            gc()
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            // need some way to know from the error message that memory is the issue
-            e.message = e.message + ' Process killed due to Memory Limit Exceeded'
+            gc();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            e.message = e.message + ' Process killed due to Memory Limit Exceeded';
         }
-        // languages like java, c and c++ sometimes throw an error and write it to stdout
-        return { error: e.message, stdout: e.stdout, stderr: e.stderr }
+        return { error: e.message, stdout: e.stdout, stderr: e.stderr };
     }
 }
 
@@ -109,7 +103,6 @@ const _respondWithMemoryExceeded = (res) => {
 
 const _prepareErrorMessage = (outputLog, language, command) => {
     let errorMsg = outputLog?.error ?? ''
-    // strip the command info
     if (errorMsg.startsWith('Command failed:')) {
         errorMsg = errorMsg.replace('Command failed: ' + command, '')
     }
@@ -192,71 +185,75 @@ const _executePrompt = async (
 }
 
 const _executeCode = async (req, res, response) => {
-    let args = null
-    let code = null
-    let hasInputFiles = false
-    let language = null
-    let stdin = null
+    console.log("Executing code:", req.language, req.script);
+    let args = null;
+    let code = null;
+    let hasInputFiles = false;
+    let language = null;
+    let stdin = null;
 
     try {
-        // Parse Input
-        // eslint-disable-next-line no-unused-vars
-        args = req.args
-        // eslint-disable-next-line no-unused-vars
-        hasInputFiles = req.hasInputFiles
+        args = req.args;
+        hasInputFiles = req.hasInputFiles;
 
-        code = req.script
-        language = req.language
-        stdin = req.stdin
-        const langConfig = LANGUAGES_CONFIG[language]
-        // Remove all files from tmp folder
-        await _runScript('rm -rf /tmp/*', res)
+        code = req.script;
+        language = req.language;
+        stdin = req.stdin;
+        const langConfig = LANGUAGES_CONFIG[language];
+        console.log("Language config:", langConfig);
 
-        // Write file in tmp folder based on language
-        await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
+        await _runScript('rm -rf /tmp/*', res);
 
-        const compileCommand = `cd /tmp/ && ${langConfig.compile}`
-        // Run compile command
-        const compileLog = await _runScript(compileCommand, res, true)
-        response.compileMessage =
-            compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+        await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code);
+        console.log("File written:", `/tmp/${langConfig.filename}`);
 
-        // Check if there is no compilation error
+        if (langConfig.compile) {
+            const compileCommand = `cd /tmp/ && ${langConfig.compile}`;
+            console.log("Compile command:", compileCommand);
+            const compileLog = await _runScript(compileCommand, res, true);
+            response.compileMessage =
+                compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : '';
+            console.log("Compile message:", response.compileMessage);
+        } else {
+            console.log("No compile step for this language");
+        }
+
         if (response.compileMessage === '') {
-            let command
+            let command;
             if (language === 'java') {
-                // Remove ulimit as a temp fix
-                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`;
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`;
             }
+            console.log("Run command:", command);
 
-            // Check if there is any input that is to be provided to code execution
             if (stdin) {
-                // Write input in a file in tmp folder
-                await fs.promises.writeFile('/tmp/input.txt', stdin)
-                // Update the execution command
-                command += ' < input.txt'
+                await fs.promises.writeFile('/tmp/input.txt', stdin);
+                command += ' < input.txt';
             }
 
-            const outputLog = await _runScript(command, res, true)
+            const outputLog = await _runScript(command, res, true);
+            console.log("Output log:", outputLog);
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
-                    : outputLog.result.stdout
+                    : outputLog.result.stdout;
+            console.log("Execution output:", response.output);
             if (outputLog.error) {
-                response.error = 1
+                response.error = 1;
             }
         } else {
-            response.error = 1
+            response.error = 1;
         }
     } catch (e) {
-        logger.error(e)
-        throw new Error('Unable to execute code.')
+        console.error("Error executing code:", e);
+        throw new Error('Unable to execute code.');
     }
+
+    console.log("Final response:", response);
+    return response;
 }
 
-// This function expects an array of size greater than 0
 const _calculateScoreConfidence = (evaluations) => {
     const scoreDetails = new Map()
 
@@ -311,7 +308,6 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
         let scoreConfidence = _calculateScoreConfidence(allValidResponses)
 
-        // If there's variation in the scores, increase the number of requests
         if (scoreConfidence.frequency !== 3) {
             const { allValidResponses: additionalValidResponses, errorResponsesCount: additionalErrorCount } = await _executePrompt(
                 7 + errorResponsesCount,
@@ -363,7 +359,6 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
             return
         }
 
-        // Keep requesting until a high confidence score is determined, respecting the request limit
         while (totalRequests < 20) {
             const {
                 allValidResponses: additionalValidResponses,
@@ -395,7 +390,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -834,9 +829,9 @@ const _executeMultiFile = async (req, res, response) => {
 
     try {
         let jasmineResults
-        if(req?.non_editable_files) {
+        if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
         if (req.type === FRONTEND_STATIC_JASMINE) {
             const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)

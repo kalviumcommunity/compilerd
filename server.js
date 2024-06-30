@@ -45,7 +45,7 @@ app.use(cors())
 app.use('/api/', baseRouter)
 
 app.get('/', (req, res) => {
-    return res.send('Compiler is up and working')
+    return res.send('Compiler is up and worki.... docker check')
 })
 
 app.listen(PORT, () => {
