@@ -15,6 +15,16 @@ RUN set -ex && \
 
 RUN ln -sf python3 /usr/bin/python
 
+RUN set -ex && \
+    echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk add --no-cache mono@testing
+
+RUN set -ex && \
+    apk add --no-cache openjdk8
+
+RUN set -ex && \
+    apk add --no-cache busybox wget
+
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
