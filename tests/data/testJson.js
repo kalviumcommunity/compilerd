@@ -513,41 +513,6 @@ echo $input;
             error: 0,
         },
     },
-    {
-        name: 'fortran : hello world',
-        reqObject: {
-            language: 'fortran',
-            script:
-                'program HelloWorld\n' +
-                '    print *, "hello world"\n' +
-                'end program HelloWorld\n',
-        },
-        expectedResponse: {
-            val: 'hello world\n',
-            status: 200,
-            error: 0,
-        },
-    },
-    {
-        name: 'fortran : print stdin',
-        reqObject: {
-            language: 'fortran',
-            script:
-                'program PrintStdin\n' +
-                '    character(len=100) :: line\n' +
-                '    read *, line\n' +
-                '    print *, trim(line)\n' +
-                'end program PrintStdin\n',
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1 2 3\n',
-            status: 200,
-            error: 0,
-        },
-    }
-
-
 ];
 
 module.exports = { testCases }

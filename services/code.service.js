@@ -42,6 +42,9 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
                 }
 
                 if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
+                    /**
+                         * detection logic of memory limit exceeded
+                    */
                     logger.info({
                         use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
                         free_mem: Math.round((os.freemem() / 1024 / 1024)),
@@ -75,13 +78,18 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
         if (memoryCheckInterval) {
             clearInterval(memoryCheckInterval);
             childProcess = undefined;
+            /**
+                 * Logic for doing proper garbage collection once child process is killed
+                 * 2 sec delay is added just to give enough time for GC to happen
+            */
         }
-
         if (isChildKilled) {
             gc();
             await new Promise(resolve => setTimeout(resolve, 2000));
+            // need some way to know from the error message that memory is the issue
             e.message = e.message + ' Process killed due to Memory Limit Exceeded';
         }
+        // languages like java, c and c++ sometimes throw an error and write it to stdout
         return { error: e.message, stdout: e.stdout, stderr: e.stderr };
     }
 }
@@ -102,6 +110,7 @@ const _respondWithMemoryExceeded = (res) => {
 }
 
 const _prepareErrorMessage = (outputLog, language, command) => {
+    // strip the command info
     let errorMsg = outputLog?.error ?? ''
     if (errorMsg.startsWith('Command failed:')) {
         errorMsg = errorMsg.replace('Command failed: ' + command, '')

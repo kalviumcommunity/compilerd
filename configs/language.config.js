@@ -1,4 +1,4 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, RUST, GO, PHP, CSHARP, SWIFT, KOTLIN, FORTRAN } = require('../enums/supportedLanguages');
+const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, GO, PHP, CSHARP, PERL } = require('../enums/supportedLanguages');
 const ONE_MB = 1024; // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512;
 
@@ -51,13 +51,6 @@ const LANGUAGES_CONFIG = {
     [PROMPTV2]: {
         model: 'gpt-3.5-turbo-1106',
     },
-    [RUST]: {
-        compile: 'rustc solution.rs',
-        run: './solution',
-        timeout: 10,
-        filename: 'solution.rs',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
     [GO]: {
         compile: 'go build -o solution solution.go',
         run: './solution',
@@ -79,18 +72,11 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.cs',
         memory: ALLOWED_RAM * ONE_MB,
     },
-    [SWIFT]: {
-        compile: 'swiftc -o solution solution.swift',
-        run: './solution',
+    [PERL]: {
+        compile: null,
+        run: 'perl solution.pl',
         timeout: 10,
-        filename: 'solution.swift',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
-    [KOTLIN]: {
-        compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
-        run: 'java -jar solution.jar',
-        timeout: 10,
-        filename: 'solution.kt',
+        filename: 'solution.pl',
         memory: ALLOWED_RAM * ONE_MB,
     },
 
