@@ -148,7 +148,7 @@ const CodeEditor = () => {
                 onChange={handleEditorChange}
                 options={{
                     minimap: { enabled: false },
-                    fontSize: 16,
+                    fontSize: 18,
                     automaticLayout: true,
                     snippetSuggestions: 'none',
                     scrollBeyondLastLine: false,
