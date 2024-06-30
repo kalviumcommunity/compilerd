@@ -10,6 +10,8 @@ const {
     PROMPTV2,
     GO, // Added Go (Task)
     PHP, // Added Php (Task)
+    SWIFT, // Added Swift (Task)
+    SQLITE3, // Added SQLite3 (Task)
 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
@@ -77,6 +79,22 @@ const LANGUAGES_CONFIG = {
         run: 'php solution.php',
         timeout: 10,
         filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    // Added Swift (Task)
+    [SWIFT]: {
+        compile: 'swiftc solution.swift',
+        run: './solution',
+        timeout: 10,
+        filename: 'solution.swift',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    // Added SQLite3 (Task)
+    [SQLITE3]: {
+        compile: 'sqlite3 solution.db',
+        run: 'sqlite3 solution.db',
+        timeout: 10,
+        filename: 'solution.db',
         memory: ALLOWED_RAM * ONE_MB,
     },
 }

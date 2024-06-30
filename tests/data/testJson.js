@@ -359,6 +359,47 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'swift : hello world',
+        reqObject: {
+            language: 'swift',
+            script: 'import Foundation\n' + 'print("hello world")\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'swift : print stdin',
+        reqObject: {
+            language: 'swift',
+            script:
+                'import Foundation\n' +
+                'if let input = readLine() {\n' +
+                '    print(input)\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'sqlite3 : create table',
+        reqObject: {
+            language: 'sqlite3',
+            script: '.open test.db\nCREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)',
+        },
+        expectedResponse: {
+            val: '',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
