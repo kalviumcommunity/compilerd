@@ -41,6 +41,18 @@ const testCases = [
 
     },
     {
+        name: 'javascript : hello world',
+        reqObject: {
+            language: 'javascript',
+            script: 'console.log(\'hello world\')',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
@@ -48,6 +60,56 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'javascript : print stdin',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'let userInput = prompt(); \n ' +
+                'console.log(userInput); \n' +
+                ' \n ' +
+                '}); \n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php \n ' +
+                'echo "hello world"; \n' +
+                '?> \n' +
+                ' \n ',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : print stdin',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php \n' +
+                '$user_input = trim(fgets(STDIN)); \n' +
+                'echo $user_input . PHP_EOL; \n' +
+                '?> \n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
             status: 200,
             error: 0,
         },
