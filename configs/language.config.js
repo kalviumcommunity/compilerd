@@ -45,6 +45,27 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.rb',
         memory: ALLOWED_RAM * ONE_MB,
     },
+    [CSHARP]: {
+        compile: 'csc -out:solution.exe solution.cs',
+        run: 'mono solution.exe',
+        timeout: 10,
+        filename: 'solution.cs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [KOTLIN]: {
+        compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
+        run: 'java -jar solution.jar',
+        timeout: 10,
+        filename: 'solution.kt',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [DART]: {
+        compile: 'dart compile exe solution.dart -o solution.exe',
+        run: './solution.exe',
+        timeout: 10,
+        filename: 'solution.dart',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
     [PROMPTV1]: {
         model: 'gpt-4-1106-preview',
     },
