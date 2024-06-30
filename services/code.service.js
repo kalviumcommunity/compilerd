@@ -494,6 +494,44 @@ const _executeSqlite3Query = async (req, res, response) => {
     }
 }
 
+const fixCode = async (data) => {
+    const { language, code, error } = data
+
+    const prompt = `
+        Please fix the following ${language} code that produced this error: "${error}"
+        
+        ${code}
+        
+        Provide the corrected code and an explanation of the changes made.
+    `
+
+    const response = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+            { role: 'system', content: 'You are a helpful coding assistant that fixes code and explains the changes.' },
+            { role: 'user', content: prompt },
+        ],
+        max_tokens: 1000,
+    })
+
+    const aiResponse = response.choices[0].message.content
+
+    // Parse the AI response to separate code and explanation
+    const [fixedCode, explanation] = parseAIResponse(aiResponse)
+
+    return {
+        originalCode: code,
+        fixedCode,
+        explanation,
+    }
+}
+
+function parseAIResponse (aiResponse) {
+    // This is a simple parser and might need to be adjusted based on the actual AI output format
+    const parts = aiResponse.split('Explanation:')
+    return [parts[0].trim(), parts[1] ? parts[1].trim() : 'No explanation provided.']
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -875,4 +913,4 @@ const _executeMultiFile = async (req, res, response) => {
     }
 }
 
-module.exports = { execute }
+module.exports = { execute, fixCode }

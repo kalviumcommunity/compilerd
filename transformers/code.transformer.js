@@ -13,6 +13,13 @@ const codeTransformer = {
             stdin: code.stdin,
         }
     },
+    transformFixedCode: (data) => {
+        return {
+            originalCode: data.originalCode,
+            fixedCode: data.fixedCode,
+            explanation: data.explanation,
+        }
+    },
 }
 
 module.exports = { codeTransformer }

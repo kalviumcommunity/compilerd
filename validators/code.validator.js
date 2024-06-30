@@ -52,4 +52,14 @@ const isValidForExecute = async (body) => {
     return schema.validateAsync(body)
 }
 
-module.exports = { isValidForExecute }
+const isValidForFixCode = (data) => {
+    const schema = Joi.object({
+        language: Joi.string().required(),
+        code: Joi.string().required(),
+        error: Joi.string().required(),
+    })
+
+    return schema.validateAsync(data)
+}
+
+module.exports = { isValidForExecute, isValidForFixCode }

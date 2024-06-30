@@ -1,7 +1,7 @@
 const { respond, respondWithException } = require('../loader').helpers
 const { codeTransformer } = require('../transformers/code.transformer')
 const codeService = require('../services/code.service')
-const { isValidForExecute } = require('../validators/code.validator')
+const { isValidForExecute, isValidForFixCode } = require('../validators/code.validator')
 
 const execute = async (req, res) => {
     try {
@@ -13,6 +13,17 @@ const execute = async (req, res) => {
     }
 }
 
+const fixCode = async (req, res) => {
+    try {
+        const validatedData = await isValidForFixCode(req.body)
+        const responseBody = await codeService.fixCode(validatedData)
+        return respond(res, 200, codeTransformer.transformFixedCode(responseBody))
+    } catch (error) {
+        respondWithException(res, error)
+    }
+}
+
 module.exports = {
     execute,
+    fixCode,
 }
