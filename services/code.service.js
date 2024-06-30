@@ -217,7 +217,7 @@ const _executeCode = async (req, res, response) => {
 
         const compileCommand = `cd /tmp/ && ${langConfig.compile}`
         // Run compile command
-        const compileLog = await _runScript(compileCommand, res, true)
+        const compileLog = await _runScript(compileCommand, res, true);
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
@@ -238,8 +238,7 @@ const _executeCode = async (req, res, response) => {
                 // Update the execution command
                 command += ' < input.txt'
             }
-
-            const outputLog = await _runScript(command, res, true)
+            const outputLog = await _runScript(command, res, true);
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
