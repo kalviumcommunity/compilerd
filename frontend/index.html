@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Runner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <h1>Code Runner</h1>
+        <form id="codeForm">
+            <label for="language">Choose a language:</label>
+            <select id="language" name="language" required>
+                <option value="rust">Rust</option>
+                <option value="swift">Swift</option>
+                <option value="typescript">TypeScript</option>
+            </select>
+            <label for="code">Enter your code:</label>
+            <textarea id="code" name="code" rows="10" required></textarea>
+            <button type="submit">Run Code</button>
+        </form>
+        <div class="output">
+            <h2>Output:</h2>
+            <pre id="output"></pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
