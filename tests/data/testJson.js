@@ -298,6 +298,118 @@ const testCases = [
             error: 0,
         },
     },
-]
+
+
+{
+    name: 'rust : hello world',
+    reqObject: {
+        language: 'rust',
+        script: 'fn main() { println!("hello world"); }',
+    },
+    expectedResponse: {
+        val: 'hello world\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'rust : print stdin',
+    reqObject: {
+        language: 'rust',
+        script: `
+use std::io::{self, BufRead};
+
+fn main() {
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        println!("{}", line.unwrap());
+    }
+}`,
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3\n',
+        status: 200,
+        error: 0,
+    },
+},
+
+{
+    name: 'go : hello world',
+    reqObject: {
+        language: 'go',
+        script: `
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("hello world")
+}`,
+    },
+    expectedResponse: {
+        val: 'hello world\n',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'go : print stdin',
+    reqObject: {
+        language: 'go',
+        script: `
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    scanner := bufio.NewScanner(os.Stdin)
+    for scanner.Scan() {
+        fmt.Println(scanner.Text())
+    }
+}`,
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3\n',
+        status: 200,
+        error: 0,
+    },
+},
+
+{
+    name: 'php : hello world',
+    reqObject: {
+        language: 'php',
+        script: '<?php echo "hello world"; ?>',
+    },
+    expectedResponse: {
+        val: 'hello world',
+        status: 200,
+        error: 0,
+    },
+},
+{
+    name: 'php : print stdin',
+    reqObject: {
+        language: 'php',
+        script: `
+<?php
+$input = trim(fgets(STDIN));
+echo $input;
+?>`,
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3',
+        status: 200,
+        error: 0,
+    },
+},
+];
 
 module.exports = { testCases }

@@ -4,6 +4,10 @@ ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
     apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
 
+RUN apk add --no-cache rust cargo
+RUN apk add --no-cache go
+RUN apk add --no-cache php php-cli
+
 RUN set -ex && \
     apk add --no-cache chromium lsof
 
@@ -21,7 +25,6 @@ ADD start.sh /usr/bin/
 RUN npm --prefix /usr/bin/ install
 EXPOSE 8080
 
-# add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
-#   USER runner
 CMD sh /usr/bin/start.sh
+
