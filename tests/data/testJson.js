@@ -44,7 +44,7 @@ const testCases = [
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
-            script: 'console.log(\'hello world\')',
+            script: 'console.log(\'hello world !\')',
         },
         expectedResponse: {
             val: 'hello world\n',
