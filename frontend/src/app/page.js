@@ -42,15 +42,21 @@ export default function Home() {
 
   useEffect(() => {
     if (!language) return;
+    const lang = localStorage.getItem("compilerd");
     const selected = languagesData.filter(e => e.value === language);
     console.log(selected);
     setLanguageInfo(selected[0]);
-    setCode(selected[0]?.comment);
+    if (!lang) setCode(selected[0]?.comment);
   }, [language])
 
   const compileProgram = async () => {
+    if (!code) {
+      message.error("Program cannot be empty");
+      return;
+    }
     setLoading(true);
     setLoadingForStart(true);
+    saveCode(false);
     const data = {
       language: language,
       script: code,
@@ -60,7 +66,7 @@ export default function Home() {
     if (response.status_code === 200) {
       message.success("Compiled successfully");
     } else {
-      message.error(response.message);
+      message.error("Error compiling program");
       setOutput(response.message);
     }
     setLoading(false);
@@ -76,9 +82,10 @@ export default function Home() {
     element.click();
   }
 
-  const saveCode = () => {
+  const saveCode = (notify) => {
     localStorage.setItem('compilerd', language);
     localStorage.setItem(language, code);
+    if (notify === false) return;
     message.success("Saved in your browser");
   }
 
@@ -90,11 +97,11 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-[calc(100%-100px)]">
-      <div className="flex flex-col gap-8 md:gap-0 items-start w-1/2 px-1 h-full">
+    <div className="flex flex-col md:flex-row w-full h-[calc(100%-100px)] pr-10 md:pr-0 mb-4">
+      <div className="flex flex-col gap-8 md:gap-0 items-start md:w-1/2 px-3 h-full md:px-2">
         <div className="md:w-full pt-6 md:h-[15vh] flex flex-col gap-6 md:gap-0 md:flex-row justify-between px-5 md:px-5">
           <Select value={language} onValueChange={(e) => setLanguage(e)}>
-            <SelectTrigger className="w-[180px]" title="Language">
+            <SelectTrigger className="w-[200px] md:w-[180px]" title="Language">
               <SelectValue placeholder="Select a language" />
             </SelectTrigger>
             <SelectContent>
@@ -146,7 +153,7 @@ export default function Home() {
           </div>
         }
       </div>
-      <div className="w-1/2 h-full flex flex-col justify-between pt-4 gap-2 px-2">
+      <div className="md:w-1/2 h-full flex flex-col justify-between pt-4 gap-2 px-2">
         <div className="flex flex-col w-full h-1/2 border-2 border-bg-background">
           <p className="py-1 bg-gray-200 dark:bg-gray-700">Input</p>
           <Editor
