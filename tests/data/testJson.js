@@ -298,6 +298,136 @@ const testCases = [
             error: 0,
         },
     },
+    // GO test cases
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1\n2\n3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    // TypeScript test cases
+    {
+        name: 'TypeScript: Hello World',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log("Hello, World!");',
+        },
+        expectedResponse: {
+            val: 'Hello, World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'TypeScript: Simple Calculation',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log(5 + 3);',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'TypeScript: Asynchronous Operation',
+        reqObject: {
+            language: 'typescript',
+            script: `
+                async function fetchData() {
+                    return new Promise(resolve => setTimeout(() => resolve("Data fetched"), 1000));
+                }
+
+                fetchData().then(data => console.log(data));
+            `,
+        },
+        expectedResponse: {
+            val: 'Data fetched\n',
+            status: 200,
+            error: 0,
+        },
+    }, 
+    {
+        name: 'TypeScript: Print stdin',
+        reqObject: {
+            language: 'typescript',
+            script: `
+                process.stdin.setEncoding('utf8');
+                process.stdin.on('data', (input) => {
+                    console.log(input.trim());
+                });
+            `,
+            stdin: 'TypeScript is awesome!',
+        },
+        expectedResponse: {
+            val: 'TypeScript is awesome!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    // PHP test cases
+    {
+        name: 'PHP: Hello World',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "Hello, world!"; ?>',
+        },
+        expectedResponse: {
+            val: 'Hello, world!',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : division by zero error',
+        reqObject: {
+            language: 'php',
+            script: '<?php $a = 5; $b = 0; echo $a / $b; ?>',
+        },
+        expectedResponse: {
+            val: '',
+            status: 200,
+            error: 1,
+        },
+    },  
+        
 ]
 
 module.exports = { testCases }
