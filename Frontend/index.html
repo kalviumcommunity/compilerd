@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Compiler</title>
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Online Compiler</h1>
+        <form id="compiler-form">
+            <label for="language">Language:</label>
+            <select id="language" name="language">
+                <!-- Options will be dynamically added here -->
+            </select>
+            
+            <div class="editor-output-container">
+                <div class="code-editor">
+                    <label for="script" class="section-heading">Script:</label>
+                    <textarea id="script" name="script" rows="10" placeholder="Write your code here..."></textarea>
+                </div>
+
+                <div id="output-section">
+                    <label class="section-heading">Output:</label>
+                    <div id="output-container">
+                        <pre id="output"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Execute</button>
+        </form>
+    </div>
+    <script src="./scripts/script.js"></script>
+</body>
+</html>

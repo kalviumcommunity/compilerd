@@ -1,0 +1,106 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2e2929;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #681414;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(109, 42, 42, 0.1);
+    width: 90%;
+    max-width: 1000px; /* Increased max-width to accommodate side-by-side layout */
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #690909;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.editor-output-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.code-editor, #output-section {
+    flex: 1;
+    margin: 0 1rem; /* Added margin between code editor and output section */
+}
+
+.section-heading {
+    font-weight: bold;
+    font-size: 1.2rem; /* Set the font size to be the same for both */
+    color: #4e1313;
+    margin-bottom: 0.5rem;
+}
+
+select, textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #997d7d;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+textarea {
+    resize: vertical;
+    height: 300px; /* Increased height for better viewing */
+}
+
+button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #333b35;
+    color: #1f0202;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem; /* Added margin-top for better spacing */
+}
+
+button:hover {
+    background-color: #9ca89f;
+}
+
+#output-section {
+    display: flex;
+    flex-direction: column;
+}
+
+#output-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    height: 300px; /* Set height to match the textarea */
+    overflow-y: auto; /* Added scroll for overflow content */
+}
+
+#output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
