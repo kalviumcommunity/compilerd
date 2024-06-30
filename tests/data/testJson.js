@@ -121,6 +121,19 @@ const testCases = [
         },
     },
     {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script:
+                'echo \'hello world\';\n'
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'c : print stdin',
         reqObject: {
             language: 'c',
@@ -358,6 +371,133 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'php : calculate factorial',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                'function factorial($n) {\n' +
+                '    if ($n <= 1) {\n' +
+                '        return 1;\n' +
+                '    }\n' +
+                '    return $n * factorial($n - 1);\n' +
+                '}\n' +
+                'echo factorial(5);\n',
+        },
+        expectedResponse: {
+            val: '120',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php : calculate sum of numbers',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                '$input = trim(fgets(STDIN));\n' +
+                '$numbers = explode(" ", $input);\n' +
+                '$sum = array_sum($numbers);\n' +
+                'echo $sum;\n',
+            stdin: '1 2 3 4 5',
+        },
+        expectedResponse: {
+            val: '15',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : calculate factorial',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n' +
+                'import "fmt"\n' +
+                'func factorial(n int) int {\n' +
+                '    if n <= 1 {\n' +
+                '        return 1\n' +
+                '    }\n' +
+                '    return n * factorial(n-1)\n' +
+                '}\n' +
+                'func main() {\n' +
+                '    fmt.Println(factorial(5))\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '120',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : calculate sum of numbers',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n' +
+                'import (\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                '    "strconv"\n' +
+                ')\n' +
+                'func main() {\n' +
+                '    args := os.Args[1:]\n' +
+                '    sum := 0\n' +
+                '    for _, arg := range args {\n' +
+                '        num, _ := strconv.Atoi(arg)\n' +
+                '        sum += num\n' +
+                '    }\n' +
+                '    fmt.Println(sum)\n' +
+                '}\n',
+            stdin: '1 2 3 4 5',
+        },
+        expectedResponse: {
+            val: '15',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'dart : calculate factorial',
+        reqObject: {
+            language: 'dart',
+            script:
+                'void main() {\n' +
+                '  print(factorial(5));\n' +
+                '}\n' +
+                'int factorial(int n) {\n' +
+                '  if (n <= 1) {\n' +
+                '    return 1;\n' +
+                '  }\n' +
+                '  return n * factorial(n - 1);\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '120\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'dart : calculate sum of numbers',
+        reqObject: {
+            language: 'dart',
+            script:
+                'void main() {\n' +
+                '  List<String> args = ["1", "2", "3", "4", "5"];\n' +
+                '  int sum = args.map(int.parse).reduce((a, b) => a + b);\n' +
+                '  print(sum);\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '15\n',
+            status: 200,
+            error: 0,
+        },
+    },            
 ]
 
 module.exports = { testCases }
