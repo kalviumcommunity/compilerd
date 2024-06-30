@@ -26,6 +26,25 @@ async function executeCode(language, code) {
       throw error;
     }
   }
+
+const fixCode = async (language, code, error) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/fix-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language, code, error }),
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  };
   
-  export { executeCode };
+  export { executeCode, fixCode };
   

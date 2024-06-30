@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Editor from '@monaco-editor/react';
 import { LanguageContext } from '../context/LanguageContext';
-import { executeCode } from '../api/api';
+import { executeCode, fixCode } from '../api/api';
 import OutputComponent from './OutputComponent';
 import '../styles/Editor.css';
 
@@ -10,6 +10,8 @@ function CodeEditor() {
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [fixedCode, setFixedCode] = useState('');
+  const [explanation, setExplanation] = useState('');
 
   // Set initial code based on selected language
   useEffect(() => {
@@ -54,18 +56,23 @@ function CodeEditor() {
       if (runCode && code.trim() !== '') {
         try {
           const response = await executeCode(selectedLanguage, code);
-          console.log(response); // Log the response for debugging
+          console.log(response);
           if (response.status_code === 200) {
-            setOutput(response.output || ''); // Update output state with the response
-            setError(response.errorMessage || response.compile_message || ''); // Update error state
+            setOutput(response.output || '');
+            setError(response.errorMessage || response.compile_message || '');
+            if (response.errorMessage || response.compile_message) {
+              await handleFixCode(response.errorMessage || response.compile_message);
+            }
           } else {
-            setError(response.errorMessage || response.compile_message || 'Unknown error'); // Display error message
+            setError(response.errorMessage || response.compile_message || 'Unknown error');
+            await handleFixCode(response.errorMessage || response.compile_message || 'Unknown error');
           }
         } catch (error) {
           console.error('Error executing code:', error);
-          setError('Error executing code'); 
+          setError('Error executing code');
+          await handleFixCode('Error executing code');
         } finally {
-          resetRunCode(); 
+          resetRunCode();
         }
       }
     };
@@ -78,26 +85,64 @@ function CodeEditor() {
     setCode(value);
   };
 
+  const handleFixCode = async (errorMessage) => {
+    try {
+      const response = await fixCode(selectedLanguage, code, errorMessage);
+      setFixedCode(response.fixedCode);
+      setExplanation(response.explanation);
+    } catch (error) {
+      console.error('Error fixing code:', error);
+      setExplanation('Unable to fix the code at this time.');
+    }
+  };
+
   return (
     <div className='editor-container'>
       <div className='editor-section'>
-        <div className='editor-header'>Your Code</div>
-        <Editor
-          height="60vh"
-          theme="vs-dark"
-          language={selectedLanguage}
-          value={code}
-          onChange={handleEditorChange}
-        />
+        <div className='editor-code-container'>
+          <div className={error ? 'editor-code-error' : 'editor-code'}>
+            <div className='editor-header'>Your Code</div>
+            <Editor
+              height="60vh"
+              theme="vs-dark"
+              language={selectedLanguage}
+              value={code}
+              onChange={handleEditorChange}
+            />
+          </div>
+          {error && (
+            <div className='editor-fix'>
+              <div className='editor-header'>Fixed Code</div>
+              <Editor
+                height="60vh"
+                theme="vs-dark"
+                language={selectedLanguage}
+                value={fixedCode}
+                options={{ readOnly: true }} // Make this editor read-only
+              />
+            </div>
+          )}
+        </div>
       </div>
-      
-      <div className='output-section'>
-        <div className='output-header'>Output</div>
-        <OutputComponent output={output} error={error} />
+
+      <div className='output-section-container'>
+        <div className={error ? 'output-section-wrapper' : 'output-section'}>
+          <div className='output-box'>
+            <div className='output-header'>Output</div>
+            <OutputComponent output={output} error={error} />
+          </div>
+          {error && (
+            <div className='explanation-box'>
+              <div className='output-header'>Explanation</div>
+              <div className='explanation-content'>
+                  {explanation}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-
 }
 
 export default CodeEditor;
