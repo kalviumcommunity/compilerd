@@ -2,7 +2,9 @@ FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables go rust && \
+    npm install -g typescript && \
+    npm install -g ts-node
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
@@ -25,3 +27,33 @@ EXPOSE 8080
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
 #   USER runner
 CMD sh /usr/bin/start.sh
+
+# # Install .NET SDK
+# RUN wget -q https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && \
+#     chmod +x dotnet-install.sh && \
+#     ./dotnet-install.sh -c Current && \
+#     rm -f dotnet-install.sh
+
+# # Additional setup (assuming this is specific to your application)
+# RUN set -ex && \
+#     apk add --no-cache chromium lsof && \
+#     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
+#     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto1 && \
+#     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
+#     rm -f /usr/bin/x86_64-alpine-linux-musl-gcj && \
+#     ln -sf python3 /usr/bin/python
+
+# # Copy your application code
+# ADD . /usr/bin/
+# ADD start.sh /usr/bin/
+
+# # Install Node.js dependencies
+# RUN npm --prefix /usr/bin/ install
+
+# EXPOSE 8080
+
+# # Add a dummy user for running the server
+# RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
+
+# # Run the start script as the dummy user
+# CMD sh /usr/bin/start.sh
