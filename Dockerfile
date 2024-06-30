@@ -5,7 +5,8 @@ RUN set -ex && \
     apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
 
 
-# Install Go, PHP, fortan
+# Install Go, PHP, fortan, rust
+RUN apk add --no-cache rust cargo
 RUN apk add --no-cache go
 RUN apk add --no-cache php php-cli
 RUN apk add --no-cache gfortran
