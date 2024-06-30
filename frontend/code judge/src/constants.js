@@ -8,7 +8,6 @@ export const LANGUAGE_VERSIONS = {
   go: "1.18",
   rust: "1.53.0",
   typescript: "5.0.3",
-  promptv2: "gpt-3.5",
 };
 
 export const CODE_SNIPPETS = {

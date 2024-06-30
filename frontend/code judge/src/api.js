@@ -8,10 +8,6 @@ const executeCode = async (language, sourceCode) => {
   }
 
   try {
-    if (language === "promptv2") {
-      language: language;
-      prompt: sourceCode;
-    }
     const payload = { language: language, script: sourceCode };
 
     const { data: resultData } = await axios.post(API_URL, payload);
