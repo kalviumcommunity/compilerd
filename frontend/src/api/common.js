@@ -4,7 +4,7 @@ const Common = {
     execute: async (data) => {
         try {
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}execute`, data
+                `${process.env.NEXT_PUBLIC_API_URL}/execute`, data
             );
             return response.data;
         } catch (error) {
