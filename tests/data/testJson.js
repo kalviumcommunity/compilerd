@@ -298,6 +298,148 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'python : division by zero',
+        reqObject: {
+          language: 'python',
+          script: 'print(1 / 0)',
+        },
+        expectedResponse: {
+          val: 'ZeroDivisionError: division by zero',
+          status: 200,
+          error: 1,
+        },
+    },
+    {
+        name: 'cpp : empty script',
+        reqObject: {
+          language: 'cpp',
+          script: '',
+        },
+        expectedResponse: {
+          val: '',
+          status: 200,
+          error: 0,
+        },
+      },
+      {
+        name: 'python : invalid syntax',
+        reqObject: {
+          language: 'python',
+          script:
+            'for i in range(10)\n' +
+            '    print(i)\n',
+        },
+        expectedResponse: {
+          val: 'SyntaxError: invalid syntax',
+          status: 200,
+          error: 1,
+        },
+      },
+      {
+        name: 'typescript: hello world',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'console.log("hello world");',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'typescript: print stdin',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'const readline = require("readline");\n' +
+                'const rl = readline.createInterface({\n' +
+                '  input: process.stdin,\n' +
+                '  output: process.stdout\n' +
+                '});\n' +
+                'rl.on("line", function(line) {\n' +
+                '  console.log(line);\n' +
+                '});',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust: hello world',
+        reqObject: {
+            language: 'rust',
+            script:
+                'fn main() {\n' +
+                '    println!("hello world");\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust: print stdin',
+        reqObject: {
+            language: 'rust',
+            script:
+                'use std::io::{self, BufRead};\n' +
+                'fn main() {\n' +
+                '    let stdin = io::stdin();\n' +
+                '    for line in stdin.lock().lines() {\n' +
+                '        println!("{}", line.unwrap());\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php: hello world',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php echo "hello world"; ?>',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'php: print stdin',
+        reqObject: {
+            language: 'php',
+            script:
+                '<?php\n' +
+                '$stdin = fopen("php://stdin", "r");\n' +
+                'while (!feof($stdin)) {\n' +
+                '    $line = fgets($stdin);\n' +
+                '    echo $line;\n' +
+                '}\n' +
+                'fclose($stdin);\n',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+        
+    
 ]
 
 module.exports = { testCases }
