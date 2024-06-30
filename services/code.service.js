@@ -229,6 +229,9 @@ const _executeCode = async (req, res, response) => {
     // Remove all files from tmp folder
     await _runScript("rm -rf /tmp/*", res);
 
+    console.log("first")    
+    console.log(langConfig);
+
     if (!langConfig) {
       throw new Error(`Unsupported language: ${language}`);
     }
@@ -253,7 +256,7 @@ const _executeCode = async (req, res, response) => {
     // Check if there is no compilation error
     if (response.compileMessage === "") {
       let command;
-      if (language === "java" || language === "bash") {
+      if (language === "java" || language === "bash" || language === "rust" || language === "php") {
         // Remove ulimit as a temp fix
         command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`;
       } else {

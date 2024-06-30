@@ -2,8 +2,10 @@ FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
 
+# Install required dependencies and tools
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables bash lsof chromium
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables bash lsof chromium rust cargo libc6-compat curl php php-cli php-json php-phar php-openssl php-curl php-zip php-dom
+
 
 RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
