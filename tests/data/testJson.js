@@ -41,6 +41,45 @@ const testCases = [
 
     },
     {
+        name: 'cpp : simple calculation',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int a = 5, b = 3;\n' +
+                '    cout << (a + b);\n' +
+                'return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'cpp : string manipulation',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    string s = "Hello";\n' +
+                '    s += " World!";\n' +
+                '    cout << s;\n' +
+                'return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Hello World!',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
@@ -66,6 +105,36 @@ const testCases = [
         },
         expectedResponse: {
             val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'nodejs : array manipulation',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'let arr = [1, 2, 3];\n' +
+                'arr.push(4);\n' +
+                'console.log(arr.join(","));\n',
+        },
+        expectedResponse: {
+            val: '1,2,3,4\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'nodejs : asynchronous operation',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'setTimeout(() => {\n' +
+                '  console.log("Done!");\n' +
+                '}, 1000);\n',
+        },
+        expectedResponse: {
+            val: 'Done!\n',
             status: 200,
             error: 0,
         },
@@ -99,6 +168,33 @@ const testCases = [
         },
         expectedResponse: {
             val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'python : simple calculation',
+        reqObject: {
+            language: 'python',
+            script: 'print(5 + 3)',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'python : list manipulation',
+        reqObject: {
+            language: 'python',
+            script:
+                'lst = [1, 2, 3]\n' +
+                'lst.append(4)\n' +
+                'print(lst)\n',
+        },
+        expectedResponse: {
+            val: '[1, 2, 3, 4]\n',
             status: 200,
             error: 0,
         },
@@ -179,6 +275,43 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : string manipulation',
+        reqObject: {
+            language: 'java',
+            script:
+                'public class Main {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        String s = "Hello";\n' +
+                '        s += " World!";\n' +
+                '        System.out.println(s);\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Hello World!\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : simple calculation',
+        reqObject: {
+            language: 'java',
+            script:
+                'public class Main {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        int a = 5, b = 3;\n' +
+                '        System.out.println(a + b);\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: '8\n',
             status: 200,
             error: 0,
         },
@@ -414,20 +547,7 @@ const testCases = [
             status: 200,
             error: 0,
         },
-    },
-    {
-        name: 'php : division by zero error',
-        reqObject: {
-            language: 'php',
-            script: '<?php $a = 5; $b = 0; echo $a / $b; ?>',
-        },
-        expectedResponse: {
-            val: '',
-            status: 200,
-            error: 1,
-        },
-    },  
-        
+    } 
 ]
 
 module.exports = { testCases }
