@@ -1,5 +1,5 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
-const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
+const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, GO, PHP, RUST, PERL } = require('../enums/supportedLanguages')
+const ONE_MB = 1024
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
@@ -27,7 +27,7 @@ const LANGUAGES_CONFIG = {
     [JAVA]: {
         compile: 'javac Solution.java',
         run: 'java Solution',
-        timeout: 4,
+        timeout: 10,
         filename: 'Solution.java',
         memory: ALLOWED_RAM * ONE_MB,
     },
@@ -36,13 +36,41 @@ const LANGUAGES_CONFIG = {
         run: 'node solution.js',
         timeout: 10,
         filename: 'solution.js',
-        memory: 786432, // Node.js v20 requires more initial memory, so initialize it to around 780MB (1.5 * 512MB). This value is higher than the previous 512MB but below 1GB to ensure ulimit catches excessive memory use without the GCR container being killed.
+        memory: 786432,
     },
     [RUBY]: {
         compile: 'ruby -c solution.rb',
         run: 'ruby solution.rb',
         timeout: 10,
         filename: 'solution.rb',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [GO]:{
+        compile: 'go build solution.go',
+        run: './solution',
+        timeout: 2,
+        filename: 'solution.go',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PHP]:{
+        compile: 'php -l solution.php',
+        run: 'php solution.php',
+        timeout: 10,
+        filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [RUST]:{
+        compile: 'rustc solution.rs',
+        run: './solution',
+        timeout: 2,
+        filename: 'solution.rs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PERL]:{
+        compile: 'perl solution.pl',
+        run: 'perl solution.pl',
+        timeout: 20,
+        filename: 'solution.pl',
         memory: ALLOWED_RAM * ONE_MB,
     },
     [PROMPTV1]: {
