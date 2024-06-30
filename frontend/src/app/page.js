@@ -1,13 +1,16 @@
+"use client";
 import { useState, useCallback } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 
-import { langMap } from "./utils/langMap";
-import { executeCode } from "./utils/api";
-import CodeNav from "./components/CodeNav";
+import { Button } from "@/components/ui/button";
+import CodeNav from "@/components/CodeNav";
 
-function App() {
+import { langMap } from "@/utils/langMap";
+import { executeCode } from "@/utils/api";
+
+export default function Home() {
   const [value, setValue] = useState({
-    language: "JAVASCRIPT",
+    language: "Javascript",
     script: "console.log('Hello, World!');",
     result: {
       output: "",
@@ -59,7 +62,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-5">
+    <main className="min-h-screen p-4 bg-black text-white flex flex-col gap-4">
       <div className="flex justify-center items-center flex-col pt-5 pb-2 gap-2">
         <h1 className="text-5xl font-extrabold leading-none">CompilerD</h1>
         <p className="text-lg font-normal text-gray-400">Your Online Code Judge</p>
@@ -67,7 +70,7 @@ function App() {
       <CodeNav value={value} handleOnChange={onCodeChange} handleOnRun={onCodeRun} theme={"dark"} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-1 px-4">
         <div>
-          <div className="bg-zinc-900">
+          <div className="w-full text-center whitespace-nowrap rounded-md rounded-b-none text-sm font-medium border p-2 border-zinc-800 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-50">
             Editor
           </div>
           <CodeMirror
@@ -80,15 +83,16 @@ function App() {
           />
         </div>
         <div>
+          <div className="w-full text-center whitespace-nowrap rounded-md rounded-b-none text-sm font-medium border p-2 border-zinc-800 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-50">
+            Output
+          </div>
           <CodeMirror value={value.showValue} className="w-full" height="500px" theme={"dark"} basicSetup={false} />
-          <div className="flex items-end justify-end md:justify-start flex-wrap gap-4 font-thin opacity-80 ml-1">
+          <div className="flex items-end justify-end flex-wrap gap-4 font-thin opacity-80 mt-1">
             <span>Time Taken: {value.result.execute_time}ms</span>
             <span>Memory: {value.result.memory}KB</span>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
-
-export default App;

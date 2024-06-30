@@ -1,14 +1,14 @@
 import { langs } from "@uiw/codemirror-extensions-langs";
 
 const langMap = {
-  JAVASCRIPT: langs.javascript(),
-  PYTHON: langs.python(),
-  JAVA: langs.java(),
+  Javascript: langs.javascript(),
+  Python: langs.python(),
+  Java: langs.java(),
   C: langs.c(),
   CPP: langs.cpp(),
-  GO: langs.go(),
-  RUBY: langs.ruby(),
-  TYPESCRIPT: langs.typescript(),
+  GoLang: langs.go(),
+  Ruby: langs.ruby(),
+  TypeScript: langs.typescript(),
   PHP: langs.php(),
 };
 

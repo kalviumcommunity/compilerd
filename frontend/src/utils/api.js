@@ -8,8 +8,10 @@ const executeCode = async (data) => {
     data.language = "nodejs";
   }
 
+  data.language = data.language.toUpperCase();
+
   try {
-    const { data: resData } = await axios.post(API_URL, { script: data.script, language: data.language, constraints: data.constraints});
+    const { data: resData } = await axios.post(API_URL, { script: data.script, language: data.language, constraints: data.constraints });
     const result = checkConstraints(resData, data.constraints);
 
     return result;
