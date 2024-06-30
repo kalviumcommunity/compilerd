@@ -17,12 +17,12 @@ export default function ThemeSwitcher() {
     return (
         <>
             {theme === "light" ? (
-                <Button value="dark" onClick={() => setTheme("dark")}>
+                <Button variant="ghost" className="" onClick={() => setTheme("dark")}>
                     <MoonIcon className="size-[1rem]" />
                 </Button>
             ) : (
-                <Button value="light" onClick={() => setTheme("light")}>
-                    <SunIcon className="size-[1rem]" />
+                <Button variant="ghost" className="hover:bg-slate-100 dark:hover:bg-slate-900" onClick={() => setTheme("light")}>
+                    <SunIcon className="size-[1rem] text-black dark:text-white" />
                 </Button>
             )}
         </>
