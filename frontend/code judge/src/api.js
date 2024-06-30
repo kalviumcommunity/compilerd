@@ -6,23 +6,28 @@ const executeCode = async (language, sourceCode) => {
   if (language === "javascript") {
     language = "nodejs";
   }
+
   try {
+    if (language === "promptv2") {
+      language: language;
+      prompt: sourceCode;
+    }
     const payload = { language: language, script: sourceCode };
 
-    const { data: resData } = await axios.post(API_URL, payload);
-    console.log("Response from API:", resData);
+    const { data: resultData } = await axios.post(API_URL, payload);
+    console.log("Response from API:", resultData);
 
-    if (resData.error > 0) {
-      const compile_message = resData.compile_message;
-      const output = resData.output;
+    if (resultData.error > 0) {
+      const compile_message = resultData.compile_message;
+      const output = resultData.output;
 
       if (compile_message !== "")
-        return { result: resData, showValue: resData.compile_message };
+        return { result: resultData, displayValue: resultData.compile_message };
       else if (output !== "")
-        return { result: resData, showValue: resData.output };
+        return { result: resultData, displayValue: resultData.output };
     }
 
-    return { result: resData, showValue: resData.output };
+    return { result: resultData, displayValue: resultData.output };
   } catch (error) {
     throw new Error(error.response ? error.response.data : "Server error");
   }

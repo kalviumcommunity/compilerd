@@ -8,6 +8,7 @@ export const LANGUAGE_VERSIONS = {
   go: "1.18",
   rust: "1.53.0",
   typescript: "5.0.3",
+  promptv2: "gpt-3.5",
 };
 
 export const CODE_SNIPPETS = {
@@ -23,4 +24,5 @@ export const CODE_SNIPPETS = {
   rust: `\nfn main() {\n\tprintln!("Hello, Sumresh!");\n}\n`,
   go: `\npackage main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello, Sumresh!")\n}\n`,
   typescript: `\ntype Params = {\n\tname: string;\n}\n\nfunction greet(data: Params) {\n\tconsole.log("Hello, " + data.name + "!");\n}\n\ngreet({ name: "Sumresh" });\n`,
+  promptv2: `The question is what is 2 plus 2`,
 };

@@ -19,13 +19,6 @@ const Header = () => {
           style={{ height: "40px", width: "auto" }} // Adjust height as needed
         />
       </div>
-
-      {/* Title */}
-      {/* <h1
-        style={{ margin: 0, fontSize: "2.5rem", fontFamily: "Times New Roman" }}
-      >
-        Code Judge
-      </h1> */}
     </div>
   );
 };

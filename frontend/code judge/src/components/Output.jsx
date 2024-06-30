@@ -13,8 +13,8 @@ const Output = ({ editorRef, language }) => {
     if (!sourceCode) return;
     try {
       setIsLoading(true);
-      const { result, showValue } = await executeCode(language, sourceCode);
-      setOutput(showValue.split("\n"));
+      const { result, displayValue } = await executeCode(language, sourceCode);
+      setOutput(displayValue);
       setIsError(!!result.stderr);
     } catch (error) {
       console.log(error);
@@ -50,12 +50,13 @@ const Output = ({ editorRef, language }) => {
         border="1px solid"
         borderRadius={4}
         borderColor={isError ? "red.500" : "#333"}
+        whiteSpace="pre"
+        fontFamily="monospace"
       >
-        {output
-          ? output.map((line, i) => <Text key={i}>{line}</Text>)
-          : 'Click "Run Code" to see the output here'}
+        {output ? output : 'Click "Run Code" to see the output here'}
       </Box>
     </Box>
   );
 };
+
 export default Output;

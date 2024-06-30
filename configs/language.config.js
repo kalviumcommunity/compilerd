@@ -32,7 +32,7 @@ const LANGUAGES_CONFIG = {
   [PYTHON]: {
     compile: "python -m compileall -q solution.py",
     run: "python solution.py",
-    timeout: 10,
+    timeout: 2,
     filename: "solution.py",
     memory: ALLOWED_RAM * ONE_MB,
   },
