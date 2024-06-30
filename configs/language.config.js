@@ -1,4 +1,3 @@
-// Added Golang (Task)
 const {
     CPP,
     C,
