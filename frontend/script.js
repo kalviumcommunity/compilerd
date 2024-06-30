@@ -2,7 +2,7 @@ function executeCode() {
     const language = document.getElementById('language').value;
     const code = document.getElementById('code').value;
 
-    fetch('/api/execute/', {
+    fetch('http://localhost:3000/api/execute/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
