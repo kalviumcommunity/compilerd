@@ -1,27 +1,29 @@
-FROM docker.io/library/node:20.13.0-alpine
+# Use the official Node.js image as the base image
+FROM node:14
 
-ENV PYTHONUNBUFFERED=1
-RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
+# Install necessary packages
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    openjdk-11-jdk \
+    python3 \
+    python3-pip \
+    && apt-get clean
 
-RUN set -ex && \
-    apk add --no-cache chromium lsof
+# Set the working directory
+WORKDIR /usr/src/app
 
-RUN set -ex && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto1 && \
-    rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/lto-wrapper && \
-    rm -f /usr/bin/x86_64-alpine-linux-musl-gcj
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-RUN ln -sf python3 /usr/bin/python
+# Install npm dependencies
+RUN npm install
 
-ADD . /usr/bin/
-ADD start.sh /usr/bin/
+# Copy the rest of the application code
+COPY . .
 
-RUN npm --prefix /usr/bin/ install
-EXPOSE 8080
+# Expose the application port
+EXPOSE 3000
 
-# add a dummy user that will run the server, hence sandboxing the rest of the container
-RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
-#   USER runner
-CMD sh /usr/bin/start.sh
+# Run the application
+CMD ["npm", "start"]
