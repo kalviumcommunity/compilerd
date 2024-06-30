@@ -211,6 +211,171 @@ const testCases = [
             error: 0,
         },
     },
+// test cases added for 5 new languages- PHP, rust, kotlin,C# and dart
+
+    {
+      name: 'php : hello world',
+      reqObject: {
+          language: 'php',
+          script: '<?php echo "hello world"; ?>',
+      },
+      expectedResponse: {
+          val: 'hello world\n',
+          status: 200,
+          error: 0,
+      },
+  }
+  {
+    name: 'php : print stdin',
+    reqObject: {
+        language: 'php',
+        script: '<?php echo file_get_contents("php://stdin"); ?>',
+        stdin: '1 2 3',
+    },
+    expectedResponse: {
+        val: '1 2 3\n',
+        status: 200,
+        error: 0,
+    },
+},
+
+{
+  name: 'csharp : print hello world',
+  reqObject: {
+      language: 'csharp',
+      script:
+          'using System;\n' +
+          'public class Program {\n' +
+          '    public static void Main() {\n' +
+          '        Console.WriteLine("hello world");\n' +
+          '    }\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: 'hello world\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'kotlin : print hello world',
+  reqObject: {
+      language: 'kotlin',
+      script:
+          'fun main() {\n' +
+          '    println("hello world")\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: 'hello world\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'kotlin : print stdin',
+  reqObject: {
+      language: 'kotlin',
+      script:
+          'fun main() {\n' +
+          '    val input = readLine()\n' +
+          '    println(input)\n' +
+          '}',
+      stdin: '10\n'
+  },
+  expectedResponse: {
+      val: '10\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'csharp : print stdin',
+  reqObject: {
+      language: 'csharp',
+      script:
+          'using System;\n' +
+          'public class Program {\n' +
+          '    public static void Main() {\n' +
+          '        string input = Console.ReadLine();\n' +
+          '        Console.WriteLine(input);\n' +
+          '    }\n' +
+          '}',
+      stdin: '10\n'
+  },
+  expectedResponse: {
+      val: '10\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'rust : print hello world',
+  reqObject: {
+      language: 'rust',
+      script:
+          'fn main() {\n' +
+          '    println!("hello world");\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: 'hello world\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'rust : print stdin',
+  reqObject: {
+      language: 'rust',
+      script:
+          'use std::io;\n' +
+          'fn main() {\n' +
+          '    let mut input = String::new();\n' +
+          '    io::stdin().read_line(&mut input).expect("Failed to read line");\n' +
+          '    println!("{}", input.trim());\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: '10\n', // Assuming '10\n' as input
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'dart : print hello world',
+  reqObject: {
+      language: 'dart',
+      script:
+          'void main() {\n' +
+          '  print("hello world");\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: 'hello world\n',
+      status: 200,
+      error: 0,
+  },
+},
+{
+  name: 'dart : print stdin',
+  reqObject: {
+      language: 'dart',
+      script:
+          'import "dart:io";\n' +
+          'void main() {\n' +
+          '  String input = stdin.readLineSync();\n' +
+          '  print(input);\n' +
+          '}'
+  },
+  expectedResponse: {
+      val: '10\n', // Assuming '10\n' as input
+      status: 200,
+      error: 0,
+  },
+},
+
+  
     {
         name: 'TLE test',
         reqObject: {

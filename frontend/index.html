@@ -1,0 +1,63 @@
+<!-- Home Page:
+The home page serves as the landing page for the application. It provides a welcoming interface that introduces users to the platform's features and functionality. This includes navigational elements and brief descriptions or highlights of what the platform offers. The design is clean and intuitive, aimed at providing a seamless user experience.
+
+Sign-in Functionality:
+Users can access the platform's features by signing in. The sign-in option is prominently displayed, allowing new users to create accounts or existing users to log in securely. -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <header class="py-3 mb-3 border-bottom">
+      <div class="container-fluid d-grid gap-3 align-items-center" style="grid-template-columns: 1fr 2fr;">
+        <div class="dropdown">
+          <a href="#" class="d-flex align-items-center col-lg-4 mb-2 mb-lg-0 link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-code" viewBox="0 0 16 16">
+              <path d="M6.646 5.646a.5.5 0 1 1 .708.708L5.707 8l1.647 1.646a.5.5 0 0 1-.708.708l-2-2a.5.5 0 0 1 0-.708zm2.708 0a.5.5 0 1 0-.708.708L10.293 8 8.646 9.646a.5.5 0 0 0 .708.708l2-2a.5.5 0 0 0 0-.708z"/>
+              <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/>
+            </svg>
+          </a>
+          <ul class="dropdown-menu text-small shadow">
+            <li><a class="dropdown-item active" href="#" aria-current="page"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Overview</font></font></a></li>
+          </ul>
+        </div>
+  
+        <div class="d-flex align-items-center">
+          <form class="w-100 me-3" role="search">
+            <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
+          </form>
+  
+          <div class="flex-shrink-0 dropdown">
+            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="https://github.com/mdo.png" alt="the way" width="32" height="32" class="rounded-circle">
+            </a>
+            <ul class="dropdown-menu text-small shadow">
+              <li><a class="dropdown-item
+                " href="#"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">New project...</font></font></a></li>
+              <li><a class="dropdown-item" href="#"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Settings</font></font></a></li>
+              <li><a class="dropdown-item" href="#"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Profile</font></font></a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Sign out</font></font></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="px-4 py-5 my-5 text-center">
+      <h1 class="display-5 fw-bold text-body-emphasis">Execute with CodeWired</h1>
+      <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">Bring your code to life! Best of all we offer compatibility with many languages</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="window.location.href='/code.html'">Code</button>
+          <button type="button" class="btn btn-outline-secondary btn-lg px-4" fdprocessedid="wo2gjq">Sign Up</button>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
