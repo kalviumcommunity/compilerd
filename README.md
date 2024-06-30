@@ -1,5 +1,11 @@
 # <img alt="Kalvium" src="https://kalvium.community/images/sidebar-2d-logo.svg" width="80"/> Kalvium
 
+
+
+check out my frontend - [click here](https://merry-frangollo-202e0f.netlify.app/)
+
+
+
 ---
 
 <!-- [![Contributors][contributors-shield]][contributors-url]
@@ -42,7 +48,7 @@
 
 
 ## About The Project : 
-Compilerd is a online code judge for evaluating code submissions passed to it. It compiles and executes code in several languages and returns the result and various other properties in the response. The judge supports several languages including C++, Python, C, JavaScript (Node.js) and Java. 
+Compilerd is a online code judge for evaluating code submissions passed to it. It compiles and executes code in several languages and returns the result and various other properties in the response. The judge supports several languages including C++, Python, C, JavaScript (Node.js), Java, PHP, R, Perl, Go, and Rust. 
 This is a service that is build using nodejs and express in the backend.
 It is fully customizable and can be adjusted as per requirement. Also, it has been tried and tested on Google Cloud Run and it just works seamlessly.
 
@@ -83,6 +89,11 @@ We will run the project locally and try to make a request to see a sample use ca
   - Java
   - Node.js
   - Ruby
+  - PHP
+  - R
+  - Perl
+  - Go
+  - Rust
 
 ## Contribution :
 
