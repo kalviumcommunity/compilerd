@@ -6,4 +6,6 @@ export const languageOptions = [
     { value: 'nodejs', label: 'Node.js', monaco: 'javascript' },
     { value: 'go', label: 'GoLang', monaco: 'go' },
     { value: 'php', label: 'PHP', monaco: 'php' },
+    { value: 'swift', label: 'Swift', monaco: 'swift' },
+    { value: 'sqlite3', label: 'Sql', monaco: 'sqlite3' },
 ]
