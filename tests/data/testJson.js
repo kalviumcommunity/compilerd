@@ -298,6 +298,118 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'csharp : hello world',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n\n' +
+                'class Program {\n' +
+                '    static void Main() {\n' +
+                '        Console.WriteLine("hello world");\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'csharp : print stdin',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n\n' +
+                'class Program {\n' +
+                '    static void Main() {\n' +
+                '        string input;\n' +
+                '        while ((input = Console.ReadLine()) != null) {\n' +
+                '            Console.WriteLine(input);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'r : hello world',
+        reqObject: {
+            language: 'r',
+            script: 'cat("hello world\\n")',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'r : print stdin',
+        reqObject: {
+            language: 'r',
+            script:
+                'input <- file("stdin", "r")\n' +
+                'while (length(line <- readLines(input, n = 1, warn = FALSE)) > 0) {\n' +
+                '    cat(line, "\\n")\n' +
+                '}\n' +
+                'close(input)\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
