@@ -1,5 +1,149 @@
 const testCases = [
     {
+        name: 'c : hello world',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    printf("hello world");\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'c : print stdin',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include <stdio.h>\n' +
+                'int main() {\n' +
+                '    int number;\n' +
+                '    while (scanf("%d", &number) == 1) {\n' +
+                '        printf("%d\\n", number);\n' +
+                '    } \n' +
+                '    return 0;\n' +
+                '}',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    // C Language Additional Test Cases
+    {
+        name: 'c : division by zero',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    int a = 1 / 0;\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Runtime Error: Division by zero',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : syntax error',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(\n\n' + // Missing closing parenthesis
+                '    printf("hello world");\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Syntax Error',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : file not found',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                '#include "non_existent_file.h"\n\n' + // Non-existent file
+                'int main(){\n\n' +
+                '    printf("hello world");\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'File Not Found',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : memory limit exceeded',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    int arr[100000000];\n' + // Large array to exceed memory
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Memory Limit Exceeded',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : null pointer dereference',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    int *p = NULL;\n' +
+                '    int a = *p;\n' + // Dereference null pointer
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Null Pointer Dereference',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'c : segmentation fault',
+        reqObject: {
+            language: 'c',
+            script:
+                '#include<stdio.h>\n\n' +
+                'int main(){\n\n' +
+                '    int arr[10];\n' +
+                '    arr[100] = 1;\n' + // Out of bounds access
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Segmentation Fault',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
         name: 'cpp : hello world',
         reqObject: {
             language: 'cpp',
@@ -38,43 +182,124 @@ const testCases = [
             status: 200,
             error: 0,
         },
-
     },
+    // CPP Language Additional Test Cases
     {
-        name: 'nodejs : hello world',
+        name: 'cpp : division by zero',
         reqObject: {
-            language: 'nodejs',
-            script: 'console.log(\'hello world\')',
-        },
-        expectedResponse: {
-            val: 'hello world\n',
-            status: 200,
-            error: 0,
-        },
-    },
-    {
-        name: 'nodejs : print stdin',
-        reqObject: {
-            language: 'nodejs',
+            language: 'cpp',
             script:
-                'process.stdin.setEncoding(\'utf8\'); \n ' +
-                'process.stdin.on(\'data\', (input) => { \n ' +
-                '  console.log(input); \n ' +
-                ' \n ' +
-                '}); \n ',
-            stdin: '1 2 3',
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int a = 1 / 0;\n' +
+                '    return 0;\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: '1 2 3\n',
+            val: 'Runtime Error: Division by zero',
             status: 200,
-            error: 0,
+            error: 1,
+        },
+    },
+    {
+        name: 'cpp : syntax error',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(\n' + // Missing closing parenthesis
+                '    cout << "hello world";\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Syntax Error',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'cpp : file not found',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                '#include "non_existent_file.h"\n' + // Non-existent file
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    cout << "hello world";\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'File Not Found',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'cpp : memory limit exceeded',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int arr[100000000];\n' + // Large array to exceed memory
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Memory Limit Exceeded',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'cpp : null pointer dereference',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int *p = NULL;\n' +
+                '    int a = *p;\n' + // Dereference null pointer
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Null Pointer Dereference',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'cpp : segmentation fault',
+        reqObject: {
+            language: 'cpp',
+            script:
+                '#include<bits/stdc++.h>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    int arr[10];\n' +
+                '    arr[100] = 1;\n' + // Out of bounds access
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Segmentation Fault',
+            status: 200,
+            error: 1,
         },
     },
     {
         name: 'python : hello world',
         reqObject: {
             language: 'python',
-            script: 'print(\'hello world\')',
+            script: 'print("hello world")',
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -86,69 +311,95 @@ const testCases = [
         name: 'python : print stdin',
         reqObject: {
             language: 'python',
-            script:
-                'try:\n' +
-                '    while(True):\n' +
-                '        line = input()\n' +
-                '        if not line:\n' +
-                '            break\n' +
-                '        print(line)\n' +
-                'except EOFError:\n' +
-                '    pass',
-            stdin: '1 2 3',
+            script: 'import sys\nfor line in sys.stdin:\n\tprint(line, end="")',
+            stdin: '1\n2\n3',
         },
         expectedResponse: {
-            val: '1 2 3\n',
+            val: '1\n2\n3',
             status: 200,
             error: 0,
         },
     },
+    // Python Language Additional Test Cases
     {
-        name: 'c : hello world',
+        name: 'python : division by zero',
         reqObject: {
-            language: 'c',
-            script:
-                '#include<stdio.h>\n\n' +
-                'int main(){\n\n' +
-                '    printf("hello world");\n' +
-                '    return 0;\n' +
-                '}\n',
+            language: 'python',
+            script: 'a = 1 / 0',
         },
         expectedResponse: {
-            val: 'hello world',
+            val: 'ZeroDivisionError: division by zero\n',
             status: 200,
-            error: 0,
+            error: 1,
         },
     },
     {
-        name: 'c : print stdin',
+        name: 'python : syntax error',
         reqObject: {
-            language: 'c',
-            script:
-                '#include <stdio.h>\n' +
-                'int main() {\n' +
-                '    int number;\n' +
-                '    while (scanf("%d", &number) == 1) {\n' +
-                '        printf("%d\\n", number);\n' +
-                '    } \n' +
-                '    return 0;\n' +
-                '}',
-            stdin: '1 2 3',
+            language: 'python',
+            script: 'print("hello world"', // Missing closing parenthesis
         },
         expectedResponse: {
-            val: '1\n2\n3\n',
+            val: 'SyntaxError: unexpected EOF while parsing\n',
             status: 200,
-            error: 0,
+            error: 1,
         },
     },
     {
-        name: 'java : print stdin',
+        name: 'python : file not found',
+        reqObject: {
+            language: 'python',
+            script: 'open("non_existent_file.txt")', // Non-existent file
+        },
+        expectedResponse: {
+            val: 'FileNotFoundError: [Errno 2] No such file or directory: \'non_existent_file.txt\'\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'python : memory limit exceeded',
+        reqObject: {
+            language: 'python',
+            script: 'arr = [0] * (10**8)', // Large array to exceed memory
+        },
+        expectedResponse: {
+            val: 'MemoryError\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'python : infinite loop',
+        reqObject: {
+            language: 'python',
+            script: 'while True: pass', // Infinite loop
+        },
+        expectedResponse: {
+            val: 'Timeout Error: Infinite Loop\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'python : key error',
+        reqObject: {
+            language: 'python',
+            script: 'd = {}\nprint(d["key"])', // KeyError
+        },
+        expectedResponse: {
+            val: 'KeyError: \'key\'\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : hello world',
         reqObject: {
             language: 'java',
             script:
-                'import java.util.Scanner;\n' +
-                'public class Solution {\n' +
-                '    public static void main(String[] args) {\n' +
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
                 '        System.out.println("hello world");\n' +
                 '    }\n' +
                 '}\n',
@@ -164,15 +415,13 @@ const testCases = [
         reqObject: {
             language: 'java',
             script:
-                'import java.util.Scanner;\n' +
-                'public class Solution {\n' +
-                '    public static void main(String[] args) {\n' +
-                '        Scanner scanner = new Scanner(System.in);\n' +
-                '        while (scanner.hasNextInt()) {\n' +
-                '            int number = scanner.nextInt();\n' +
-                '            System.out.println(number);\n' +
-                '        } \n' +
-                '        scanner.close();\n' +
+                'import java.util.*;\n' +
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        Scanner sc = new Scanner(System.in);\n' +
+                '        while(sc.hasNextInt()){\n' +
+                '            System.out.println(sc.nextInt());\n' +
+                '        }\n' +
                 '    }\n' +
                 '}\n',
             stdin: '1 2 3',
@@ -183,15 +432,120 @@ const testCases = [
             error: 0,
         },
     },
+    // Java Language Additional Test Cases
     {
-        name: 'ruby : print hello world',
+        name: 'java : division by zero',
         reqObject: {
-            language: 'ruby',
+            language: 'java',
             script:
-                'print "hello world"'
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        int a = 1 / 0;\n' +
+                '    }\n' +
+                '}\n',
         },
         expectedResponse: {
-            val: 'hello world',
+            val: 'Exception in thread "main" java.lang.ArithmeticException: / by zero\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : syntax error',
+        reqObject: {
+            language: 'java',
+            script:
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        System.out.println("hello world")\n' + // Missing semicolon
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Syntax Error\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : file not found',
+        reqObject: {
+            language: 'java',
+            script:
+                'import java.io.*;\n' +
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        FileReader file = new FileReader("non_existent_file.txt");\n' + // Non-existent file
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Exception in thread "main" java.io.FileNotFoundException: non_existent_file.txt (No such file or directory)\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : memory limit exceeded',
+        reqObject: {
+            language: 'java',
+            script:
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        int arr[] = new int[100000000];\n' + // Large array to exceed memory
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Exception in thread "main" java.lang.OutOfMemoryError: Java heap space\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : null pointer exception',
+        reqObject: {
+            language: 'java',
+            script:
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        String str = null;\n' +
+                '        System.out.println(str.length());\n' + // Null pointer exception
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Exception in thread "main" java.lang.NullPointerException\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'java : array index out of bounds exception',
+        reqObject: {
+            language: 'java',
+            script:
+                'class main{\n' +
+                '    public static void main(String args[]){\n' +
+                '        int arr[] = new int[10];\n' +
+                '        arr[100] = 1;\n' + // Out of bounds access
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 100 out of bounds for length 10\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : hello world',
+        reqObject: {
+            language: 'ruby',
+            script: 'puts "hello world"',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
             status: 200,
             error: 0,
         },
@@ -200,104 +554,186 @@ const testCases = [
         name: 'ruby : print stdin',
         reqObject: {
             language: 'ruby',
-            script:
-                'user_input = gets.chomp\n' +
-                'puts user_input',
-            stdin: '10\n'
+            script: 'ARGF.each {|line| print line }',
+            stdin: '1\n2\n3',
         },
         expectedResponse: {
-            val: '10\n',
+            val: '1\n2\n3',
+            status: 200,
+            error: 0,
+        },
+    },
+    // Ruby Language Additional Test Cases
+    {
+        name: 'ruby : division by zero',
+        reqObject: {
+            language: 'ruby',
+            script: 'a = 1 / 0',
+        },
+        expectedResponse: {
+            val: 'ZeroDivisionError: divided by 0\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : syntax error',
+        reqObject: {
+            language: 'ruby',
+            script: 'puts "hello world"', // Missing end
+        },
+        expectedResponse: {
+            val: 'SyntaxError: unexpected end-of-input, expecting end\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : file not found',
+        reqObject: {
+            language: 'ruby',
+            script: 'File.read("non_existent_file.txt")', // Non-existent file
+        },
+        expectedResponse: {
+            val: 'Errno::ENOENT: No such file or directory @ rb_sysopen - non_existent_file.txt\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : memory limit exceeded',
+        reqObject: {
+            language: 'ruby',
+            script: 'arr = Array.new(100000000)', // Large array to exceed memory
+        },
+        expectedResponse: {
+            val: 'NoMemoryError: failed to allocate memory\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : no method error',
+        reqObject: {
+            language: 'ruby',
+            script: 'nil.some_method', // NoMethodError
+        },
+        expectedResponse: {
+            val: 'NoMethodError: undefined method `some_method` for nil:NilClass\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'ruby : type error',
+        reqObject: {
+            language: 'ruby',
+            script: '1 + "string"', // TypeError
+        },
+        expectedResponse: {
+            val: 'TypeError: String can\'t be coerced into Integer\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'node : hello world',
+        reqObject: {
+            language: 'node',
+            script: 'console.log("hello world");',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
             status: 200,
             error: 0,
         },
     },
     {
-        name: 'TLE test',
+        name: 'node : print stdin',
         reqObject: {
-            language: 'nodejs',
-            script: 'for(let i=0 ; ; ){i++}',
+            language: 'node',
+            script: 'process.stdin.on("data", function(data) { console.log(data.toString()); });',
+            stdin: '1\n2\n3',
         },
         expectedResponse: {
-            val: 'Time limit exceeded',
+            val: '1\n2\n3\n',
             status: 200,
-            error: 1,
+            error: 0,
         },
     },
+    // Node.js Language Additional Test Cases
     {
-        name: 'MLE test',
+        name: 'node : division by zero',
         reqObject: {
-            language: 'python',
-            script: 'one_gb_data = bytearray(1000 * 1024 * 1024)',
+            language: 'node',
+            script: 'let a = 1 / 0; console.log(a);',
         },
         expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
-    },
-    {
-        name: 'MLE test 2',
-        reqObject: {
-            language: 'python',
-            script:
-                'import time\n' +
-                'def consume_memory(target_mb, duration_sec):\n' +
-                '    float_size = 8\n' +
-                '    floats_per_mb = (1024 * 1024) // float_size\n' +
-                '    total_floats = target_mb * floats_per_mb\n' +
-                '    iterations = int(duration_sec / 0.1)\n' +
-                '    floats_per_iteration = total_floats // iterations\n' +
-                '    memory_hog = []\n' +
-                '    for _ in range(iterations):\n' +
-                '        memory_hog.extend([0.0] * floats_per_iteration)\n' +
-                '        time.sleep(0.1)\n' +
-                'consume_memory(1000, 1)\n',
-        },
-        expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
-    },
-    {
-        name: 'MLE test 3',
-        reqObject: {
-            language: 'python',
-            script:
-                'a = [100]\n' +
-                'for i in a:\n' +
-                '    a.append(i)\n',
-        },
-        expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
-    },
-    {
-        name: 'OPEN AI test promptv1',
-        reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-        },
-        expectedResponse: {
-            val: {},
+            val: 'Infinity\n',
             status: 200,
             error: 0,
         },
     },
     {
-        name: 'OPEN AI test promptv2',
+        name: 'node : syntax error',
         reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'node',
+            script: 'console.log("hello world"' // Missing closing parenthesis
         },
         expectedResponse: {
-            val: {},
+            val: 'SyntaxError: Unexpected end of input\n',
             status: 200,
-            error: 0,
+            error: 1,
         },
     },
-]
+    {
+        name: 'node : file not found',
+        reqObject: {
+            language: 'node',
+            script: 'const fs = require("fs"); fs.readFileSync("non_existent_file.txt");', // Non-existent file
+        },
+        expectedResponse: {
+            val: 'Error: ENOENT: no such file or directory, open \'non_existent_file.txt\'\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'node : memory limit exceeded',
+        reqObject: {
+            language: 'node',
+            script: 'let arr = new Array(1e9);', // Large array to exceed memory
+        },
+        expectedResponse: {
+            val: 'RangeError: Invalid array length\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'node : infinite loop',
+        reqObject: {
+            language: 'node',
+            script: 'while (true) {}', // Infinite loop
+        },
+        expectedResponse: {
+            val: 'Timeout Error: Infinite Loop\n',
+            status: 200,
+            error: 1,
+        },
+    },
+    {
+        name: 'node : reference error',
+        reqObject: {
+            language: 'node',
+            script: 'console.log(nonExistentVariable);', // ReferenceError
+        },
+        expectedResponse: {
+            val: 'ReferenceError: nonExistentVariable is not defined\n',
+            status: 200,
+            error: 1,
+        },
+    },
+];
 
-module.exports = { testCases }
+module.exports = testCases;

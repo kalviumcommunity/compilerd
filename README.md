@@ -113,29 +113,50 @@ For local development we should have the following dependencies set up locally i
   - Summary can be seen on the console when all the tests have finished.
 
 
+### TASK:
+I've Implement The Test Cases.
+Add in significantly more test cases that may have been missed.
 
-### Guidelines :
- - Provide Detailed Pull Requests
-   - Clearly describe the problem you're solving or the feature you're adding
-   - Provide context, background, and any relevant information
- - Adhere to the project's coding standards and style guides
- - Update documentation as needed for your changes
-   - Ensure that your code is well-documented and easy for others to understand
- - Ensure that your contributions are well-tested
- - Maintain consistency with the existing codebase
+C Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
+CPP Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
+Python Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
-<!-- LICENSE -->
-## License : 
+Java Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
+Ruby Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
+Node.js Language: 
+-Runtime Error 
+-Division by Zero 
+-Syntax Error 
+-File Not Found 
+-Memory Limit Exceeded
 
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+### I've done small changes in test.js file
