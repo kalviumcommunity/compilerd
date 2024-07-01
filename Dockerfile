@@ -26,7 +26,7 @@ RUN npm --prefix /usr/bin/ install
 
 EXPOSE 8080
 
-# Add a dummy user that will run the server
+#  add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
 
 COPY testOpenApiKey.py /usr/src/app/
