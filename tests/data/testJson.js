@@ -40,6 +40,7 @@ const testCases = [
         },
 
     },
+
     {
         name: 'nodejs : hello world',
         reqObject: {
@@ -70,6 +71,21 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'nodejs : incorrect output',
+        reqObject: {
+            language: 'nodejs',
+            script: 'console.log(\'Hello World\')', 
+        },
+        expectedResponse: {
+          val: 'Hello World\n', 
+          status: 200,
+          error: 0,
+        },
+    },
+
+
+
     {
         name: 'python : hello world',
         reqObject: {
@@ -103,6 +119,56 @@ const testCases = [
             error: 0,
         },
     },
+
+    
+    // {
+    //     name: 'python : runtime error',
+    //     reqObject: {
+    //         language: 'python',
+    //         script: 'print(10 / 0)',
+    //     },
+    //     expectedResponse: {
+    //         val: 'ZeroDivisionError: division by zero',
+    //         status: 200, 
+    //         error: 1,
+    //     },
+    // },
+
+    {
+        name: 'python : function call',
+        reqObject: {
+            language: 'python',
+            script:
+            'def add(x, y):\n' +
+            '  return x + y\n' +
+            '\n' +
+            'print(add(5, 3))',
+        },
+        expectedResponse: {
+          val: '8\n',
+          status: 200,
+          error: 0,
+        },
+    },
+
+
+    {
+        name: 'python : string manipulation',
+        reqObject: {
+            language: 'python',
+            script:
+            'text = "Hello, world!"\n' +
+            'print(text.upper())\n' +  
+            'print(text.split(" "))\n', 
+        },
+        expectedResponse: {
+          val: 'HELLO, WORLD!\n[\'Hello,\', \'world!\']\n',
+          status: 200,
+          error: 0,
+        },
+    },
+
+
     {
         name: 'c : hello world',
         reqObject: {
@@ -184,6 +250,27 @@ const testCases = [
         },
     },
     {
+        name: 'java : infinite loop',
+        reqObject: {
+          language: 'java',
+          script:
+            'import java.util.Scanner;\n' +
+            'public class Solution {\n' +
+            'public static void main(String[] args) {\n' +
+            'while (true) { // Infinite loop' +
+            'System.out.println("Looping...");' +
+            '} \n' +
+            '}\n' +
+            '}\n',
+        },
+        expectedResponse: {
+          val: '',
+          status: 200,
+          error: 1,
+        },
+    },
+
+    {
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
@@ -211,6 +298,51 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'ruby : print with spaces',
+        reqObject: {
+            language: 'ruby',
+            script: '  puts " hello world "  ', 
+        },
+        expectedResponse: {
+        val: ' hello world \n',
+        status: 200,
+        error: 0,
+        },
+    },
+    
+    {
+        name: 'ruby : access array elements',
+        reqObject: {
+            language: 'ruby',
+            script:
+              'colors = ["red", "green", "blue"]\n' +
+              'puts colors[1]',
+        },
+        expectedResponse: {
+          val: 'green\n',
+          status: 200,
+          error: 0,
+        },
+    },
+
+    {
+        name: 'ruby : regular expressions',
+        reqObject: {
+            language: 'ruby',
+            script:
+            'text = "This is an email: test@example.com"\n' +
+            'match = text.match(/test@(.+)\.com/) \n' +
+            'puts match ? match[1] : "No email found."',
+        },
+        expectedResponse: {
+          val: 'example\n',
+          status: 200,
+          error: 0,
+        },
+    },
+
+
     {
         name: 'TLE test',
         reqObject: {
@@ -315,6 +447,110 @@ const testCases = [
             error: 0,
         },
     },
+
+    
+    {
+        name: 'go : string concatenation',
+        reqObject: {
+            language: 'go',
+            script: `package main
+        
+        import (
+          "fmt"
+        )
+        
+        func main() {
+          firstName := "Sunil"
+          lastName := "Sharma"
+          fullName := firstName + " " + lastName
+          fmt.Println(fullName)
+        }
+        `,
+          },
+          expectedResponse: {
+            val: 'Sunil Sharma\n',
+            status: 200,
+            error: 0,
+          },
+    },
+    
+    
+    {
+      name: 'go : if-else statement',
+      reqObject: {
+            language: 'go',
+            script: `package main
+        
+            import (
+              "fmt"
+            )
+            
+            func main() {
+              number := 10
+              if number > 5 {
+                fmt.Println("Number is greater than 5")
+              } else {
+                fmt.Println("Number is less than or equal to 5")
+              }
+            }`,
+      },
+      expectedResponse: {
+            val: 'Number is greater than 5\n',
+            status: 200,
+            error: 0,
+      },
+    },
+    
+    
+    
+    {
+        name: 'go : for loop',
+        reqObject: {
+            language: 'go',
+            script: `package main
+    
+            import (
+              "fmt"
+            )
+            
+            func main() {
+              for i := 0; i < 5; i++ {
+                fmt.Println(i)
+              }
+            }`,
+      },
+      expectedResponse: {
+        val: '0\n1\n2\n3\n4\n',
+        status: 200,
+        error: 0,
+      },
+    },
+    
+    
+    
+    
+    {
+        name: 'go : array access',
+        reqObject: {
+            language: 'go',
+            script: `package main
+    
+            import (
+              "fmt"
+            )
+            
+            func main() {
+              colors := [3]string{"red", "green", "blue"}
+              secondColor := colors[1]
+              fmt.Println(secondColor)
+            }`,
+      },
+      expectedResponse: {
+        val: 'green\n',
+        status: 200,
+        error: 0,
+      },
+    },
     {
         name: 'rust : hello world',
         reqObject: {
@@ -327,6 +563,9 @@ const testCases = [
             error: 0,
         },
     },
+
+
+
     {
         name: 'php : hello world',
         reqObject: {
