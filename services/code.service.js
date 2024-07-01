@@ -8,10 +8,13 @@ const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
-const openai = new OpenAI()
+const openai = new OpenAI({ apiKey: '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' })
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
+const { PHP } = require('../enums/supportedLanguages')
+
+//const memoryUsedThreshold = 512
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
 const puppeteer = require('puppeteer');
 const express = require('express')
@@ -215,23 +218,38 @@ const _executeCode = async (req, res, response) => {
         // Write file in tmp folder based on language
         await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
 
-        const compileCommand = `cd /tmp/ && ${langConfig.compile}`
-        // Run compile command
-        const compileLog = await _runScript(compileCommand, res, true)
-        response.compileMessage =
-            compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
-
-        // Check if there is no compilation error
-        if (response.compileMessage === '') {
-            let command
-            if (language === 'java') {
-                // Remove ulimit as a temp fix
-                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
-            } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+        if (language==='perl') {
+            let command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`;
+        
+            if (stdin) {
+                await fs.promises.writeFile('/tmp/input.txt', stdin);
+                command += ' < input.txt';
             }
+        
+            const outputLog = await _runScript(command, res, true);
+            response.output = outputLog.error !== undefined ? _prepareErrorMessage(outputLog, language, command) : outputLog.result.stdout;
+            if (outputLog.error) {
+                response.error = 1;
+            }
+        }
+        else if (language==='bash') {
+            let command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`;
+        
+            if (stdin) {
+                await fs.promises.writeFile('/tmp/input.txt', stdin);
+                command += ' < input.txt';
+            }
+        
+            const outputLog = await _runScript(command, res, true);
+            response.output = outputLog.error !== undefined ? _prepareErrorMessage(outputLog, language, command) : outputLog.result.stdout;
+            if (outputLog.error) {
+                response.error = 1;
+            }
+        }
 
-            // Check if there is any input that is to be provided to code execution
+        else if (language === 'php') {
+            let command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+
             if (stdin) {
                 // Write input in a file in tmp folder
                 await fs.promises.writeFile('/tmp/input.txt', stdin)
@@ -240,16 +258,41 @@ const _executeCode = async (req, res, response) => {
             }
 
             const outputLog = await _runScript(command, res, true)
-            response.output =
-                outputLog.error !== undefined
-                    ? _prepareErrorMessage(outputLog, language, command)
-                    : outputLog.result.stdout
+            response.output = outputLog.error !== undefined ? _prepareErrorMessage(outputLog, language, command) : outputLog.result.stdout
             if (outputLog.error) {
                 response.error = 1
             }
         } else {
-            response.error = 1
+            // Handle other languages as before
+            const compileCommand = `cd /tmp/ && ${langConfig.compile}`
+            // Run compile command
+            const compileLog = await _runScript(compileCommand, res, true)
+            response.compileMessage = compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+
+            // Check if there is no compilation error
+            if (response.compileMessage === '') {
+                let command
+                if (language === 'java') {
+                    command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                } else {
+                    command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                }
+
+                if (stdin) {
+                    await fs.promises.writeFile('/tmp/input.txt', stdin)
+                    command += ' < input.txt'
+                }
+
+                const outputLog = await _runScript(command, res, true)
+                response.output = outputLog.error !== undefined ? _prepareErrorMessage(outputLog, language, command) : outputLog.result.stdout
+                if (outputLog.error) {
+                    response.error = 1
+                }
+            } else {
+                response.error = 1
+            }
         }
+    
     } catch (e) {
         logger.error(e)
         throw new Error('Unable to execute code.')

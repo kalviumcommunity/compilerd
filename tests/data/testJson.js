@@ -142,7 +142,7 @@ const testCases = [
         },
     },
     {
-        name: 'java : print stdin',
+        name: 'java : hello world',
         reqObject: {
             language: 'java',
             script:
@@ -184,11 +184,37 @@ const testCases = [
         },
     },
     {
-        name: 'ruby : print hello world',
+        name: 'ruby : hello world',
         reqObject: {
             language: 'ruby',
-            script:
-                'print "hello world"'
+            script: 'print "hello world"',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    // {
+    //     name: 'ruby : print stdin',
+    //     reqObject: {
+    //         language: 'ruby',
+    //         script:
+    //             'user_input = gets.chomp\n' +
+    //             'puts user_input',
+    //         stdin: '10\n'
+    //     },
+    //     expectedResponse: {
+    //         val: '10\n',
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "hello world"; ?>',
         },
         expectedResponse: {
             val: 'hello world',
@@ -197,16 +223,18 @@ const testCases = [
         },
     },
     {
-        name: 'ruby : print stdin',
+        name: 'php : print stdin',
         reqObject: {
-            language: 'ruby',
+            language: 'php',
             script:
-                'user_input = gets.chomp\n' +
-                'puts user_input',
-            stdin: '10\n'
+                '<?php\n' +
+                '$input = file_get_contents("php://stdin");\n' +
+                'echo $input;\n' +
+                '?>',
+            stdin: '1 2 3',
         },
         expectedResponse: {
-            val: '10\n',
+            val: '1 2 3',
             status: 200,
             error: 0,
         },
@@ -275,29 +303,102 @@ const testCases = [
         },
     },
     {
-        name: 'OPEN AI test promptv1',
+        name: 'ruby : print stdin',
         reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'ruby',
+            script:
+                'while input = gets\n' +
+                '    puts input\n' +
+                'end',
+            stdin: '10\n',
         },
         expectedResponse: {
-            val: {},
+            val: '10\n',
             status: 200,
             error: 0,
         },
     },
     {
-        name: 'OPEN AI test promptv2',
+        name: 'OPEN AI test promptv1',
         reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'promptv1',
+            question: 'What is 2 plus 2?',
+            userAnswer: '4'
         },
         expectedResponse: {
             val: {},
             status: 200,
+            error: 0
+        }
+    },    
+    {
+        name: 'OPEN AI test promptv2',
+        reqObject: {
+            language: 'promptv2',
+            question: 'What is 2 plus 2?',
+            userAnswer: '4'
+        },
+        expectedResponse: {
+            val: {},
+            status: 200,
+            error: 0
+        }
+    },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello\\n";',
+        },
+        expectedResponse: {
+            val: 'hello\n',
+            status: 200,
             error: 0,
         },
     },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'while (<STDIN>) {\n' +
+                '    print $_;\n' +
+                '}',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'bash : hello world',
+        reqObject: {
+            language: 'bash',
+            script: 'echo "hello"',
+        },
+        expectedResponse: {
+            val: 'hello\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        "name": "bash : print stdin",
+        "reqObject": {
+            "language": "bash",
+            "script": "read num1\nread num2\nread num3\nif [ $num1 -gt $num2 ] && [ $num1 -gt $num3 ]; then\n    echo $num1\nelif [ $num2 -gt $num3 ] && [ $num2 -gt $num1 ]; then\n    echo $num2\nelse\n    echo $num3\nfi",
+            "stdin": "5\n3\n7"
+        },
+        "expectedResponse": {
+            "val": "7\n",
+            "status": 200,
+            "error": 0
+        }
+    }
+    
+    
 ]
 
 module.exports = { testCases }
