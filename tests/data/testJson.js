@@ -298,6 +298,118 @@ const testCases = [
             error: 0,
         },
     },
+
+{
+        name: 'javascript : hello world',
+        reqObject: {
+            language: 'javascript',
+            script: 'console.log(\'hello world\')',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'javascript : print stdin',
+        reqObject: {
+            language: 'javascript',
+            script:
+                'process.stdin.setEncoding(\'utf8\'); \n ' +
+                'process.stdin.on(\'data\', (input) => { \n ' +
+                '  console.log(input.trim().split(\' \').join(\'\\n\')); \n ' +
+                '}); \n ',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // C# test cases
+    {
+        name: 'csharp : hello world',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n\n' +
+                'public class Program\n' +
+                '{\n' +
+                '    public static void Main()\n' +
+                '    {\n' +
+                '        Console.WriteLine("hello world");\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'csharp : print stdin',
+        reqObject: {
+            language: 'csharp',
+            script:
+                'using System;\n\n' +
+                'public class Program\n' +
+                '{\n' +
+                '    public static void Main()\n' +
+                '    {\n' +
+                '        string input = Console.ReadLine();\n' +
+                '        string[] numbers = input.Split(\' \');\n' +
+                '        foreach (string number in numbers)\n' +
+                '        {\n' +
+                '            Console.WriteLine(number);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // Kotlin test cases
+    {
+        name: 'kotlin : hello world',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : print stdin',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    val input = readLine()\n' +
+                '    input?.split(" ")?.forEach { println(it) }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
