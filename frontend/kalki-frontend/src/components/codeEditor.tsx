@@ -7,12 +7,14 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ code, onChange }) => {
   return (
-    <textarea
-      value={code}
-      onChange={(e) => onChange(e.target.value)}
-      rows={20}
-      cols={80}
-    />
+    <div className="mt-4">
+      <textarea
+        value={code}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-64 p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-mono text-sm bg-gray-50"
+        placeholder="Enter your code here..."
+      />
+    </div>
   );
 };
 
