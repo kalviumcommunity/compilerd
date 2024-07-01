@@ -18,6 +18,34 @@ const testCases = [
         },
     },
     {
+        
+            name: 'cpp : conditional statements',
+            reqObject: {
+                language: 'cpp',
+                script: 
+                    '#include<iostream>\n' +
+                    'using namespace std;\n' +
+                    'int main(){\n' +
+                    '    int number;\n' +
+                    '    cout << "Enter a number: ";\n' +
+                    '    cin >> number;\n' +
+                    '    if (number % 2 == 0) {\n' +
+                    '        cout << number << " is even." << endl;\n' +
+                    '    } else {\n' +
+                    '        cout << number << " is odd." << endl;\n' +
+                    '    }\n' +
+                    '    return 0;\n' +
+                    '}\n',
+            },
+            expectedResponse: {
+                val: 'Enter a number: ',
+                status: 200,
+                error: 0,
+            },
+        
+        
+    },
+    {
         name: 'cpp : print stdin',
         reqObject: {
             language: 'cpp',
@@ -41,6 +69,50 @@ const testCases = [
 
     },
     {
+        name: 'cpp : loops',
+        reqObject: {
+            language: 'cpp',
+            script: 
+                '#include<iostream>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    for (int i = 1; i <= 5; ++i) {\n' +
+                '        cout << "Count: " << i << endl;\n' +
+                '    }\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Count: 1\nCount: 2\nCount: 3\nCount: 4\nCount: 5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'cpp : strings',
+        reqObject: {
+            language: 'cpp',
+            script: 
+                '#include<iostream>\n' +
+                '#include<string>\n' +
+                'using namespace std;\n' +
+                'int main(){\n' +
+                '    string str;\n' +
+                '    cout << "Enter a string: ";\n' +
+                '    cin >> str;\n' +
+                '    cout << "You entered: " << str << endl;\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Enter a string: ',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+    
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
@@ -52,6 +124,25 @@ const testCases = [
             error: 0,
         },
     },
+    
+    {
+        name: 'nodejs : simple addition function',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'function add(a, b) {\n' +
+                '  return a + b;\n' +
+                '}\n' +
+                'console.log(add(2, 3));\n',
+        },
+        expectedResponse: {
+            val: '5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+
     {
         name: 'nodejs : print stdin',
         reqObject: {
@@ -70,6 +161,30 @@ const testCases = [
             error: 0,
         },
     },
+
+    {
+        name: 'nodejs : http server',
+        reqObject: {
+            language: 'nodejs',
+            script:
+                'const http = require("http");\n' +
+                'const server = http.createServer((req, res) => {\n' +
+                '  res.statusCode = 200;\n' +
+                '  res.setHeader("Content-Type", "text/plain");\n' +
+                '  res.end("Hello, World!\\n");\n' +
+                '});\n' +
+                'server.listen(3000, "127.0.0.1", () => {\n' +
+                '  console.log("Server running at http://127.0.0.1:3000/");\n' +
+                '});\n',
+        },
+        expectedResponse: {
+            val: 'Server running at http://127.0.0.1:3000/\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+
     {
         name: 'python : hello world',
         reqObject: {
@@ -82,6 +197,22 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'python : basic arithmetic',
+        reqObject: {
+            language: 'python',
+            script: 
+                'a = 5\n' +
+                'b = 3\n' +
+                'print(a + b)\n',
+        },
+        expectedResponse: {
+            val: '8\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
     {
         name: 'python : print stdin',
         reqObject: {
@@ -104,6 +235,21 @@ const testCases = [
         },
     },
     {
+        name: 'python : loops',
+        reqObject: {
+            language: 'python',
+            script: 
+                'for i in range(1, 6):\n' +
+                '    print(f"Count: {i}")\n',
+        },
+        expectedResponse: {
+            val: 'Count: 1\nCount: 2\nCount: 3\nCount: 4\nCount: 5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+    {
         name: 'c : hello world',
         reqObject: {
             language: 'c',
@@ -120,6 +266,52 @@ const testCases = [
             error: 0,
         },
     },
+    
+    {
+        name: 'c : conditional statements',
+        reqObject: {
+            language: 'c',
+            script: 
+                '#include <stdio.h>\n' +
+                'int main() {\n' +
+                '    int number = 7;\n' +
+                '    if (number % 2 == 0) {\n' +
+                '        printf("even\\n");\n' +
+                '    } else {\n' +
+                '        printf("odd\\n");\n' +
+                '    }\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'odd\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+
+    {
+        name: 'c : loops',
+        reqObject: {
+            language: 'c',
+            script: 
+                '#include <stdio.h>\n' +
+                'int main() {\n' +
+                '    for (int i = 1; i <= 5; i++) {\n' +
+                '        printf("Count: %d\\n", i);\n' +
+                '    }\n' +
+                '    return 0;\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Count: 1\nCount: 2\nCount: 3\nCount: 4\nCount: 5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+    
     {
         name: 'c : print stdin',
         reqObject: {
@@ -184,6 +376,49 @@ const testCases = [
         },
     },
     {
+        name: 'java : conditional statements',
+        reqObject: {
+            language: 'java',
+            script: 
+                'public class Main {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        int number = 7;\n' +
+                '        if (number % 2 == 0) {\n' +
+                '            System.out.println("even");\n' +
+                '        } else {\n' +
+                '            System.out.println("odd");\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'odd\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'java : loops',
+        reqObject: {
+            language: 'java',
+            script: 
+                'public class Main {\n' +
+                '    public static void main(String[] args) {\n' +
+                '        for (int i = 1; i <= 5; i++) {\n' +
+                '            System.out.println("Count: " + i);\n' +
+                '        }\n' +
+                '    }\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'Count: 1\nCount: 2\nCount: 3\nCount: 4\nCount: 5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+    
+    {
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
@@ -211,6 +446,43 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'ruby : conditional statements',
+        reqObject: {
+            language: 'ruby',
+            script: 
+                'number = 7\n' +
+                'if number % 2 == 0\n' +
+                '    puts "even"\n' +
+                'else\n' +
+                '    puts "odd"\n' +
+                'end'
+        },
+        expectedResponse: {
+            val: 'odd\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    {
+        name: 'ruby : loops',
+        reqObject: {
+            language: 'ruby',
+            script: 
+                '5.times do |i|\n' +
+                '    puts "Count: #{i + 1}"\n' +
+                'end'
+        },
+        expectedResponse: {
+            val: 'Count: 1\nCount: 2\nCount: 3\nCount: 4\nCount: 5\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    
+    
+    
     {
         name: 'TLE test',
         reqObject: {
