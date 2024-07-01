@@ -1,12 +1,16 @@
 
 import './App.css';
-import Compiler from './components/Compiler';
+import Header from './components/Header';
+// import Compiler from './components/Compiler';
+import Temp from './components/Temp';
 
 function App() {
   return (
     <>
-      <div className="min-h-screen flex justify-center bg-gray-900 pt-2">
-       <Compiler/>
+      <div className="h-screen flex bg-gray-900 flex-col">
+       {/* <Compiler/> */}
+       <Header/>
+       <Temp/>
       </div>
     </>
   );

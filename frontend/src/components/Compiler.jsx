@@ -70,7 +70,7 @@ const Compiler = () => {
                         <option value="promptv1">PromptV1</option>
                         <option value="promptv2">PromptV2</option>
                         <option value="multifile">Multifile</option>
-                        <option value="sqlite3">SQLite3</option>
+                        <option value="sqlite3">SQLite3  </option>
                         <option value="csharp">C#</option>
                         <option value="go">Go</option>
                         <option value="php">PHP</option>
@@ -105,3 +105,4 @@ const Compiler = () => {
 }
 
 export default Compiler
+

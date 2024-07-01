@@ -207,7 +207,7 @@ const _executeCode = async (req, res, response) => {
 
         code = req.script;
         language = req.language;
-        stdin = req.stdin;
+        stdin = req.stdin || '';
         const langConfig = LANGUAGES_CONFIG[language];
         console.log("Language config:", langConfig);
 
