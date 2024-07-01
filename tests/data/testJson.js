@@ -315,6 +315,18 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'rust : hello world',
+        reqObject: {
+            language: 'rust',
+            script: 'fn main() { println!("hello world"); }',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
