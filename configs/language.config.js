@@ -1,8 +1,16 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const { GO,CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
+const intial_mem_for_GO = 1024
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
+    [csharp] : { 
+        compile: 'mcs -out:a.exe solution.cs',
+        run: 'mono a.exe',
+        timeout: 2,
+        filename: 'solution.cs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
     [C]: {
         compile: 'gcc -o a.out solution.c',
         run: './a.out',
@@ -50,6 +58,13 @@ const LANGUAGES_CONFIG = {
     },
     [PROMPTV2]: {
         model: 'gpt-3.5-turbo-1106',
+    },
+    [GO]: {
+        compile: 'go build -o solution solution.go',
+        run: './solution',
+        timeout: 5,
+        filename: 'solution.go',
+        memory: intial_mem_for_GO * ONE_MB,
     },
 }
 

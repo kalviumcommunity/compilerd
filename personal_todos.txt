@@ -2,5 +2,5 @@ find languages to add in the compiler
 options 
 1. php (exec : php)
 2. c# (exec:mono-complete =>  mono is not available on alphnine)
-3. go (exec : go)
+3.(done) go (exec : go)
 4. rust (exec : rust)
