@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeCompile Pro</title>
+    <title>CodeMaster Pro</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Fira+Code&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -11,10 +11,10 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-code"></i> CodeCompile Pro</h1>
+            <h1><i class="fas fa-code"></i> CodeMaster Pro</h1>
         </header>
         <main>
-            <div class="compiler-container">
+            <div class="code-container">
                 <div class="top-controls">
                     <div class="language-select">
                         <select id="language">
@@ -33,20 +33,51 @@
                 <div class="code-area">
                     <textarea id="code" placeholder="Enter your code here..."></textarea>
                 </div>
-                <div class="bottom-panel">
-                    <div class="input-section">
-                        <h3>Input</h3>
-                        <textarea id="userInput" placeholder="Enter input for your program (if needed)..."></textarea>
-                    </div>
-                    <div class="output-section">
-                        <h3>Output</h3>
-                        <pre id="output"></pre>
-                    </div>
+            </div>
+            <div class="io-container">
+                <div class="input-section">
+                    <h3>Input</h3>
+                    <textarea id="userInput" placeholder="Enter input for your program (if needed)..."></textarea>
+                </div>
+                <div class="output-section">
+                    <h3>Output</h3>
+                    <pre id="output"></pre>
+                </div>
+            </div>
+            <div class="converter-container">
+                <h2>Code Converter</h2>
+                <div class="converter-controls">
+                    <select id="fromLanguage">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="java">Java</option>
+                        <option value="python">Python</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="rust">Rust</option>
+                        <option value="dart">Dart</option>
+                    </select>
+                    <span>to</span>
+                    <select id="toLanguage">
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="java">Java</option>
+                        <option value="python">Python</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="rust">Rust</option>
+                        <option value="dart">Dart</option>
+                    </select>
+                    <button onclick="convertCode()" class="convert-btn">Convert</button>
+                </div>
+                <div class="converted-code">
+                    <h3>Converted Code</h3>
+                    <pre id="convertedCode"></pre>
                 </div>
             </div>
         </main>
         <footer>
-            <p>&copy; 2024 CodeCompile Pro. All rights reserved.</p>
+            <p>&copy; 2024 CodeMaster Pro. All rights reserved.</p>
         </footer>
     </div>
     <script src="script.js"></script>

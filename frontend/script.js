@@ -62,3 +62,41 @@ function getSubmissionResult(token) {
             output.textContent = 'Error: ' + err.message;
         });
 }
+
+async function convertCode() {
+    const fromLanguage = document.getElementById('fromLanguage').value;
+    const toLanguage = document.getElementById('toLanguage').value;
+    const code = document.getElementById('code').value;
+    const convertedCodeElement = document.getElementById('convertedCode');
+
+    convertedCodeElement.textContent = 'Converting...';
+
+    const prompt = `Translate the following ${fromLanguage} code to ${toLanguage}:\n\n${code}\n\nTranslated ${toLanguage} code:`;
+
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: [
+                    {"role": "system", "content": "You are a helpful assistant that translates code between programming languages."},
+                    {"role": "user", "content": prompt}
+                ]
+            })
+        });
+
+        const data = await response.json();
+        if (data.choices && data.choices.length > 0) {
+            convertedCodeElement.textContent = data.choices[0].message.content.trim();
+        } else {
+            convertedCodeElement.textContent = 'Conversion failed: No response from API';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        convertedCodeElement.textContent = 'Error: ' + error.message;
+    }
+}
