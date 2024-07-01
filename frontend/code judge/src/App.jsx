@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import CodeEditor from "./components/CodeEditor";
 import Header from "./components/Header";
 import Assistant from "./components/Assistant";
-
+import TextExtractor from "./components/TextExtractor";
 function App() {
   return (
     <>
@@ -11,6 +11,7 @@ function App() {
         <CodeEditor />
       </Box>
       <Assistant />
+      <TextExtractor />
     </>
   );
 }
