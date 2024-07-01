@@ -1,0 +1,61 @@
+.navbar {
+    width: 98vw;
+    display: flex;
+    justify-content: space-between;
+    padding: 1% .5vw;
+}
+
+.select-lang {
+    margin-right: 20px;
+}
+
+.loading-info {
+    display: flex;
+    gap: 30px;
+}
+
+.select-lang select {
+    width: 200px;
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    background-color: #fafafa;
+    color: #333333;
+}
+
+.select-lang select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.select-lang select option {
+    background-color: #ffffff;
+    color: #333333;
+    padding: 5%;
+}
+
+.select-lang select option:hover {
+    background-color: #f0f0f0;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #7983ff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;/
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+
+    }
+}

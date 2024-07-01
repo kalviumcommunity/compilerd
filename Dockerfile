@@ -1,20 +1,25 @@
 FROM docker.io/library/node:20.13.0-alpine
 
 ENV PYTHONUNBUFFERED=1
+
 RUN set -ex && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables go php php-fpm php-cli icu-libs
+    apk add --no-cache \
+        gcc \
+        g++ \
+        musl-dev \
+        python3 \
+        openjdk17 \
+        ruby \
+        iptables \
+        ip6tables \
+        go \
+        php 
+
+RUN set -ex && \
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
-
-# Install .NET Core SDK (for C#)
-RUN set -ex && \
-    apk add --no-cache --virtual=build-dependencies wget icu-dev && \
-    wget https://dot.net/v1/dotnet-install.sh && \
-    chmod +x ./dotnet-install.sh && \
-    ./dotnet-install.sh --channel LTS && \
-    ln -s /root/.dotnet/dotnet /usr/bin/dotnet && \
-    apk del build-dependencies
 
 RUN set -ex && \
     rm -f /usr/libexec/gcc/x86_64-alpine-linux-musl/6.4.0/cc1obj && \
@@ -32,6 +37,5 @@ EXPOSE 8080
 
 # add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
-USER runner
-
+#   USER runner
 CMD sh /usr/bin/start.sh
