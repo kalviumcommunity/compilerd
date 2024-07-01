@@ -1,14 +1,15 @@
-# <img alt="Kalvium" src="https://kalvium.community/images/sidebar-2d-logo.svg" width="80"/> Kalvium
+# My Contributions :
 
----
+### Added Language Support :
+  - ``C#``
+  - ``PHP``
+  - ``GO``
 
-<!-- [![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url] -->
+*Note: Added 2 Test cases for each language.*
 
+### Front-end User Interface :
 
-
+* ``TailwindCSS`` and ``ReactJS`` were used to create a user-friendly interface for running and compiling codes. 
 
 
 
@@ -76,15 +77,42 @@ We will run the project locally and try to make a request to see a sample use ca
         }
     ```
 
+# Frontend setup
+Navigate to frontend directory, you can run:
+
+### `npm install`
+
+To install required dependencies to run frontend.
+
+### `npm start`
+
+To run frontend
+Open [http://localhost:3001](http://localhost:3001) to view it in your browser.
+The page will provide and interface to interact with complier.
+
 ## Languages supported :
-  - C
-  - CPP
-  - Python
-  - Java
-  - Node.js
-  - Ruby
+  - ``C``
+  - ``CPP``
+  - ``Python``
+  - ``Java``
+  - ``Node.js``
+  - ``Ruby``
+  -  ``C#``
+  - ``PHP``
+  - ``GO``
 
 ## Contribution :
+
+### Added Language Support:
+  - ``C#``
+  - ``PHP``
+  - ``GO``
+
+*Note: Added 2 Test cases for each language.*
+
+### Front-end User Interface :
+
+* ``TailwindCSS`` and ``ReactJS`` were used to create a user-friendly interface for running and compiling codes.
 
 ### Prerequisites:
 For local development we should have the following dependencies set up locally in our system
@@ -139,3 +167,4 @@ For local development we should have the following dependencies set up locally i
 [stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+
