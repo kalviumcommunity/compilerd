@@ -275,6 +275,109 @@ const testCases = [
         },
     },
     {
+        name: 'fortran : hello world',
+        reqObject: {
+            language: 'fortran',
+            script:
+                'program hello\n' +
+                'print *, "hello world"\n' +
+                'end program hello\n',
+        },
+        expectedResponse: {
+            val: ' hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'fortran : print stdin',
+        reqObject: {
+            language: 'fortran',
+            script:
+                'program print_stdin\n' +
+                'integer :: number\n' +
+                'do\n' +
+                '    read(*,*,end=10) number\n' +
+                '    print *, number\n' +
+                'end do\n' +
+                '10 stop\n' +
+                'end program print_stdin\n',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: '           1\n           2\n           3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello world\\n";',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'while (<>) {\n' +
+                '    print;\n' +
+                '}\n',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ada : hello world',
+        reqObject: {
+            language: 'ada',
+            script:
+                'with Ada.Text_IO; use Ada.Text_IO;\n' +
+                'procedure Hello is\n' +
+                'begin\n' +
+                '   Put_Line ("hello world");\n' +
+                'end Hello;\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ada : print stdin',
+        reqObject: {
+            language: 'ada',
+            script:
+                'with Ada.Text_IO; use Ada.Text_IO;\n' +
+                'procedure Print_Stdin is\n' +
+                '   Input : Integer;\n' +
+                'begin\n' +
+                '   while not End_Of_File loop\n' +
+                '      Get (Input);\n' +
+                '      Put_Line (Integer\'Image (Input));\n' +
+                '   end loop;\n' +
+                'end Print_Stdin;\n',
+            stdin: '1\n2\n3\n',
+        },
+        expectedResponse: {
+            val: ' 1\n 2\n 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'OPEN AI test promptv1',
         reqObject: {
             language: 'promptv1',
