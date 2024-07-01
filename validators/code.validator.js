@@ -26,6 +26,10 @@ const isValidForExecute = async (body) => {
                 then: Joi.optional(),
                 otherwise: Joi.required(),
             }),
+        constraints: Joi.object({
+          TLE: Joi.number().integer().required(),
+          MLE: Joi.number().integer().required(),
+        }).optional(),
         url: Joi.string().trim()
             .when('language', {
                 is: MULTIFILE,
