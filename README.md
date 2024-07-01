@@ -8,7 +8,7 @@
 [![Issues][issues-shield]][issues-url] -->
 
 
-
+Just GO inside the file and run --> npm run dev (i have used vite + react + ts) for this
 
 
 
