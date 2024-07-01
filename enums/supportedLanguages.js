@@ -10,8 +10,9 @@ module.exports = {
     PROMPTV2: 'promptv2',
     MULTIFILE: 'multifile',
     SQLITE3: 'sqlite3',
-    
+
     GO: 'go',
     RUST: 'rust',
+    PHP: 'php', 
 
 }

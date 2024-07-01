@@ -327,6 +327,18 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php\n' + 'echo "hello world";\n',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
