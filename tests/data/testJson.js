@@ -298,6 +298,107 @@ const testCases = [
             error: 0,
         },
     },
-]
+ // Swift test cases
+    {
+        name: 'swift : hello world',
+        reqObject: {
+            language: 'swift',
+            script:
+                'print("hello world")\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'swift : print stdin',
+        reqObject: {
+            language: 'swift',
+            script:
+                'import Foundation\n' +
+                'if let input = readLine() {\n' +
+                '    print(input)\n' +
+                '}\n',
+            stdin: '1 2 3\n',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
 
-module.exports = { testCases }
+    // TypeScript test cases
+    {
+        name: 'typescript : hello world',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'console.log("hello world");\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'typescript : print stdin',
+        reqObject: {
+            language: 'typescript',
+            script:
+                'import * as readline from "readline";\n' +
+                'const rl = readline.createInterface({ input: process.stdin });\n' +
+                'rl.on("line", (input) => {\n' +
+                '    console.log(input);\n' +
+                '    rl.close();\n' +
+                '});\n',
+            stdin: '1 2 3\n',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+
+    // Kotlin test cases
+    {
+        name: 'kotlin : hello world',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'kotlin : print stdin',
+        reqObject: {
+            language: 'kotlin',
+            script:
+                'fun main() {\n' +
+                '    val input = readLine()\n' +
+                '    if (input != null) {\n' +
+                '        println(input)\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3\n',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+];
+
+module.exports = { testCases };

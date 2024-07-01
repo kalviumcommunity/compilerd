@@ -45,6 +45,27 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.rb',
         memory: ALLOWED_RAM * ONE_MB,
     },
+     [SWIFT]: {
+        compile: 'swiftc -o solution solution.swift',
+        run: './solution',
+        timeout: 5,
+        filename: 'solution.swift',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+     [TYPESCRIPT]: {
+        compile: 'tsc solution.ts',
+        run: 'node solution.js',
+        timeout: 10,
+        filename: 'solution.ts',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [KOTLIN]: {
+        compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
+        run: 'java -jar solution.jar',
+        timeout: 5,
+        filename: 'solution.kt',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
     [PROMPTV1]: {
         model: 'gpt-4-1106-preview',
     },
