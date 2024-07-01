@@ -1,6 +1,6 @@
 find languages to add in the compiler 
 options 
-1. php (exec : php)
+1. (done)php (exec : php)
 2. c# (exec:mono-complete =>  mono is not available on alphnine apk package manager - have to opt for traditional .tar.gz unpacking  )
 3.(done) go (exec : go)
 4. (done) rust (exec : rust)
