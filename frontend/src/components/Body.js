@@ -1,7 +1,6 @@
-
-
 import React, { useState } from 'react';
 import axios from 'axios';
+import stubs from '../defaultStubs';
 
 const Body = () => {
     const [code, setCode] = useState('');
@@ -53,6 +52,7 @@ const Body = () => {
 
     const handleLanguageChange = (e) => {
         setLanguage(e.target.value);
+        setCode(stubs[e.target.value] || '');
     };
 
     const toggleDarkMode = () => {
@@ -64,7 +64,7 @@ const Body = () => {
             <div className="flex items-center mb-6 w-full justify-between">
                 <div className="flex items-center">
                     <img src="https://camo.githubusercontent.com/f27baabc660e31293bb03fe4eda40e4ce9c1873620b0f51b2f221d138f77771c/68747470733a2f2f6b616c7669756d2e636f6d6d756e6974792f696d616765732f736964656261722d32642d6c6f676f2e737667" alt="Logo" className="h-12 mr-2"/>
-                    <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-blue-600'}`}> Kalvium Online Code Compiler</h1>
+                    <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-white-600'}`}> Kalvium Online Code Compiler</h1>
                 </div>
                 <button onClick={toggleDarkMode} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">
                     Toggle {isDarkMode ? 'Light' : 'Dark'} Mode
@@ -76,7 +76,7 @@ const Body = () => {
                         id="language"
                         value={language}
                         onChange={handleLanguageChange}
-                        className={`p-2 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} border border-gray-400 rounded-md`}
+                        className={`p-2 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-white'} border border-gray-400 rounded-md`}
                     >
                         <option value="nodejs">JavaScript</option>
                         <option value="c">C</option>
@@ -84,15 +84,14 @@ const Body = () => {
                         <option value="python">Python</option>
                         <option value="java">Java</option>
                         <option value="ruby">Ruby</option>
-                        <option value="promptv1">PromptV1</option>
-                        <option value="multifile">Multifile</option>
-                        <option value="sqlite3">SQLite3</option>
                         <option value="rust">Rust</option>
                         <option value="go">Go</option>
                         <option value="php">PHP</option>
+                        <option value="csharp">C#</option>
+                        <option value="go">Go</option>
                         <option value="r">R</option>
                         <option value="perl">Perl</option>
-                        <option value="csharp">C#</option>
+                        <option value="promptv1">Prompt</option>
                     </select>
                 </div>
                 <textarea
@@ -100,7 +99,7 @@ const Body = () => {
                     onChange={handleCodeChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Write your code here..."
-                    className={`w-full h-40 p-4 ${isDarkMode ? 'bg-black text-white' : 'bg-gray-200 text-black'} border border-gray-400 rounded-md font-mono placeholder-gray-500`}
+                    className={`w-full h-40 p-4 ${isDarkMode ? 'bg-black text-white' : 'bg-gray-200 text-white'} border border-gray-400 rounded-md font-mono placeholder-gray-500`}
                 />
                 <button
                     onClick={runCode}
@@ -110,8 +109,8 @@ const Body = () => {
                 </button>
             </div>
             <div className="w-full">
-                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-black'} mb-2`}>Output:</h3>
-                <pre className={`w-full h-40 p-4 ${isDarkMode ? 'bg-black text-white' : 'bg-gray-200 text-black'} border border-gray-400 rounded-md overflow-auto`}>
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-white'} mb-2`}>Output:</h3>
+                <pre className={`w-full h-40 p-4 ${isDarkMode ? 'bg-black text-white' : 'bg-gray-200 text-white'} border border-gray-400 rounded-md overflow-auto`}>
                     {output}
                 </pre>
             </div>
