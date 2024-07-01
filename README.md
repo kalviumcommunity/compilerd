@@ -159,4 +159,4 @@ For local development we should have the following dependencies set up locally i
 
 Here is an example working integrated with the backend (on docker). Left hand side has a RUST stub, Input has input given and we get the desired output.
 
-![RustWorking]{/images/working.jpg}
+![RustWorking](/images/working.jpg)
