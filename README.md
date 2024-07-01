@@ -139,3 +139,24 @@ For local development we should have the following dependencies set up locally i
 [stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+
+## My Contributions :
+
+### Languages I added :
+  - Rust
+  - Go
+  - PHP
+  - R
+  - Perl
+  - C#
+
+*Note: Added 2 Test cases for each language.*
+
+### Front-end User Interface :
+* Used ReactJS and TailwindCSS to provide a User-Interface to the application.
+* On the left side we have stubs(example starter codes for every language)
+* On the right side we have input and output tabs for running and executing the code.
+
+Here is an example working integrated with the backend (on docker). Left hand side has a RUST stub, Input has input given and we get the desired output.
+
+![RustWorking]{/images/working.jpg}
