@@ -40,7 +40,6 @@ const testCases = [
         },
 
     },
-
     {
         name: 'nodejs : hello world',
         reqObject: {
@@ -83,9 +82,6 @@ const testCases = [
           error: 0,
         },
     },
-
-
-
     {
         name: 'python : hello world',
         reqObject: {
@@ -118,9 +114,7 @@ const testCases = [
             status: 200,
             error: 0,
         },
-    },
-
-    
+    },    
     // {
     //     name: 'python : runtime error',
     //     reqObject: {
@@ -133,7 +127,6 @@ const testCases = [
     //         error: 1,
     //     },
     // },
-
     {
         name: 'python : function call',
         reqObject: {
@@ -150,8 +143,6 @@ const testCases = [
           error: 0,
         },
     },
-
-
     {
         name: 'python : string manipulation',
         reqObject: {
@@ -167,8 +158,6 @@ const testCases = [
           error: 0,
         },
     },
-
-
     {
         name: 'c : hello world',
         reqObject: {
@@ -269,7 +258,6 @@ const testCases = [
           error: 1,
         },
     },
-
     {
         name: 'ruby : print hello world',
         reqObject: {
@@ -310,7 +298,6 @@ const testCases = [
         error: 0,
         },
     },
-    
     {
         name: 'ruby : access array elements',
         reqObject: {
@@ -325,7 +312,6 @@ const testCases = [
           error: 0,
         },
     },
-
     {
         name: 'ruby : regular expressions',
         reqObject: {
@@ -341,8 +327,6 @@ const testCases = [
           error: 0,
         },
     },
-
-
     {
         name: 'TLE test',
         reqObject: {
@@ -447,8 +431,6 @@ const testCases = [
             error: 0,
         },
     },
-
-    
     {
         name: 'go : string concatenation',
         reqObject: {
@@ -473,8 +455,6 @@ const testCases = [
             error: 0,
           },
     },
-    
-    
     {
       name: 'go : if-else statement',
       reqObject: {
@@ -499,10 +479,7 @@ const testCases = [
             status: 200,
             error: 0,
       },
-    },
-    
-    
-    
+    },    
     {
         name: 'go : for loop',
         reqObject: {
@@ -525,10 +502,6 @@ const testCases = [
         error: 0,
       },
     },
-    
-    
-    
-    
     {
         name: 'go : array access',
         reqObject: {

@@ -1,3 +1,8 @@
+this is a personal todo file for my reference and should be ignored. 
+In future commits it will be added in .gitignore 
+THANK YOU
+
+
 find languages to add in the compiler 
 options 
 1. (done)php (exec : php)
