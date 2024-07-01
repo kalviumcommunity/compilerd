@@ -45,7 +45,7 @@ const Compiler = () => {
         console.log(payload);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/execute/', payload);
+            const response = await axios.post('http://localhost:3000/api/execute/', payload);
             setOutput(response.data.output);
         } catch (error) {
             console.error('Error executing code:', error);
@@ -82,7 +82,7 @@ const Compiler = () => {
 
             <div className="flex flex-row w-5/6 bg-gray-800 p-4">
                 <div className="flex flex-col w-1/2 pr-2">
-                    <h3 className="text-lg font-semibold text-white">Filename: {getFileName()}</h3>
+                    <h3 className="text-lg font-semibold text-white">{getFileName()}</h3>
                     <textarea
                         value={code}
                         onChange={handleCodeChange}
@@ -96,7 +96,7 @@ const Compiler = () => {
                     <textarea
                         value={stdin}
                         onChange={handleInputChange}
-                        placeholder="Each input should in separate lines ..."
+                        placeholder="Enter inputs in seperate lines...."
                         className="w-full h-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md font-mono"
                     />
                     <button

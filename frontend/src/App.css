@@ -1,3 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Shantell+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+.nunito-sans-400 {
+  font-family: "Nunito Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+  font-variation-settings:
+    "wdth"100,
+    "YTLC"500;
+}
+
 .App {
   text-align: center;
 }
@@ -32,6 +44,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
