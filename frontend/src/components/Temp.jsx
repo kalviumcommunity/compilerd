@@ -42,11 +42,8 @@ const Temp = () => {
 
         try {
             const response = await axios.post('http://localhost:5000/api/execute/', payload);
-            if (response.data.error === 0) {
-                setOutput(response.data.output);
-            } else {
-                setOutput(response.data.compile_message);
-            }
+            // console.log(response.data)
+            setOutput(response.data.output);
         } catch (error) {
             console.error('Error executing code:', error);
         }
@@ -87,7 +84,7 @@ const Temp = () => {
                     <textarea
                         value={stdin}
                         onChange={handleInputChange}
-                        placeholder="Provide input here..."
+                        placeholder="Every input should be in seperate line"
                         className="w-full h-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md font-mono"
                     />
                     <button

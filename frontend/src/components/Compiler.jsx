@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { languageExtensions, boilerplateCode } from '../utils/complier.js';
+
+
 
 const Compiler = () => {
-    const [code, setCode] = useState('');
+
+    const [code, setCode] = useState(boilerplateCode['python']);
     const [output, setOutput] = useState('');
-    const [language, setLanguage] = useState('nodejs');
+    const [language, setLanguage] = useState('python');
+    const [stdin, setStdin] = useState("");
 
     const handleCodeChange = (e) => {
         setCode(e.target.value);
+    };
+
+    const handleInputChange = (e) => {
+        setStdin(e.target.value);
     };
 
     const handleKeyDown = (e) => {
@@ -29,80 +38,81 @@ const Compiler = () => {
     const runCode = async () => {
         const payload = {
             language,
-            script: code
+            script: code,
+            stdin: stdin || undefined
         };
+        setOutput('');
         console.log(payload);
-        setOutput(''); // Clear the output while waiting for the response
 
         try {
             const response = await axios.post('http://localhost:5000/api/execute/', payload);
-            // eslint-disable-next-line
-            if (response.data.error == 0) {
-                console.log(response.data);
-                setOutput(response.data.output);
-            } else {
-                console.log(response.data);
-                setOutput(response.data.compile_message);
-            }
+            setOutput(response.data.output);
         } catch (error) {
             console.error('Error executing code:', error);
         }
     };
 
-    const handleLanguageChange = (e) => {
-        setLanguage(e.target.value);
+    const getFileName = () => {
+        return `main.${languageExtensions[language]}`;
     };
+
+    const handleLanguageChange = (lang) => {
+        setLanguage(lang);
+        setCode(boilerplateCode[lang]);
+    };
+
     return (
-        <div className="flex flex-col items-center w-full max-w-6xl mt-8">
-            <div className="flex flex-col items-start mb-4 w-full">
-                <div className="flex justify-between w-full">
-                    <select
-                        value={language}
-                        onChange={handleLanguageChange}
-                        className="mb-2 p-2 bg-gray-800 text-white border border-gray-600 rounded-md"
-                    >
-                        <option value="nodejs">JavaScript</option>
-                        <option value="c">C</option>
-                        <option value="cpp">C++</option>
-                        <option value="python">Python</option>
-                        <option value="java">Java</option>
-                        <option value="ruby">Ruby</option>
-                        <option value="promptv1">PromptV1</option>
-                        <option value="promptv2">PromptV2</option>
-                        <option value="multifile">Multifile</option>
-                        <option value="sqlite3">SQLite3  </option>
-                        <option value="csharp">C#</option>
-                        <option value="go">Go</option>
-                        <option value="php">PHP</option>
-                        <option value="perl">Perl</option>
-                    </select>
-                </div>
-                <textarea
-                    value={code}
-                    onChange={handleCodeChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Write your code here..."
-                    className="w-full h-40 p-2 bg-gray-800 text-white border border-gray-600 rounded-md font-mono"
-                />
-                <br />
-                <button
-                    onClick={runCode}
-                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                    Run Code
-                </button>
+        <div className="flex h-screen">
+            <div className="flex flex-col w-1/6 bg-gray-900 text-white p-4">
+                <h2 className="text-xl font-bold mb-4">Select Language</h2>
+                <ul>
+                    {Object.keys(languageExtensions).map((lang) => (
+                        <li key={lang} className="mb-2">
+                            <button
+                                onClick={() => handleLanguageChange(lang)}
+                                className={`w-full text-left p-2 rounded-md ${language === lang ? 'bg-blue-700' : 'bg-gray-800 hover:bg-gray-700'
+                                    }`}
+                            >
+                                {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
             </div>
-            <div className="w-full">
-                <br />
-                <h3 className="text-lg font-semibold text-white">Output:</h3>
-                <br />
-                <pre className="w-full h-40 p-2 bg-gray-800 text-white border border-gray-600 rounded-md overflow-auto">
-                    {output}
-                </pre>
+
+            <div className="flex flex-row w-5/6 bg-gray-800 p-4">
+                <div className="flex flex-col w-1/2 pr-2">
+                    <h3 className="text-lg font-semibold text-white">Filename: {getFileName()}</h3>
+                    <textarea
+                        value={code}
+                        onChange={handleCodeChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Write your code here..."
+                        className="w-full h-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md font-mono"
+                    />
+                </div>
+                <div className="flex flex-col w-1/2 pl-2">
+                    <h3 className="text-lg font-semibold text-white">Input:</h3>
+                    <textarea
+                        value={stdin}
+                        onChange={handleInputChange}
+                        placeholder="Each input should in separate lines ..."
+                        className="w-full h-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md font-mono"
+                    />
+                    <button
+                        onClick={runCode}
+                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        Run Code
+                    </button>
+                    <h3 className="text-lg font-semibold text-white mt-4">Output:</h3>
+                    <pre className="w-full min-h-60 p-2 bg-gray-700 text-white border border-gray-600 rounded-md overflow-auto">
+                        {output}
+                    </pre>
+                </div>
             </div>
         </div>
     );
 }
 
-export default Compiler
-
+export default Compiler;
