@@ -298,6 +298,118 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello world";',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script: 'my $input = <>; print $input;',
+            stdin: '10\n',
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : hello world',
+        reqObject: {
+            language: 'ruby',
+            script: 'print "hello world"',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'ruby : print stdin',
+        reqObject: {
+            language: 'ruby',
+            script: 'user_input = gets.chomp; puts user_input;',
+            stdin: '10\n',
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script: 'package main; import "fmt"; func main() { fmt.Println("hello world") }',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script: 'package main; import "fmt"; func main() { var input int; fmt.Scanln(&input); fmt.Println(input) }',
+            stdin: '10\n',
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : hello world',
+        reqObject: {
+            language: 'rust',
+            script: `
+                fn main() {
+                    println!("hello world");
+                }
+            `,
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : print stdin',
+        reqObject: {
+            language: 'rust',
+            script: `
+                use std::io::{self, BufRead};
+
+                fn main() {
+                    let stdin = io::stdin();
+                    let input = stdin.lock().lines().next().unwrap().unwrap();
+                    println!("{}", input);
+                }
+            `,
+            stdin: '10\n',
+        },
+        expectedResponse: {
+            val: '10\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
