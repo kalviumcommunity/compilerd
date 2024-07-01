@@ -1,5 +1,5 @@
 module.exports = {
-    csharp : 'csharp' 
+    csharp : 'csharp',
     C: 'c',
     CPP: 'cpp',
     PYTHON: 'python',

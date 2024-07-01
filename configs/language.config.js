@@ -4,13 +4,13 @@ const intial_mem_for_GO = 1024
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
-    [csharp] : { 
-        compile: 'mcs -out:a.exe solution.cs',
-        run: 'mono a.exe',
-        timeout: 2,
-        filename: 'solution.cs',
-        memory: ALLOWED_RAM * ONE_MB,
-    },
+    // [csharp] : { 
+    //     compile: 'mcs -out:a.exe solution.cs',
+    //     run: 'mono a.exe',
+    //     timeout: 2,
+    //     filename: 'solution.cs',
+    //     memory: ALLOWED_RAM * ONE_MB,
+    // },
     [C]: {
         compile: 'gcc -o a.out solution.c',
         run: './a.out',
