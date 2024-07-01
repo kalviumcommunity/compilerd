@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SiPython, SiC, SiRuby, SiGo, SiCsharp } from "react-icons/si";
 import { TbBrandCpp, TbBrandKotlin } from "react-icons/tb";
 import { IoLogoJavascript } from "react-icons/io5";
@@ -64,11 +64,14 @@ function CodeEditor() {
 
       const result = await response.json();
       console.log(result);
+
       const output = result.output || "";
       const compileMessage = result.compile_message || "";
+
       if (compileMessage !== "") {
         setError(true);
       }
+      setError(compileMessage !== "" || output.toLowerCase().includes("error"));
       const formattedOutput = output + compileMessage;
 
       setOutput(formattedOutput);
@@ -95,6 +98,20 @@ function CodeEditor() {
       document.removeEventListener("keydown", handleKeyPress);
     };
   }, [code, input, selectedLanguage]);
+
+  const textareaRef = useRef(null);
+  const lineNumbersRef = useRef(null);
+
+  useEffect(() => {
+    const syncScroll = () => {
+      if (lineNumbersRef.current) {
+        lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+      }
+    };
+
+    textareaRef.current.addEventListener("scroll", syncScroll);
+    return () => textareaRef.current.removeEventListener("scroll", syncScroll);
+  }, []);
 
   return (
     <div className="flex h-screen bg-slate-900 text-gray-100">
@@ -145,13 +162,59 @@ function CodeEditor() {
             {loading ? "Loading...." : "Run Code"}
           </button>
         </div>
-        <textarea
+        <div className="relative flex-1 mb-4 font-mono text-sm">
+          <div
+            ref={lineNumbersRef}
+            className="absolute left-0 top-0 bottom-0 w-10 bg-slate-700 text-gray-400 text-right pr-2 pt-4 select-none overflow-hidden"
+          >
+            {code.split("\n").map((_, index) => (
+              <div key={index} className="leading-6">
+                {index + 1}
+              </div>
+            ))}
+          </div>
+          <textarea
+            ref={textareaRef}
+            id="code-editor"
+            className="w-full h-full bg-slate-800 text-gray-100 p-4 pl-12 rounded-lg resize-none focus:ring-2 focus:ring-teal-500 focus:outline-none leading-6"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            style={{ tabSize: 2 }}
+          />
+        </div>
+        {/* <textarea
           id="code-editor"
           className="flex-1 bg-slate-800 text-gray-100 p-4 rounded-lg mb-4 resize-none focus:ring-2 focus:ring-teal-500 focus:outline-none"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-        />
-        <div className="flex w-full ">
+        /> */}
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+          <div className="flex-1 bg-slate-800 rounded-lg overflow-hidden">
+            <div className=" px-4 py-2">
+              <h3 className="text-sm font-semibold text-teal-300">Input</h3>
+            </div>
+            <textarea
+              id="input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="w-full h-32 bg-slate-800 text-gray-100 p-4 resize-none focus:ring-1 focus:ring-teal-500 focus:outline-none"
+              placeholder="Enter your input here..."
+            ></textarea>
+          </div>
+          <div className="flex-1 bg-slate-800 rounded-lg overflow-hidden">
+            <div className=" px-4 py-2">
+              <h3 className="text-sm font-semibold text-teal-300">Output</h3>
+            </div>
+            <pre
+              className={`w-full h-32 p-4 overflow-auto whitespace-pre-wrap break-words ${
+                error ? "text-red-500" : "text-gray-100"
+              }`}
+            >
+              {output}
+            </pre>
+          </div>
+        </div>
+        {/* <div className="flex w-full ">
           <div
             className="flex-3 m-1 bg-slate-800 text-gray-100 p-4 rounded-lg overflow-y-auto resize-vertical focus:ring-2 focus:ring-teal-500 focus:outline-none"
             style={{
@@ -188,7 +251,7 @@ function CodeEditor() {
               {output}
             </pre>
           </div>
-        </div>
+        </div> */}
       </main>
     </div>
   );

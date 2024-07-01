@@ -43,5 +43,9 @@ class Program {
 fun main() {
     println("Try kotlin Kalvium");
 }`,
+  type: `// Write kotlin code here
+fun main() {
+    println("Try kotlin Kalvium");
+}`,
 };
 export default codeSnippets;
