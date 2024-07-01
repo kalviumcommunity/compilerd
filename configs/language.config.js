@@ -45,6 +45,27 @@ const LANGUAGES_CONFIG = {
         filename: 'solution.rb',
         memory: ALLOWED_RAM * ONE_MB,
     },
+    [JAVASCRIPT]:{
+        compile: 'node --check solution.js',
+        run: 'node solution.js',
+        timeout: 10,
+        filename: 'solution.js',
+        memory: 786432, // Node.js v20 requires more initial memory, so initialize it to around 780MB (1.5 * 512MB). This value is higher than the previous 512MB but below 1GB to ensure ulimit catches excessive memory use without the GCR container being killed.
+        },
+    [GO]:{
+        compile: 'go build -o solution solution.go',
+        run: './solution',
+        timeout: 2,
+        filename: 'solution.go',
+        memory: ALLOWED_RAM * ONE_MB,
+        },
+    [PERL]: {
+        compile: 'perl -c solution.pl',
+        run: 'perl solution.pl',
+        timeout: 10,
+        filename: 'solution.pl',
+        memory: ALLOWED_RAM * ONE_MB,
+        },
     [PROMPTV1]: {
         model: 'gpt-4-1106-preview',
     },

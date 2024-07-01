@@ -298,6 +298,216 @@ const testCases = [
             error: 0,
         },
     },
-]
+ {
+         name: 'perl : hello world',
+         reqObject: {
+             language: 'perl',
+             script:
+                 'print "hello world"',
+         },
+         expectedResponse: {
+             val: 'hello world',
+             status: 200,
+             error: 0,
+         },
+     },
+     {
+         name: 'perl : print stdin',
+         reqObject: {
+             language: 'perl',
+             script:
+                 'while (<STDIN>) {\n' +
+                 '    print $_;\n' +
+                 '}',
+             stdin: '1 2 3\n',
+         },
+         expectedResponse: {
+             val: '1 2 3\n',
+             status: 200,
+             error: 0,
+         },
+     },
+     {
+         name: 'go : hello world',
+         reqObject: {
+             language: 'go',
+             script:
+                 'package main\n\n' +
+                 'import "fmt"\n\n' +
+                 'func main() {\n' +
+                 '    fmt.Println("hello world")\n' +
+                 '}',
+         },
+         expectedResponse: {
+             val: 'hello world\n',
+             status: 200,
+             error: 0,
+         },
+     },
+     {
+         name: 'go : print stdin',
+         reqObject: {
+             language: 'go',
+             script:
+                 'package main\n\n' +
+                 'import (\n' +
+                 '    "bufio"\n' +
+                 '    "fmt"\n' +
+                 '    "os"\n' +
+                 ')\n\n' +
+                 'func main() {\n' +
+                 '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                 '    for scanner.Scan() {\n' +
+                 '        fmt.Println(scanner.Text())\n' +
+                 '    }\n' +
+                 '}',
+             stdin: '1 2 3\n',
+         },
+         expectedResponse: {
+             val: '1 2 3\n',
+             status: 200,
+             error: 0,
+         },
+     },
+     {
+         name: 'javascript : hello world',
+         reqObject: {
+             language: 'javascript',
+             script: 'console.log("hello world")',
+         },
+         expectedResponse: {
+             val: 'hello world\n',
+             status: 200,
+             error: 0,
+         },
+     },
+     {
+         name: 'javascript : print stdin',
+         reqObject: {
+             language: 'javascript',
+             script:
+                 'const readline = require("readline");\n' +
+                 'const rl = readline.createInterface({\n' +
+                 '  input: process.stdin,\n' +
+                 '  output: process.stdout,\n' +
+                 '  terminal: false\n' +
+                 '});\n' +
+                 'rl.on("line", (line) => {\n' +
+                 '  console.log(line);\n' +
+                 '});',
+             stdin: '1 2 3',
+         },
+         expectedResponse: {
+             val: '1 2 3\n',
+             status: 200,
+             error: 0,
+         },
+     },
+{
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script:
+                'print "hello world"',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'while (<STDIN>) {\n' +
+                '    print $_;\n' +
+                '}',
+            stdin: '1 2 3\n',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}',
+            stdin: '1 2 3\n',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'javascript : hello world',
+        reqObject: {
+            language: 'javascript',
+            script: 'console.log("hello world")',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'javascript : print stdin',
+        reqObject: {
+            language: 'javascript',
+            script:
+                'const readline = require("readline");\n' +
+                'const rl = readline.createInterface({\n' +
+                '  input: process.stdin,\n' +
+                '  output: process.stdout,\n' +
+                '  terminal: false\n' +
+                '});\n' +
+                'rl.on("line", (line) => {\n' +
+                '  console.log(line);\n' +
+                '});',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+];
 
 module.exports = { testCases }
