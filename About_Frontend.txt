@@ -1,0 +1,34 @@
+# Project Name
+
+## Implement a Simple Frontend for Code Execution
+
+### Pull Request: Implement a Simple Frontend for Code Execution
+
+**Title**: [Feature] - Implement a Simple Frontend for Code Execution
+
+**Description**:
+- **Problem**: The current project lacks a frontend interface that allows users to run code against supported programming languages.
+- **Solution**: Implemented a simple and well-designed frontend in a folder called `frontend`. This frontend allows users to select a programming language, input their code, and execute it, displaying the output accordingly.
+- **Type of Change**: New feature
+- **Related Issue**: #456 (if there is a related issue, otherwise, omit this line)
+
+**Context**:
+The project requires a user-friendly interface for running code in various supported languages. This feature enhances the usability of the application by providing an intuitive way for users to test and run code directly from the frontend.
+
+**Background**:
+This implementation provides a basic but functional interface that serves as the foundation for more advanced features in the future. The frontend is built using React to ensure a dynamic and responsive user experience.
+
+**Checklist**:
+- [x] Code compiles correctly
+- [x] All tests passing
+- [x] Documentation updated
+- [x] No code style issues
+
+**Documentation Updates**:
+- Updated `README.md` with instructions on how to set up and run the frontend.
+- Added details on new environment variables in `.env.example`.
+
+---
+
+### File Structure
+
