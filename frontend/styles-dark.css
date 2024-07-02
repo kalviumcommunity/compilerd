@@ -1,0 +1,115 @@
+body, html {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0; /* Remove any padding */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #002b36;  /* Solarized Dark background */
+    font-family: 'Arial', sans-serif;
+    color: #839496;  /* Solarized Dark text */
+    overflow: hidden;  /* Prevent scrolling */
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw; /* Fill the entire width */
+    height: 100vh; /* Fill the entire height */
+    background-color: #073642;  /* Solarized Dark container */
+    overflow: hidden;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #586e75;  /* Solarized Dark header */
+    padding: 10px 0; /* Adjust padding for header */
+    color: #fdf6e3;  /* Solarized Light text for header */
+}
+
+.Kalvium-image {
+    height: 40px;  /* Adjust the height as needed */
+    margin-right: 10px;  /* Add margin for spacing */
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 20px;
+    background-color: #586e75;  /* Solarized Dark toolbar */
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem; 
+}
+
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.5rem; 
+}
+
+select, button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+select {
+    background-color: #268bd2;  /* Solarized Blue */
+    color: white;
+}
+
+button {
+    background-color: #268bd2;  /* Solarized Blue */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2aa198;  /* Solarized Cyan */
+}
+
+.container {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 60px); /* Adjust height to fill space minus header height */
+}
+
+.editor-container, .output-container {
+    flex: 1;
+    padding: 0; /* Remove padding */
+}
+
+.CodeMirror {
+    height: 100%;
+    background-color: #002b36;  /* Solarized Dark background */
+    color: #839496;  /* Solarized Dark text */
+    font-size: 1.15rem;
+    border-right: 1px solid #586e75;  /* Solarized Dark border */
+}
+
+.output-container {
+    background-color: #073642;  /* Solarized Dark output */
+    color: #839496;  /* Solarized Dark text */
+    font-size: 1.5rem;
+
+    overflow: auto;
+}
+
+#loader {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}

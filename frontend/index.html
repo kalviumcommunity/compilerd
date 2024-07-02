@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalvium Online Compiler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="styles-dark.css" id="theme-stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <div class="image-rapper">
+                <img class="Kalvium-image" src="Kalvium-Logo-SVG.svg" alt="Kalvium Logo">
+                <h1>Compilerd</h1>
+            </div>
+        </header>
+        <div class="toolbar">
+            <div class="select-group">
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="nodejs">JavaScript</option>
+                    <option value="ruby">RUBY</option>
+                    <option value="promptv1">chatgpt 3.5</option>
+                    <option value="promptv2">chatgpt 4.0</option>
+                    <option value="multifile">MULTI FILE</option>
+                    <option value="SQLITE3">sqlite3</option>
+                    <option value="rust">RUST</option>
+                    <option value="go">Go</option>
+                    <option value="php">PHP</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="theme">Theme</label>
+                <select id="theme">
+                    <option value="solarized-dark">Solarized Dark</option>
+                    <option value="solarized-light">Solarized Light</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button id="runButton"> Run </button>
+                <button id="clearButton">Clear</button>
+            </div>
+        </div>
+        <div class="container">
+            <div class="editor-container">
+                <textarea id="code"></textarea>
+            </div>
+            <div class="output-container">
+                <div id="loader">Loading...</div>
+                <pre id="output"></pre>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/swift/swift.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/go/go.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
