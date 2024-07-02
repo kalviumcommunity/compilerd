@@ -1,4 +1,5 @@
-const { CPP, C, KOTLIN, CSHARP, GO, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const { compile } = require('joi')
+const { CPP, C, KOTLIN, CSHARP, GO, PYTHON, JAVA, NODEJS, RUBY, PHP, BASH, PERL, TYPESCRIPT, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
@@ -64,6 +65,34 @@ const LANGUAGES_CONFIG = {
         run: 'ruby solution.rb',
         timeout: 10,
         filename: 'solution.rb',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PHP]: {
+        compile: 'php solution.php',
+        run: 'php solution.php',
+        timeout: 10,
+        filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [BASH]: {
+        compile: 'bash solution.sh',
+        run: 'bash solution.sh',
+        timeout: 10,
+        filename: 'solution.sh',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PERL]: {
+        compile: 'chmod +x solution.pl',
+        run: 'perl solution.pl',
+        timeout: 10,
+        filename: 'solution.pl',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [TYPESCRIPT]: {
+        compile: 'tsc solution.ts',
+        run: 'node solution.js',
+        timeout: 10,
+        filename: 'solution.ts',
         memory: ALLOWED_RAM * ONE_MB,
     },
     [PROMPTV1]: {

@@ -1,8 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { SiPython, SiC, SiRuby, SiGo, SiCsharp } from "react-icons/si";
+import {
+  SiPython,
+  SiC,
+  SiRuby,
+  SiGo,
+  SiCsharp,
+  SiPhp,
+  SiPerl,
+  SiTypescript,
+} from "react-icons/si";
+import { RiTerminalBoxFill } from "react-icons/ri";
 import { TbBrandCpp, TbBrandKotlin } from "react-icons/tb";
 import { IoLogoJavascript } from "react-icons/io5";
 import { FaJava } from "react-icons/fa";
+
 import codeSnippets from "./codeSnippets";
 
 function CodeEditor() {
@@ -18,6 +29,10 @@ function CodeEditor() {
     go: SiGo,
     "c#": SiCsharp,
     kotlin: TbBrandKotlin,
+    php: SiPhp,
+    bash: RiTerminalBoxFill,
+    perl: SiPerl,
+    typescript: SiTypescript,
   };
 
   const [code, setCode] = useState(snippets.cpp);
@@ -28,7 +43,6 @@ function CodeEditor() {
   const [loading, setLoading] = useState(false);
 
   const handleRunCode = async () => {
-    // Assuming here you want to send 'code' to the backend
     await setLoading(true);
     await sendCodeToBackend(code);
     await setLoading(false);
@@ -115,35 +129,68 @@ function CodeEditor() {
 
   return (
     <div className="flex h-screen bg-slate-900 text-gray-100">
-      <aside className="w-16 md:w-1/6 bg-slate-800 p-4">
+      <aside className="w-14 md:w-1/6 bg-slate-800 flex flex-col h-screen">
+        <h1 className="text-lg font-bold p-3 text-teal-500 hidden md:block">
+          Languages
+        </h1>
+        <div className="overflow-y-auto flex-grow">
+          <ul className="p-2">
+            {Object.keys(snippets).map((language) => {
+              const IconComponent = languageIcons[language];
+              return (
+                <li key={language} className="mb-1">
+                  <button
+                    className={`w-full flex items-center justify-center md:justify-start p-2 rounded-lg transition-colors duration-200 ${
+                      selectedLanguage === language
+                        ? "bg-teal-600 text-white"
+                        : "hover:bg-slate-700"
+                    }`}
+                    onClick={() => handleLanguageChange(language)}
+                  >
+                    {IconComponent && (
+                      <IconComponent className="text-base md:text-lg md:mr-2" />
+                    )}
+                    <span className="hidden md:inline text-sm">
+                      {language.charAt(0).toUpperCase() + language.slice(1)}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </aside>
+      {/* <aside className="w-16 md:w-1/6 bg-slate-800 p-4">
         <h1 className="text-xl font-bold mb-4 text-teal-500 hidden md:block">
           Languages
         </h1>
-        <ul>
-          {Object.keys(snippets).map((language) => {
-            const IconComponent = languageIcons[language];
-            return (
-              <li key={language} className="mb-2 flex items-center">
-                <button
-                  className={`w-full flex items-center justify-center md:justify-start p-2 rounded-xl transition-colors duration-200 ${
-                    selectedLanguage === language
-                      ? "bg-teal-600 text-white"
-                      : "hover:bg-slate-500"
-                  }`}
-                  onClick={() => handleLanguageChange(language)}
-                >
-                  {IconComponent && (
-                    <IconComponent className="text-xl md:mr-2" />
-                  )}
-                  <span className="hidden md:inline">
-                    {language.charAt(0).toUpperCase() + language.slice(1)}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </aside>
+        <div className="overflow-y-auto max-h-screen-3/4">
+          <ul>
+            {Object.keys(snippets).map((language) => {
+              const IconComponent = languageIcons[language];
+              return (
+                <li key={language} className="mb-2 flex items-center">
+                  <button
+                    className={`w-full flex items-center justify-center md:justify-start p-1 rounded-xl transition-colors duration-200 ${
+                      selectedLanguage === language
+                        ? "bg-teal-600 text-white"
+                        : "hover:bg-slate-500"
+                    }`}
+                    onClick={() => handleLanguageChange(language)}
+                  >
+                    {IconComponent && (
+                      <IconComponent className="text-lg md:text-xl md:mr-2" />
+                    )}
+                    <span className="hidden md:inline">
+                      {language.charAt(0).toUpperCase() + language.slice(1)}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </aside> */}
       <main className="flex-1 flex flex-col p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold text-teal-500">
@@ -182,12 +229,6 @@ function CodeEditor() {
             style={{ tabSize: 2 }}
           />
         </div>
-        {/* <textarea
-          id="code-editor"
-          className="flex-1 bg-slate-800 text-gray-100 p-4 rounded-lg mb-4 resize-none focus:ring-2 focus:ring-teal-500 focus:outline-none"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        /> */}
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
           <div className="flex-1 bg-slate-800 rounded-lg overflow-hidden">
             <div className=" px-4 py-2">
@@ -214,44 +255,6 @@ function CodeEditor() {
             </pre>
           </div>
         </div>
-        {/* <div className="flex w-full ">
-          <div
-            className="flex-3 m-1 bg-slate-800 text-gray-100 p-4 rounded-lg overflow-y-auto resize-vertical focus:ring-2 focus:ring-teal-500 focus:outline-none"
-            style={{
-              resize: "vertical",
-              minHeight: "100px",
-              maxHeight: "250px",
-            }}
-          >
-            <h3 className="text-lg font-semibold mb-2 text-teal-300">Input:</h3>
-            <textarea
-              id="input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="bg-slate-800 text-gray-100 p-4 rounded-lg mb-4 resize-none focus:ring-2 focus:ring-teal-500 focus:outline-none"
-            ></textarea>
-          </div>
-          <div
-            id="output"
-            className="flex-1 m-1 bg-slate-800 text-gray-100 p-4 rounded-lg overflow-y-auto resize-vertical focus:ring-2 focus:ring-teal-500 focus:outline-none"
-            style={{
-              resize: "vertical",
-              minHeight: "100px",
-              maxHeight: "250px",
-            }}
-          >
-            <h3 className="text-lg font-semibold mb-2 text-teal-300">
-              Output:
-            </h3>
-            <pre
-              className={`whitespace-pre-wrap break-words ${
-                error ? "text-red-500" : ""
-              }`}
-            >
-              {output}
-            </pre>
-          </div>
-        </div> */}
       </main>
     </div>
   );

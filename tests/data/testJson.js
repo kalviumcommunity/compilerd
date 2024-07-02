@@ -636,6 +636,71 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'php : hello world',
+        reqObject: {
+            language: 'php',
+            script: '<?php echo "hello world"; ?>',
+        },
+        expectedResponse: {
+            val: 'hello world',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : hello world',
+        reqObject: {
+            language: 'perl',
+            script: 'print "hello\\n";',
+        },
+        expectedResponse: {
+            val: 'hello\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'perl : print stdin',
+        reqObject: {
+            language: 'perl',
+            script:
+                'while (<STDIN>) {\n' +
+                '    print $_;\n' +
+                '}',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1 2 3',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'bash : hello world',
+        reqObject: {
+            language: 'bash',
+            script: 'echo "hello"',
+        },
+        expectedResponse: {
+            val: 'hello\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'typescript : print stdin',
+        reqObject: {
+            language: 'typescript',
+            script:
+            'console.log("Hello, world!")',
+        },
+        expectedResponse: {
+            val: 'Hello, world!\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }

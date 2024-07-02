@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED=1
 
 RUN set -ex && \
     apk update && \
-    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby iptables ip6tables go bash
+    apk add --no-cache gcc g++ musl-dev python3 openjdk17 ruby go perl bash  iptables ip6tables 
 
 RUN set -ex && \
     apk add --no-cache chromium lsof
@@ -32,6 +32,12 @@ RUN set -ex && \
     ./dotnet-install.sh -c 7.0 --install-dir /usr/share/dotnet && \
     ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
     rm dotnet-install.sh
+
+# Install PHP
+RUN apk add --no-cache php
+
+#install typescript
+RUN npm install -g ts-node typescript
 
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
