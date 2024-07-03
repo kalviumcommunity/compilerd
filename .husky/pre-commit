@@ -1,5 +1,5 @@
 
-#!/bin/sh
+#!/bin/shc
 . "$(dirname "$0")/_/husky.sh"
 
 echo '🏗️👷 Styling your project before committing👷‍♂️🏗️'

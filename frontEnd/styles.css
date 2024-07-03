@@ -1,0 +1,43 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #282a36;
+    color: white;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #44475a;
+}
+
+.editor-output {
+    display: flex;
+    flex: 1;
+}
+
+.CodeMirror, .output-container {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+}
+
+.output-container {
+    background-color: #1e1e1e;
+    padding: 10px;
+    color: #f8f8f2;
+    border-left: 1px solid #44475a;
+}
+
+#loader {
+    display: none;
+}

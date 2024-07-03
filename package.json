@@ -11,7 +11,7 @@
   "dependencies": {
     "@builder.io/sqlgenerate": "^1.2.9",
     "@supercharge/promise-pool": "^2.3.2",
-    "axios": "^0.27.2",
+    "axios": "^1.7.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -22,7 +22,7 @@
     "morgan": "^1.10.0",
     "node-cache": "^5.1.2",
     "openai": "~4.24.1",
-    "puppeteer": "22.7.0",
+    "puppeteer": "^22.12.1",
     "sqlite-parser": "^1.0.1",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.0",

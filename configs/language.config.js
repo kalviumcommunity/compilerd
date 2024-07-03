@@ -1,5 +1,6 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const {PHP,RUST,GO,CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
+const intial_mem_for_GO = 1024
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 
 const LANGUAGES_CONFIG = {
@@ -51,6 +52,28 @@ const LANGUAGES_CONFIG = {
     [PROMPTV2]: {
         model: 'gpt-3.5-turbo-1106',
     },
+    [GO]: {
+        compile: 'go build -o solution solution.go',
+        run: './solution',
+        timeout: 5,
+        filename: 'solution.go',
+        memory: intial_mem_for_GO * ONE_MB,
+    },
+    [RUST]: {
+        compile: 'rustc -o answer answer.rs',
+        run: './answer',
+        timeout: 5,
+        filename: 'answer.rs',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [PHP]: {
+        compile: 'php -l answer.php',
+        run: 'php answer.php',
+        timeout: 10,
+        filename: 'answer.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+
 }
 
 module.exports = { LANGUAGES_CONFIG }
