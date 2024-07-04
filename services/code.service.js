@@ -650,6 +650,13 @@ const _runTests = async () => {
         })
         const page = await browser.newPage()
 
+        await page.setRequestInterception(true)
+
+        page.on('request', (request) => {
+            if (request.isInterceptResolutionHandled()) return
+            request.continue()
+        })
+
         page.on('requestfailed', request => {
             logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
         })
