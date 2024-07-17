@@ -405,6 +405,10 @@ const _executeStatement = (db, sql) => {
     })
 }
 
+const _generateStatement = (sql) => {
+    return sql.replace(/`([^`]+\.[^`]+)`/g, '$1');
+}
+
 const _executeSqlQueries = async (dbPath, queries) => {
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
         if (err) {
@@ -422,7 +426,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
             return { data: [] }
         }
         for (const statement of ast.statement) {
-            sqlStatements.push(generate(statement))
+            sqlStatements.push(_generateStatement(generate(statement)))
         }
     } catch (err) {
         db.close()
