@@ -265,6 +265,7 @@ const _executeCode = async (req, res, response) => {
                     ? _prepareErrorMessage(outputLog, language, command)
                     : outputLog.result.stdout
             response.memory = memory
+            //Added execute time
             response.executeTime = totalTime
             if (outputLog.error) {
                 response.error = 1
