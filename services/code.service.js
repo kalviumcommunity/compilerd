@@ -24,6 +24,7 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
 const crypto = require('crypto')
+const { performance } = require('perf_hooks');
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -64,14 +65,24 @@ const _runScript = async (cmd, res, runMemoryCheck = false) => {
 
         const execPromise = exec(cmd)
         childProcess = execPromise.child
-
+        
+        const memoryBefore = await process.memoryUsage().heapUsed;
+        performance.mark('start');
         const result = await execPromise
+        
+        const memoryAfterCompile =await process.memoryUsage().heapUsed;
+        performance.mark('end');
+        performance.measure('executionTime', 'start', 'end');
+        const memoryUsedKBCompile = (memoryAfterCompile - memoryBefore) / 1024; // Convert bytes to KB
+        const measureCompile = performance.getEntriesByName('executionTime')[0];
+        const timeElapsedCompile = measureCompile ? measureCompile.duration : 0;
+    
 
         if (memoryCheckInterval) {
             clearInterval(memoryCheckInterval); childProcess = undefined
         }
 
-        return { result }
+        return { result,memoryUsedKBCompile,timeElapsedCompile }
     } catch (e) {
         if (memoryCheckInterval) {
             clearInterval(memoryCheckInterval); childProcess = undefined
@@ -215,9 +226,13 @@ const _executeCode = async (req, res, response) => {
         // Write file in tmp folder based on language
         await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
 
+       
         const compileCommand = `cd /tmp/ && ${langConfig.compile}`
+       
         // Run compile command
         const compileLog = await _runScript(compileCommand, res, true)
+        const MemoryCompile = compileLog.memoryUsedKBCompile
+        const timeElaspsedCompile  = compileLog.timeElapsedCompile
         response.compileMessage =
             compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
@@ -227,6 +242,7 @@ const _executeCode = async (req, res, response) => {
             if (language === 'java') {
                 // Remove ulimit as a temp fix
                 command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                
             } else {
                 command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
             }
@@ -238,12 +254,18 @@ const _executeCode = async (req, res, response) => {
                 // Update the execution command
                 command += ' < input.txt'
             }
-
-            const outputLog = await _runScript(command, res, true)
+                
+            let outputLog = await _runScript(command, res, true)
+            const memory = MemoryCompile+outputLog.memoryUsedKBCompile
+            const totalTime = timeElaspsedCompile+outputLog.timeElapsedCompile
+            delete outputLog.memoryUsedKBCompile
+            delete outputLog.timeElapsedCompile
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
                     : outputLog.result.stdout
+            response.memory = memory
+            response.executeTime = totalTime
             if (outputLog.error) {
                 response.error = 1
             }
@@ -504,7 +526,8 @@ const execute = async (req, res) => {
         compileMessage: '',
         error: 0,
         stdin: req?.stdin,
-        errorMessage: '',
+        errorMessage: ''
+
     }
 
     if ([PROMPTV1, PROMPTV2].includes(req.language)) {
