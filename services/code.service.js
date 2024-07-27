@@ -507,6 +507,7 @@ const execute = async (req, res) => {
         errorMessage: '',
     }
 
+    console.log(req)
     if ([PROMPTV1, PROMPTV2].includes(req.language)) {
         await _getAiScore(
             LANGUAGES_CONFIG[req.language],

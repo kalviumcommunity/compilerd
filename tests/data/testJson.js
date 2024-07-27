@@ -41,6 +41,48 @@ const testCases = [
 
     },
     {
+        name: 'go : hello world',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import "fmt"\n\n' +
+                'func main() {\n' +
+                '    fmt.Println("hello world")\n' +
+                '}\n',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'go : print stdin',
+        reqObject: {
+            language: 'go',
+            script:
+                'package main\n\n' +
+                'import (\n' +
+                '    "bufio"\n' +
+                '    "fmt"\n' +
+                '    "os"\n' +
+                ')\n\n' +
+                'func main() {\n' +
+                '    scanner := bufio.NewScanner(os.Stdin)\n' +
+                '    for scanner.Scan() {\n' +
+                '        fmt.Println(scanner.Text())\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3',
+        },
+        expectedResponse: {
+            val: '1\n2\n3\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
