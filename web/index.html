@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Executor</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/material.min.css">
+</head>
+<body>
+    <div class="code-editor-container">
+        <h1>Code Executor</h1>
+        <div class="editor-wrapper">
+            <div class="dropdown-container">
+                <label for="language">Select Language:</label>
+                <select id="language">
+                    <option value="c">C</option>
+                    <option value="cpp">CPP</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="nodejs">NodeJS</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="promptv1">Prompt V1</option>
+                    <option value="promptv2">Prompt V2</option>
+                    <option value="multifile">Multi-file</option>
+                    <option value="sqlite3">SQLite3</option>
+                </select>
+            </div>
+            <form id="codeForm">
+                <textarea id="script" class="script-textarea" placeholder="Write your code here..."></textarea>
+                <button type="submit">Run Code</button>
+            </form>
+            <div class="response-display">
+                <h2>OUTPUT:</h2>
+                <pre id="response"></pre> 
+            </div>
+        </div>
+    </div>
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/clike/clike.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
