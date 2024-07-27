@@ -212,6 +212,18 @@ const testCases = [
         },
     },
     {
+        name: 'typescript : hello world',
+        reqObject: {
+            language: 'typescript',
+            script: 'console.log("hello world");',
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
         name: 'TLE test',
         reqObject: {
             language: 'nodejs',

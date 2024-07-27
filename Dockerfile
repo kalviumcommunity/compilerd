@@ -15,6 +15,8 @@ RUN set -ex && \
 
 RUN ln -sf python3 /usr/bin/python
 
+RUN npm install -g typescript
+
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
