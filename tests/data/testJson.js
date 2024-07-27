@@ -298,6 +298,41 @@ const testCases = [
             error: 0,
         },
     },
+    {
+        name: 'rust : hello world',
+        reqObject: {
+            language: 'rust',
+            script: 
+                'fn main() {\n' +
+                '    println!("hello world");\n' +
+                '}\n'
+        },
+        expectedResponse: {
+            val: 'hello world\n',
+            status: 200,
+            error: 0,
+        },
+    },
+    {
+        name: 'rust : print stdin',
+        reqObject: {
+            language: 'rust',
+            script: 
+                'use std::io::{self, BufRead};\n\n' +
+                'fn main() {\n' +
+                '    let stdin = io::stdin();\n' +
+                '    for line in stdin.lock().lines() {\n' +
+                '        println!("{}", line.unwrap());\n' +
+                '    }\n' +
+                '}\n',
+            stdin: '1 2 3'
+        },
+        expectedResponse: {
+            val: '1 2 3\n',
+            status: 200,
+            error: 0,
+        },
+    },
 ]
 
 module.exports = { testCases }
