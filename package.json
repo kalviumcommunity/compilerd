@@ -26,7 +26,8 @@
     "sqlite-parser": "^1.0.1",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.0",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "pglite": "^1.0.13"
   },
   "devDependencies": {
     "eslint": "8.22.0",
