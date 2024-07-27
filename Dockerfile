@@ -19,7 +19,7 @@ ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
 RUN npm --prefix /usr/bin/ install
-EXPOSE 8080
+EXPOSE 3000
 
 # add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
