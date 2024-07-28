@@ -1,22 +1,31 @@
 const express = require('express');
-const app = express();  
-const codeRouter = require('./routers/code.router');
+const router = express.Router();
+const pgLite = require('pg-lite');
 
-app.use('/', codeRouter);  
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+const db = new pgLite.Client({
+    database: 'mydb', // replace with your database name
+    user: 'myuser', // replace with your database user
+    password: 'mypassword', // replace with your database password
+    port: 5432, // default PostgreSQL port
 });
 
-module.exports = app;
+db.connect(err => {
+    if (err) {
+        console.error('Failed to connect to the database:', err);
+    } else {
+        console.log('Connected to the database');
+    }
+});
 
-/*const express = require('express')
-const router = express.Router()
+router.get('/data', (req, res) => {
+    db.query('SELECT * FROM mytable', (err, result) => {
+        if (err) {
+            console.error('Failed to execute query:', err);
+            return res.status(500).send('Internal Server Error');
+        }
 
-const codeRouter = require('./routers/code.router')
+        res.json(result.rows);
+    });
+});
 
-router.use('/', codeRouter)
-
-module.exports = router
-*/
+module.exports = router;
