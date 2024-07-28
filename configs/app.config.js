@@ -7,5 +7,8 @@ module.exports = {
     },
     dbConfig: {
         PATH: "/tmp/database.db",
-    }
+        PGLITE: {
+            PATH: "/tmp/pglite.db",
+        },
+    },
 }
