@@ -46,7 +46,7 @@ const LANGUAGES_CONFIG = {
         memory: ALLOWED_RAM * ONE_MB,
     },
     [PROMPTV1]: {
-        model: 'gpt-4-1106-preview',
+        model: 'gpt-4o-2024-05-13',
     },
     [PROMPTV2]: {
         model: 'gpt-3.5-turbo-1106',
