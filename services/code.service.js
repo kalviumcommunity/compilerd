@@ -5,7 +5,7 @@ const os = require('os')
 const fs = require('fs')
 const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
-const { PYTHON, PROMPTV1, PROMPTV2 } = require('../enums/supportedLanguages')
+const { PYTHON, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
 const OpenAI = require('openai')
 const openai = new OpenAI()
@@ -507,7 +507,7 @@ const execute = async (req, res) => {
         errorMessage: '',
     }
 
-    if ([PROMPTV1, PROMPTV2].includes(req.language)) {
+    if ([PROMPTV1, PROMPTV2, PROMPTV3].includes(req.language)) {
         await _getAiScore(
             LANGUAGES_CONFIG[req.language],
             req.question,
