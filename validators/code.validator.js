@@ -13,22 +13,22 @@ const {
 const _getBaseSchema = () => {
     return Joi.object({
         language: Joi.string().required(),
-        points: Joi.number().integer().optional(),
         hasInputFiles: Joi.bool(),
         args: Joi.string(),
         stdin: Joi.string(),
     })
 }
 
-const _getAiLanguageSchema = () => {
+const _getAiSchema = () => {
     return _getBaseSchema().keys({
         question: Joi.string().required(),
         userAnswer: Joi.string().required(),
+        points: Joi.number().integer().optional(),
         rubric: Joi.string().optional(),
     })
 }
 
-const _getMultiFileLanguageSchema = () => {
+const _getMultiFileSchema = () => {
     return _getBaseSchema().keys({
         url: Joi.string().trim().required(),
         type: Joi.string()
@@ -41,27 +41,27 @@ const _getMultiFileLanguageSchema = () => {
     })
 }
 
-const _getDefaultLanguageSchema = () => {
+const _getDefaultSchema = () => {
     return _getBaseSchema().keys({
         script: Joi.string().required(),
     })
 }
 
-const _getSchemaForLanguage = (language) => {
+const _getSchema = (language) => {
     switch (language) {
     case PROMPTV1:
     case PROMPTV2:
     case PROMPTV3:
-        return _getAiLanguageSchema()
+        return _getAiSchema()
     case MULTIFILE:
-        return _getMultiFileLanguageSchema()
+        return _getMultiFileSchema()
     default:
-        return _getDefaultLanguageSchema()
+        return _getDefaultSchema()
     }
 }
 
 const isValidForExecute = async (payload) => {
-    const schema = _getSchemaForLanguage(payload?.language)
+    const schema = _getSchema(payload?.language)
     return schema.validateAsync(payload)
 }
 
