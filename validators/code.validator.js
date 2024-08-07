@@ -1,14 +1,18 @@
 const Joi = require('joi')
-const { PROMPTV1, PROMPTV2, MULTIFILE, PROMPTV3 } = require('../enums/supportedLanguages')
-const { FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes')
+const {
+    PROMPTV1,
+    PROMPTV2,
+    PROMPTV3,
+    MULTIFILE,
+} = require('../enums/supportedLanguages')
+const {
+    FRONTEND_REACT_JASMINE,
+    FRONTEND_STATIC_JASMINE,
+} = require('../enums/supportedMultifileSetupTypes')
 
-const _getAiLanguageSchema = () => {
+const _getBaseSchema = () => {
     return Joi.object({
         language: Joi.string().required(),
-        question: Joi.string().required(),
-        userAnswer: Joi.string().required(),
-        rubric: Joi.string().optional(),
-        script: Joi.string().optional(),
         points: Joi.number().integer().optional(),
         hasInputFiles: Joi.bool(),
         args: Joi.string(),
@@ -16,11 +20,16 @@ const _getAiLanguageSchema = () => {
     })
 }
 
+const _getAiLanguageSchema = () => {
+    return _getBaseSchema().keys({
+        question: Joi.string().required(),
+        userAnswer: Joi.string().required(),
+        rubric: Joi.string().optional(),
+    })
+}
+
 const _getMultiFileLanguageSchema = () => {
-    return Joi.object({
-        language: Joi.string().required(),
-        question: Joi.string().optional(),
-        script: Joi.string().optional(),
+    return _getBaseSchema().keys({
         url: Joi.string().trim().required(),
         type: Joi.string()
             .trim()
@@ -29,22 +38,12 @@ const _getMultiFileLanguageSchema = () => {
         non_editable_files: Joi.object()
             .pattern(Joi.string(), Joi.string().pattern(/^[a-fA-F0-9]{64}$/))
             .optional(),
-        points: Joi.number().integer().optional(),
-        hasInputFiles: Joi.bool(),
-        args: Joi.string(),
-        stdin: Joi.string(),
     })
 }
 
 const _getDefaultLanguageSchema = () => {
-    return Joi.object({
-        language: Joi.string().required(),
-        question: Joi.string().optional(),
+    return _getBaseSchema().keys({
         script: Joi.string().required(),
-        points: Joi.number().integer().optional(),
-        hasInputFiles: Joi.bool(),
-        args: Joi.string(),
-        stdin: Joi.string(),
     })
 }
 
