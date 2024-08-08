@@ -1,55 +1,68 @@
 const Joi = require('joi')
-const { PROMPTV1, PROMPTV2, MULTIFILE } = require('../enums/supportedLanguages')
-const { FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes')
+const {
+    PROMPTV1,
+    PROMPTV2,
+    PROMPTV3,
+    MULTIFILE,
+} = require('../enums/supportedLanguages')
+const {
+    FRONTEND_REACT_JASMINE,
+    FRONTEND_STATIC_JASMINE,
+} = require('../enums/supportedMultifileSetupTypes')
 
-const isValidForExecute = async (body) => {
-    const schema = Joi.object({
+const _getBaseSchema = () => {
+    return Joi.object({
         language: Joi.string().required(),
-        question: Joi.string().when('language', {
-            is: [PROMPTV1, PROMPTV2],
-            then: Joi.required(),
-            otherwise: Joi.optional(),
-        }),
-        userAnswer: Joi.string().when('language', {
-            is: [PROMPTV1, PROMPTV2],
-            then: Joi.required(),
-            otherwise: Joi.forbidden(),
-        }),
-        rubric: Joi.string().when('language', {
-            is: [PROMPTV1, PROMPTV2],
-            then: Joi.optional(),
-            otherwise: Joi.forbidden(),
-        }),
-        script: Joi.string()
-            .when('language', {
-                is: [PROMPTV1, PROMPTV2, MULTIFILE],
-                then: Joi.optional(),
-                otherwise: Joi.required(),
-            }),
-        url: Joi.string().trim()
-            .when('language', {
-                is: MULTIFILE,
-                then: Joi.required(),
-                otherwise: Joi.forbidden(),
-            }),
-        type: Joi.string().trim()
-            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE)
-            .when('language', {
-                is: MULTIFILE,
-                then: Joi.required(),
-                otherwise: Joi.forbidden(),
-            }),
-        non_editable_files: Joi.object().pattern(
-            Joi.string(),
-            Joi.string().pattern(/^[a-fA-F0-9]{64}$/)
-        ).optional(),
-        points: Joi.number().integer().optional(), // totalScore
         hasInputFiles: Joi.bool(),
         args: Joi.string(),
         stdin: Joi.string(),
     })
+}
 
-    return schema.validateAsync(body)
+const _getAiSchema = () => {
+    return _getBaseSchema().keys({
+        question: Joi.string().required(),
+        userAnswer: Joi.string().required(),
+        points: Joi.number().integer().optional(),
+        rubric: Joi.string().optional(),
+    })
+}
+
+const _getMultiFileSchema = () => {
+    return _getBaseSchema().keys({
+        url: Joi.string().trim().required(),
+        type: Joi.string()
+            .trim()
+            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE)
+            .required(),
+        non_editable_files: Joi.object()
+            .pattern(Joi.string(), Joi.string().pattern(/^[a-fA-F0-9]{64}$/))
+            .optional(),
+    })
+}
+
+const _getDefaultSchema = () => {
+    return _getBaseSchema().keys({
+        script: Joi.string().required(),
+    })
+}
+
+const _getSchema = (language) => {
+    switch (language) {
+    case PROMPTV1:
+    case PROMPTV2:
+    case PROMPTV3:
+        return _getAiSchema()
+    case MULTIFILE:
+        return _getMultiFileSchema()
+    default:
+        return _getDefaultSchema()
+    }
+}
+
+const isValidForExecute = async (payload) => {
+    const schema = _getSchema(payload?.language)
+    return schema.validateAsync(payload)
 }
 
 module.exports = { isValidForExecute }
