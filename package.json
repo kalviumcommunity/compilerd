@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@builder.io/sqlgenerate": "^1.2.9",
+    "@electric-sql/pglite": "^0.1.5",
     "@supercharge/promise-pool": "^2.3.2",
     "axios": "^0.27.2",
     "compression": "^1.7.4",

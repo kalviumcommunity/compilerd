@@ -493,6 +493,33 @@ const _executeSqlite3Query = async (req, res, response) => {
     }
 }
 
+const _executePgliteQuery = async (req, res, response) => {
+    const dbPath = dbConfig.PGLITE_PATH
+    try {
+        const dbDirectory = path.dirname(dbPath)
+        if (!fs.existsSync(dbDirectory)) {
+            fs.mkdirSync(dbDirectory, { recursive: true })
+        }
+        if (!fs.existsSync(dbPath)) {
+            fs.closeSync(fs.openSync(dbPath, 'w'))
+        }
+        await _downloadSqliteDatabase(req.stdin, dbPath) 
+        const queryResults = await _executeSqlQueries(dbPath, req.script, response)
+        if (queryResults.error) {
+            response.error = 1
+        }
+        response.output = JSON.stringify(queryResults.data)
+
+        fs.unlinkSync(dbPath)
+    } catch (err) {
+        if (fs.existsSync(dbPath)) {
+            fs.unlinkSync(dbPath)
+        }
+        logger.error(err)
+        throw err
+    }
+}
+
 const execute = async (req, res) => {
     const response = {
         output: '',
@@ -524,7 +551,10 @@ const execute = async (req, res) => {
         await _executeMultiFile(req, res, response)
     } else if (req.language === supportedLanguages.SQLITE3) {
         await _executeSqlite3Query(req, res, response)
-    } else {
+    } else if (req.language === supportedLanguages.PGLITE) {
+        await _executePgliteQuery(req, res, response)
+    }
+    else {
         await _executeCode(req, res, response)
     }
     return response
@@ -882,4 +912,13 @@ const _executeMultiFile = async (req, res, response) => {
     }
 }
 
-module.exports = { execute }
+module.exports = {
+    execute,
+    _runScript,
+    _getAiScore,
+    _executeStatement,
+    _executeSqlQueries,
+    _downloadSqliteDatabase,
+    _executeSqlite3Query,
+    _executePgliteQuery,
+}
