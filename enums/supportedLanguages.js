@@ -10,4 +10,5 @@ module.exports = {
     PROMPTV3: 'promptv3',
     MULTIFILE: 'multifile',
     SQLITE3: 'sqlite3',
+    TYPESCRIPT : 'typescript'
 }
