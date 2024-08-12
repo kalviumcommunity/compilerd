@@ -18,12 +18,15 @@ const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
 const appConfig = require('../configs/app.config.js')
-const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
+const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
 const crypto = require('crypto')
+const { JUNIT } = require('../enums/supportedOutputFormatsMultifile.js')
+const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
+const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -802,8 +805,9 @@ const _killProcessOnPort = async (port) => {
     })
 }
 
-const _preCleanUp = async () => {
+const _preCleanUp = async (multifileType) => {
     try {
+        if(multifileType === NODEJS_JUNIT) return;
         await _killProcessOnPort(appConfig.multifile.jasminePort)
         // TODO: add pre cleanup for puppeteer and jasmine server to prevent memory leak
     } catch (err) {
@@ -832,10 +836,17 @@ const _checkIntegrity = async (non_editable_files) => {
     return true
 }
 
+const parseResults = async (filePath, testCaseFormat) => {
+    switch (testCaseFormat) {
+        case JUNIT:
+            return extractTestCasesJunit(filePath)
+    }
+}
+
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
-        await _preCleanUp()
+        await _preCleanUp(req.type)
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
     } catch (err) {
@@ -849,22 +860,31 @@ const _executeMultiFile = async (req, res, response) => {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
             if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
-        if (req.type === FRONTEND_STATIC_JASMINE) {
-            const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
-            jasmineResults = await _runTests()
-            if (staticServerInstance) {
-                staticServerInstance.close(() => {
-                    logger.error('Static server closed')
-                });
-            }
-        } else {
-            if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                throw new Error(`No package.json found`)
-            }
-            await _installDependencies(appConfig.multifile.workingDir)
-            const jasmineServer = await _startJasmineServer()
-            jasmineResults = await _runTests()
-            process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+        switch (req.type) {
+            case FRONTEND_STATIC_JASMINE:
+                const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+                jasmineResults = await _runTests()
+                if (staticServerInstance) {
+                    staticServerInstance.close(() => {
+                        logger.error('Static server closed')
+                    })
+                }
+                break
+            case FRONTEND_REACT_JASMINE:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await _installDependencies(appConfig.multifile.workingDir)
+                const jasmineServer = await _startJasmineServer()
+                jasmineResults = await _runTests()
+                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+                break
+            case NODEJS_JUNIT:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+                jasmineResults = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
         }
 
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
