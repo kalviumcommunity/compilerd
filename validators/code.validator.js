@@ -9,8 +9,8 @@ const {
     FRONTEND_REACT_JASMINE,
     FRONTEND_STATIC_JASMINE,
     NODEJS_JUNIT,
-} = require('../enums/supportedMultifileSetupTypes')
-const { JUNIT } = require('../enums/supportedOutputFormatsMultifile')
+} = require('../enums/supportedPMFTypes')
+const { JUNIT } = require('../enums/supportedPMFOutputFormats')
 
 const _getBaseSchema = () => {
     return Joi.object({
