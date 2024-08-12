@@ -24,7 +24,7 @@ const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
 const parser = require('sqlite-parser')
 const crypto = require('crypto')
-const { JUNIT } = require('../enums/supportedOutputFormatsMultifile.js')
+const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
 
