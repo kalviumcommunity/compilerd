@@ -8,7 +8,9 @@ const {
 const {
     FRONTEND_REACT_JASMINE,
     FRONTEND_STATIC_JASMINE,
-} = require('../enums/supportedMultifileSetupTypes')
+    NODEJS_JUNIT,
+} = require('../enums/supportedPMFTypes')
+const { JUNIT } = require('../enums/supportedPMFOutputFormats')
 
 const _getBaseSchema = () => {
     return Joi.object({
@@ -33,11 +35,26 @@ const _getMultiFileSchema = () => {
         url: Joi.string().trim().required(),
         type: Joi.string()
             .trim()
-            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE)
+            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE, NODEJS_JUNIT)
             .required(),
         non_editable_files: Joi.object()
             .pattern(Joi.string(), Joi.string().pattern(/^[a-fA-F0-9]{64}$/))
             .optional(),
+        commands: Joi.alternatives().conditional('type', {
+            is: NODEJS_JUNIT,
+            then: Joi.array().items(Joi.string().required()),
+            otherwise: Joi.optional(),
+        }),
+        output_file: Joi.alternatives().conditional('type', {
+            is: NODEJS_JUNIT,
+            then: Joi.string().required(),
+            otherwise: Joi.optional(),
+        }),
+        output_format: Joi.alternatives().conditional('type', {
+            is: NODEJS_JUNIT,
+            then: Joi.string().valid(JUNIT).required(),
+            otherwise: Joi.optional(),
+        }),
     })
 }
 
