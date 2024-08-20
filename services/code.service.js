@@ -843,10 +843,29 @@ const parseResults = async (filePath, testCaseFormat) => {
     }
 }
 
+const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServer = undefined) => {
+    await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
+    switch (type) {
+        case FRONTEND_STATIC_JASMINE:
+            if(staticServerInstance) {
+                staticServerInstance.close(() => {
+                    logger.info('Exiting static server in post cleanup')
+                })
+            }
+            break
+        case FRONTEND_REACT_JASMINE:
+            if(jasmineServer) {
+                logger.info('Exiting react setup server in post cleanup')
+                process.kill(-jasmineServer.pid)
+            }
+            break
+    }
+}
+
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
-        await _preCleanUp(req.type)
+        // await _preCleanUp(req.type)
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
     } catch (err) {
@@ -854,6 +873,7 @@ const _executeMultiFile = async (req, res, response) => {
         throw (new Error('Error in running multifile submission, check service logs for the issue'))
     }
 
+    let staticServerInstance, jasmineServer
     try {
         let jasmineResults
         if(req?.non_editable_files) {
@@ -862,7 +882,7 @@ const _executeMultiFile = async (req, res, response) => {
         }
         switch (req.type) {
             case FRONTEND_STATIC_JASMINE:
-                const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+                staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
                 jasmineResults = await _runTests()
                 if (staticServerInstance) {
                     staticServerInstance.close(() => {
@@ -875,7 +895,7 @@ const _executeMultiFile = async (req, res, response) => {
                     throw new Error(`No package.json found`)
                 }
                 await _installDependencies(appConfig.multifile.workingDir)
-                const jasmineServer = await _startJasmineServer()
+                jasmineServer = await _startJasmineServer()
                 jasmineResults = await _runTests()
                 process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
                 break
@@ -890,6 +910,7 @@ const _executeMultiFile = async (req, res, response) => {
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
         response.output = jasmineResults
     } catch (err) {
+        _postCleanUp(req.type, staticServerInstance, jasmineServer)
         if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
             throw err
         } else {
