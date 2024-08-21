@@ -735,88 +735,6 @@ const _writeFilesToDisk = async (files, workingDir) => {
     }
 }
 
-const _killProcessOnPort = async (port) => {
-    return new Promise((resolve, reject) => {
-        let isRejected = false
-        const lsof = spawn('lsof', ['-i', `:${port}`])
-
-        let stdout = ''
-        let stderr = ''
-
-        lsof.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        lsof.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        lsof.on('close', (code) => {
-            logger.info(stdout)
-            if (code === 1 && stderr.trim() === '') { // lsof returns 1 when the port is idle
-                logger.info(`port ${port} is free`)
-                resolve()
-            } else if (stderr) {
-                logger.error(stderr)
-                if (!isRejected) {
-                    isRejected = true
-                    reject()
-                }
-            }
-            else if (stdout) {
-                logger.info(`Port ${port} is occupied. Attempting to kill the process...`)
-
-                let pid
-                const lines = stdout.trim().split('\n') // For Unix-based systems, get the second part of the output line (PID)
-                if (lines.length > 1) {
-                    const line = lines[1]
-                    pid = line.trim().split(/\s+/)[1]
-                }
-
-                logger.info('printing pid ', pid)
-                if (!pid || isNaN(pid)) {
-                    logger.info(`Invalid PID: ${pid}`)
-                    if (!isRejected) {
-                        isRejected = true
-                        reject()
-                    }
-                }
-
-                const kill = spawn('kill', ['-15', pid], {
-                    detached: true,
-                    stdio: 'ignore',
-                });
-                kill.on('exit', (exitCode) => {
-                    logger.info(`kill command exited with code ${exitCode}`)
-                })
-                kill.on('close', (killCode) => {
-                    if (killCode !== 0) {
-                        logger.info(`kill command closed with code ${killCode}`)
-                        if (!isRejected) {
-                            isRejected = true
-                            reject()
-                        }
-                    } else {
-                        resolve()
-                    }
-                })
-            }
-        })
-    })
-}
-
-const _preCleanUp = async (multifileType) => {
-    try {
-        if(multifileType === NODEJS_JUNIT) return;
-        await _killProcessOnPort(appConfig.multifile.jasminePort)
-        // TODO: add pre cleanup for puppeteer and jasmine server to prevent memory leak
-    } catch (err) {
-        // since there was an error in pre clean up which is mandatory for running test setup
-        // we kill the current process and in turn container exits and new one is spun up.
-        logger.info(`Error in pre cleanup: ${err.message}`, { stack: err?.stack })
-        process.exit(1)
-    }
-}
 
 const _checkIntegrity = async (non_editable_files) => {
     for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
@@ -865,7 +783,6 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
-        // await _preCleanUp(req.type)
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
     } catch (err) {
