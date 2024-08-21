@@ -827,7 +827,7 @@ const _executeMultiFile = async (req, res, response) => {
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
         response.output = jasmineResults
     } catch (err) {
-        _postCleanUp(req.type, staticServerInstance, jasmineServer)
+        await _postCleanUp(req.type, staticServerInstance, jasmineServer)
         if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
             throw err
         } else {
