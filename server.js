@@ -1,4 +1,4 @@
-require('./envloader')()
+// require('./envloader')()
 
 const express = require('express')
 const app = express()
@@ -42,7 +42,13 @@ app.use(compression())
 app.use(helmet())
 app.use(cors())
 
+app.use("/web",express.static(__dirname+'/web'))
+
 app.use('/api/', baseRouter)
+
+app.get('/web',(req,res)=>{
+    return res.sendFile(__dirname+'/web/'+"index.html");
+})
 
 app.get('/', (req, res) => {
     return res.send('Compiler is up and working')
