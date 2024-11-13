@@ -7,7 +7,7 @@ const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
-const { openai } = require('../helpers/openaiInstance')
+const { getLangfuse } = require('../helpers/openaiInstance.js')
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
@@ -138,6 +138,7 @@ const _executePrompt = async (
     prompt,
     points = 10, // Maximum points that can be given by open AI
 ) => {
+    openai = getLangfuse()
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
             messages: [

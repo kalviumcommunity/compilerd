@@ -1,29 +1,56 @@
 const OpenAI = require('openai')
 const { observeOpenAI } = require('langfuse')
 const { 
-    openaiAPIKey, 
-    langfusePublicKey, 
-    langfuseSecretKey,
-    langfuseBaseURL
+    openaiConfig,
+    langfuseConfig
 } = require('../configs/app.config')
 
-const openaiClient = new OpenAI({
-    apiKey: openaiAPIKey,
-})
+let openaiClient = null;
+const instantiateOpenAI = () => {
+    if (!openaiClient && openaiConfig.API_KEY) { 
+        openaiClient = new OpenAI({
+            apiKey: openaiConfig.API_KEY,
+        });
+    }
+    return openaiClient; 
+};
 
-let openai
+const getOpenAI = () => {
+    return openaiClient || instantiateOpenAI();
+};
 
-if (langfuseBaseURL) {
-    openai = observeOpenAI(openaiClient, {
-        clientInitParams: {
-          publicKey: langfusePublicKey,
-          secretKey: langfuseSecretKey,
-          baseUrl: langfuseBaseURL,
-        },
-        generationName: "compilerd",
-    })
-} else {
-    openai = openaiClient
+let langfuseClient;
+const instantiateLangfuse = () => {
+    // First ensure OpenAI is instantiated
+    if (!openaiClient) {
+        openaiClient = instantiateOpenAI();
+    }
+    
+    // If we couldn't create OpenAI client, throw error
+    if (!openaiClient) {
+        throw new Error('OpenAI client could not be instantiated. Check API key.');
+    }
+
+    if (langfuseConfig.baseUrl) {
+        langfuseClient = observeOpenAI(openaiClient, {
+            clientInitParams: langfuseConfig,
+            generationName: "compilerd",
+        })
+    } else {
+        langfuseClient = openaiClient;
+    }
+    
+    return langfuseClient;
+};
+
+const getLangfuse = () => {
+    if (!langfuseClient) {
+        return instantiateLangfuse();
+    }
+    return langfuseClient;
+};
+
+module.exports = {
+    instantiateLangfuse,
+    getLangfuse
 }
-
-module.exports = { openai }
