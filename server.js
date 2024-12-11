@@ -9,8 +9,6 @@ const baseRouter = require('./router.js')
 const morgan = require('morgan')
 const PORT = process.env.PORT || 3000
 const { respond, l } = require('./loader.js').helpers
-const { instantiateLangfuse } = require('./helpers/openaiInstance.js')
-instantiateLangfuse()
 
 require('./loader.js').loadDependency(app)
 

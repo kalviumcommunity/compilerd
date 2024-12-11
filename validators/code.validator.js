@@ -27,6 +27,8 @@ const _getAiSchema = () => {
         userAnswer: Joi.string().required(),
         points: Joi.number().integer().optional(),
         rubric: Joi.string().optional(),
+        dispatchedBy: Joi.string().optional(),
+        user_email: Joi.string().email().required(),
     })
 }
 
