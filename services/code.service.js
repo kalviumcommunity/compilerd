@@ -17,7 +17,7 @@ const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
 const appConfig = require('../configs/app.config.js')
-const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE } = require('../enums/supportedPMFTypes.js')
+const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_REACT_JASMINE_V2 } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
@@ -777,6 +777,12 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
                 process.kill(-jasmineServer.pid)
             }
             break
+        case FRONTEND_REACT_JASMINE_V2:
+            if(jasmineServer) {
+                logger.info('Exiting react setup server in post cleanup')
+                process.kill(-jasmineServer.pid)
+            }
+            break
     }
 }
 
@@ -808,6 +814,15 @@ const _executeMultiFile = async (req, res, response) => {
                 }
                 break
             case FRONTEND_REACT_JASMINE:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await _installDependencies(appConfig.multifile.workingDir)
+                jasmineServer = await _startJasmineServer()
+                jasmineResults = await _runTests()
+                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+                break
+            case FRONTEND_REACT_JASMINE_V2:
                 if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
                     throw new Error(`No package.json found`)
                 }
