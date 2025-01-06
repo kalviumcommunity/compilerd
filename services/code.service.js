@@ -17,7 +17,7 @@ const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
 const appConfig = require('../configs/app.config.js')
-const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_REACT_VITEST } = require('../enums/supportedPMFTypes.js')
+const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_REACT_VITEST, FRONTEND_STATIC_VITEST } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
@@ -567,43 +567,44 @@ const _cleanUpDir = async (dirPath, downloadedFilePath) => {
 
 const _installDependencies = async (path) => {
     return new Promise((resolve, reject) => {
-        let isRejected = false
-        const npmInstall = spawn('npm', ['install'], { cwd: path })
+        let isRejected = false;
 
-        let stdout = ''
-        npmInstall.stdout.on('data', (data) => {
-            stdout += data.toString()
-        })
+        const yarnInstall = spawn("yarn", { cwd: path });
 
-        let stderr = ''
-        npmInstall.stderr.on('data', (data) => {
-            stderr += data.toString()
-        })
+        let stdout = "";
+        yarnInstall.stdout.on("data", (data) => {
+            stdout += data.toString();
+        });
 
-        npmInstall.on('exit', (code) => {
-            logger.info(`npm install exited with code ${code}`)
-        })
+        let stderr = "";
+        yarnInstall.stderr.on("data", (data) => {
+            stderr += data.toString();
+        });
 
-        npmInstall.on('close', (code) => {
-            logger.info(`npm install closed with code ${code}`)
+        yarnInstall.on("exit", (code) => {
+            console.info(`yarn install exited with code ${code}`);
+        });
+
+        yarnInstall.on("close", (code) => {
+            console.info(`yarn install closed with code ${code}`);
             if (code === 0) {
-                resolve()
+                resolve();
             } else {
                 if (!isRejected) {
-                    isRejected = true
-                    reject(new Error('Failed to install dependencies'))
+                    isRejected = true;
+                    reject(new Error(`Failed to install dependencies. Exit code: ${code}`));
                 }
             }
-        })
+        });
 
-        npmInstall.on('error', (err) => {
-            logger.error('Failed to start npm install process:', err)
+        yarnInstall.on("error", (err) => {
+            console.error("Failed to start yarn install process:", err);
             if (!isRejected) {
-                isRejected = true
-                reject(err)
+                isRejected = true;
+                reject(err);
             }
         });
-    })
+    });
 }
 
 const _startJasmineServer = async () => {
@@ -786,6 +787,73 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
     }
 }
 
+const _runVitestTests = async (path) => {
+    console.log("Starting Vitest server in path:", path);
+
+    return new Promise((resolve, reject) => {
+        const vitestServer = spawn("yarn", ["test:json"], {
+            cwd: path,
+            detached: true,
+        });
+
+        let isRejected = false;
+        let stdout = "";
+        let stderr = "";
+
+        vitestServer.stdout.on("data", (data) => {
+            const output = data.toString();
+            stdout += output;
+
+            // Attempt to parse JSON output and resolve the promise
+            try {
+                const jsonStartIndex = stdout.indexOf("{");
+                const jsonEndIndex = stdout.lastIndexOf("}");
+                if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+                    const jsonString = stdout.slice(jsonStartIndex, jsonEndIndex + 1);
+                    const parsedJSON = JSON.parse(jsonString);
+                    const result = {
+                        success: parsedJSON.numPassedTests,
+                        failed: parsedJSON.numFailedTests,
+                    };
+                    resolve(result); // Return parsed JSON
+                    vitestServer.kill(); // Terminate the process once JSON is parsed
+                }
+            } catch (err) {
+                // Ignore JSON parsing errors until complete JSON is received
+            }
+        });
+
+        vitestServer.stderr.on("data", (data) => {
+            stderr += data.toString();
+        });
+
+        vitestServer.on("error", (err) => {
+            console.error("Failed to start Vitest server:", err);
+            if (!isRejected) {
+                isRejected = true;
+                reject(err);
+            }
+        });
+
+        vitestServer.on("close", (code) => {
+            if (code !== 0) {
+                if (!isRejected) {
+                    isRejected = true;
+                    reject(
+                        new Error(
+                            `Vitest server closed with code ${code}. Stderr: ${stderr}`
+                        )
+                    );
+                }
+            }
+        });
+
+        vitestServer.on("exit", (code) => {
+            console.info(`Vitest server exited with code ${code}`);
+        });
+    });
+};
+
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
@@ -803,40 +871,41 @@ const _executeMultiFile = async (req, res, response) => {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
             if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
-        switch (req.type) {
-            case FRONTEND_STATIC_JASMINE:
-                staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
-                jasmineResults = await _runTests()
-                if (staticServerInstance) {
-                    staticServerInstance.close(() => {
-                        logger.error('Static server closed')
-                    })
-                }
-                break
-            case FRONTEND_REACT_JASMINE:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await _installDependencies(appConfig.multifile.workingDir)
-                jasmineServer = await _startJasmineServer()
-                jasmineResults = await _runTests()
-                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
-                break
-            case FRONTEND_REACT_VITEST:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await _installDependencies(appConfig.multifile.workingDir)
-                jasmineServer = await _startJasmineServer()
-                jasmineResults = await _runTests()
-                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
-                break
-            case NODEJS_JUNIT:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
-                jasmineResults = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
+
+        if (req.type === FRONTEND_STATIC_VITEST || req.type === FRONTEND_REACT_VITEST) {
+            if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                throw new Error(`No package.json found`)
+            }
+            await _installDependencies(appConfig.multifile.workingDir)
+            jasmineResults = await _runVitestTests(appConfig.multifile.workingDir)
+            process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+        } else {
+            switch (req.type) {
+                case FRONTEND_STATIC_JASMINE:
+                    staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+                    jasmineResults = await _runTests()
+                    if (staticServerInstance) {
+                        staticServerInstance.close(() => {
+                            logger.error('Static server closed')
+                        })
+                    }
+                    break
+                case FRONTEND_REACT_JASMINE:
+                    if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                        throw new Error(`No package.json found`)
+                    }
+                    await _installDependencies(appConfig.multifile.workingDir)
+                    jasmineServer = await _startJasmineServer()
+                    jasmineResults = await _runTests()
+                    process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+                    break
+                case NODEJS_JUNIT:
+                    if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                        throw new Error(`No package.json found`)
+                    }
+                    await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+                    jasmineResults = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
+            }
         }
 
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
