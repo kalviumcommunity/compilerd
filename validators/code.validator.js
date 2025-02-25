@@ -9,6 +9,7 @@ const {
     FRONTEND_REACT_JASMINE,
     FRONTEND_STATIC_JASMINE,
     NODEJS_JUNIT,
+    FRONTEND_REACT_JASMINE_V2,
 } = require('../enums/supportedPMFTypes')
 const { JUNIT } = require('../enums/supportedPMFOutputFormats')
 
@@ -35,7 +36,7 @@ const _getMultiFileSchema = () => {
         url: Joi.string().trim().required(),
         type: Joi.string()
             .trim()
-            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE, NODEJS_JUNIT)
+            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE, FRONTEND_REACT_JASMINE_V2, NODEJS_JUNIT)
             .required(),
         non_editable_files: Joi.object()
             .pattern(Joi.string(), Joi.string().pattern(/^[a-fA-F0-9]{64}$/))
