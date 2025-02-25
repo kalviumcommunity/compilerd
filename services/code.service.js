@@ -20,12 +20,12 @@ const appConfig = require('../configs/app.config.js')
 const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
-const { generate } = require('@builder.io/sqlgenerate')
-const parser = require('sqlite-parser')
 const crypto = require('crypto')
 const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
+const { Parser } = require('node-sql-parser')
+const parser = new Parser()
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -398,7 +398,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -423,13 +423,18 @@ const _executeSqlQueries = async (dbPath, queries) => {
 
     const sqlStatements = []
     try {
-        const ast = parser(queries);
+        const opt = { database: 'sqlite' }
+        const ast = parser.astify(queries, opt)
         if (!ast) {
             db.close()
             return { data: [] }
         }
-        for (const statement of ast.statement) {
-            sqlStatements.push(_generateStatement(generate(statement)))
+
+        const statements = ast ?? []
+
+        for (const statement of statements) {
+            const generatedSQL = parser.sqlify(statement, opt)
+            sqlStatements.push(_generateStatement(generatedSQL))
         }
     } catch (err) {
         db.close()
@@ -765,14 +770,14 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
     await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
     switch (type) {
         case FRONTEND_STATIC_JASMINE:
-            if(staticServerInstance) {
+            if (staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.info('Exiting static server in post cleanup')
                 })
             }
             break
         case FRONTEND_REACT_JASMINE:
-            if(jasmineServer) {
+            if (jasmineServer) {
                 logger.info('Exiting react setup server in post cleanup')
                 process.kill(-jasmineServer.pid)
             }
@@ -793,9 +798,9 @@ const _executeMultiFile = async (req, res, response) => {
     let staticServerInstance, jasmineServer
     try {
         let jasmineResults
-        if(req?.non_editable_files) {
+        if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
         switch (req.type) {
             case FRONTEND_STATIC_JASMINE:
