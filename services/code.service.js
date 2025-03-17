@@ -5,10 +5,9 @@ const os = require('os')
 const fs = require('fs')
 const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
-const { PYTHON, PROMPTV1, PROMPTV2, RUST, GO, PHP } = require('../enums/supportedLanguages')
+const { PYTHON, PROMPTV1, PROMPTV2, PROMPTV3, RUST, GO, PHP } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
-const OpenAI = require('openai')
-const openai = new OpenAI()
+const { getLangfuse } = require('../helpers/openaiInstance.js')
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
@@ -18,12 +17,15 @@ const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
 const appConfig = require('../configs/app.config.js')
-const { FRONTEND_STATIC_JASMINE } = require('../enums/supportedMultifileSetupTypes.js')
+const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
-const { generate } = require('@builder.io/sqlgenerate')
-const parser = require('sqlite-parser')
 const crypto = require('crypto')
+const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
+const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
+const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
+const { Parser } = require('node-sql-parser')
+const parser = new Parser()
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0;
@@ -129,6 +131,7 @@ const _executePrompt = async (
     prompt,
     points = 10, // Maximum points that can be given by open AI
 ) => {
+    openai = getLangfuse()
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
             messages: [
@@ -390,7 +393,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -398,6 +401,10 @@ const _executeStatement = (db, sql) => {
             }
         })
     })
+}
+
+const _generateStatement = (sql) => {
+    return sql.replace(/`([^`]+\.[^`]+)`/g, '$1');
 }
 
 const _executeSqlQueries = async (dbPath, queries) => {
@@ -411,13 +418,18 @@ const _executeSqlQueries = async (dbPath, queries) => {
 
     const sqlStatements = []
     try {
-        const ast = parser(queries);
+        const opt = { database: 'sqlite' }
+        const ast = parser.astify(queries, opt)
         if (!ast) {
             db.close()
             return { data: [] }
         }
-        for (const statement of ast.statement) {
-            sqlStatements.push(generate(statement))
+
+        const statements = ast ?? []
+
+        for (const statement of statements) {
+            const generatedSQL = parser.sqlify(statement, opt)
+            sqlStatements.push(_generateStatement(generatedSQL))
         }
     } catch (err) {
         db.close()
@@ -498,7 +510,7 @@ const execute = async (req, res) => {
         errorMessage: '',
     }
 
-    if ([PROMPTV1, PROMPTV2].includes(req.language)) {
+    if ([PROMPTV1, PROMPTV2, PROMPTV3].includes(req.language)) {
         await _getAiScore(
             LANGUAGES_CONFIG[req.language],
             req.question,
@@ -645,6 +657,13 @@ const _runTests = async () => {
         })
         const page = await browser.newPage()
 
+        await page.setRequestInterception(true)
+
+        page.on('request', (request) => {
+            if (request.isInterceptResolutionHandled()) return
+            request.continue()
+        })
+
         page.on('requestfailed', request => {
             logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
         })
@@ -716,87 +735,6 @@ const _writeFilesToDisk = async (files, workingDir) => {
     }
 }
 
-const _killProcessOnPort = async (port) => {
-    return new Promise((resolve, reject) => {
-        let isRejected = false
-        const lsof = spawn('lsof', ['-i', `:${port}`])
-
-        let stdout = ''
-        let stderr = ''
-
-        lsof.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        lsof.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        lsof.on('close', (code) => {
-            logger.info(stdout)
-            if (code === 1 && stderr.trim() === '') { // lsof returns 1 when the port is idle
-                logger.info(`port ${port} is free`)
-                resolve()
-            } else if (stderr) {
-                logger.error(stderr)
-                if (!isRejected) {
-                    isRejected = true
-                    reject()
-                }
-            }
-            else if (stdout) {
-                logger.info(`Port ${port} is occupied. Attempting to kill the process...`)
-
-                let pid
-                const lines = stdout.trim().split('\n') // For Unix-based systems, get the second part of the output line (PID)
-                if (lines.length > 1) {
-                    const line = lines[1]
-                    pid = line.trim().split(/\s+/)[1]
-                }
-
-                logger.info('printing pid ', pid)
-                if (!pid || isNaN(pid)) {
-                    logger.info(`Invalid PID: ${pid}`)
-                    if (!isRejected) {
-                        isRejected = true
-                        reject()
-                    }
-                }
-
-                const kill = spawn('kill', ['-15', pid], {
-                    detached: true,
-                    stdio: 'ignore',
-                });
-                kill.on('exit', (exitCode) => {
-                    logger.info(`kill command exited with code ${exitCode}`)
-                })
-                kill.on('close', (killCode) => {
-                    if (killCode !== 0) {
-                        logger.info(`kill command closed with code ${killCode}`)
-                        if (!isRejected) {
-                            isRejected = true
-                            reject()
-                        }
-                    } else {
-                        resolve()
-                    }
-                })
-            }
-        })
-    })
-}
-
-const _preCleanUp = async () => {
-    try {
-        await _killProcessOnPort(appConfig.multifile.jasminePort)
-        // TODO: add pre cleanup for puppeteer and jasmine server to prevent memory leak
-    } catch (err) {
-        // since there was an error in pre clean up which is mandatory for running test setup
-        // we kill the current process and in turn container exits and new one is spun up.
-        logger.info(`Error in pre cleanup: ${err.message}`, { stack: err?.stack })
-        process.exit(1)
-    }
-}
 
 const _checkIntegrity = async (non_editable_files) => {
     for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
@@ -816,10 +754,35 @@ const _checkIntegrity = async (non_editable_files) => {
     return true
 }
 
+const parseResults = async (filePath, testCaseFormat) => {
+    switch (testCaseFormat) {
+        case JUNIT:
+            return extractTestCasesJunit(filePath)
+    }
+}
+
+const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServer = undefined) => {
+    await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
+    switch (type) {
+        case FRONTEND_STATIC_JASMINE:
+            if (staticServerInstance) {
+                staticServerInstance.close(() => {
+                    logger.info('Exiting static server in post cleanup')
+                })
+            }
+            break
+        case FRONTEND_REACT_JASMINE:
+            if (jasmineServer) {
+                logger.info('Exiting react setup server in post cleanup')
+                process.kill(-jasmineServer.pid)
+            }
+            break
+    }
+}
+
 const _executeMultiFile = async (req, res, response) => {
     logger.info(`serving ${req.type}`)
     try {
-        await _preCleanUp()
         const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
         await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
     } catch (err) {
@@ -827,33 +790,44 @@ const _executeMultiFile = async (req, res, response) => {
         throw (new Error('Error in running multifile submission, check service logs for the issue'))
     }
 
+    let staticServerInstance, jasmineServer
     try {
         let jasmineResults
-        if(req?.non_editable_files) {
+        if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
-        if (req.type === FRONTEND_STATIC_JASMINE) {
-            const staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
-            jasmineResults = await _runTests()
-            if (staticServerInstance) {
-                staticServerInstance.close(() => {
-                    logger.error('Static server closed')
-                });
-            }
-        } else {
-            if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                throw new Error(`No package.json found`)
-            }
-            await _installDependencies(appConfig.multifile.workingDir)
-            const jasmineServer = await _startJasmineServer()
-            jasmineResults = await _runTests()
-            process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+        switch (req.type) {
+            case FRONTEND_STATIC_JASMINE:
+                staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+                jasmineResults = await _runTests()
+                if (staticServerInstance) {
+                    staticServerInstance.close(() => {
+                        logger.error('Static server closed')
+                    })
+                }
+                break
+            case FRONTEND_REACT_JASMINE:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await _installDependencies(appConfig.multifile.workingDir)
+                jasmineServer = await _startJasmineServer()
+                jasmineResults = await _runTests()
+                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+                break
+            case NODEJS_JUNIT:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+                jasmineResults = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
         }
 
         await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
         response.output = jasmineResults
     } catch (err) {
+        await _postCleanUp(req.type, staticServerInstance, jasmineServer)
         if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
             throw err
         } else {
