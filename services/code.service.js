@@ -399,7 +399,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
+        db.all(sql, function(err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -424,8 +424,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
 
     const sqlStatements = []
     try {
-        const opt = { database: 'sqlite' }
-        const ast = parser.astify(queries, opt)
+        const ast = parser.astify(queries)
         if (!ast) {
             db.close()
             return { data: [] }
@@ -435,7 +434,7 @@ const _executeSqlQueries = async (dbPath, queries) => {
         const statements = Array.isArray(ast) ? ast : [ast]
 
         for (const statement of statements) {
-            const generatedSQL = parser.sqlify(statement, opt)
+            const generatedSQL = parser.sqlify(statement)
             sqlStatements.push(_generateStatement(generatedSQL))
         }
     } catch (err) {
@@ -893,14 +892,14 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
     await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
     switch (type) {
         case FRONTEND_STATIC_JASMINE:
-            if (staticServerInstance) {
+            if(staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.info('Exiting static server in post cleanup')
                 })
             }
             break
         case FRONTEND_REACT_JASMINE:
-            if (jasmineServer) {
+            if(jasmineServer) {
                 logger.info('Exiting react setup server in post cleanup')
                 process.kill(-jasmineServer.pid)
             }
@@ -923,7 +922,7 @@ const _executeMultiFile = async (req, res, response) => {
         let result
         if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
         switch (req.type) {
             case FRONTEND_STATIC_JASMINE:
