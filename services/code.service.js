@@ -20,13 +20,13 @@ const appConfig = require('../configs/app.config.js')
 const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_STATIC_VITEST, FRONTEND_REACT_VITEST } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
+const { generate } = require('@builder.io/sqlgenerate')
+const parser = require('sqlite-parser')
 const crypto = require('crypto')
 const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
-const { Parser } = require('node-sql-parser')
 const { TEST_STATUS } = require('../enums/testStatus.js')
-const parser = new Parser()
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -424,18 +424,13 @@ const _executeSqlQueries = async (dbPath, queries) => {
 
     const sqlStatements = []
     try {
-        const ast = parser.astify(queries)
+        const ast = parser(queries);
         if (!ast) {
             db.close()
             return { data: [] }
         }
-
-        // Handle single or multiple statements
-        const statements = Array.isArray(ast) ? ast : [ast]
-
-        for (const statement of statements) {
-            const generatedSQL = parser.sqlify(statement)
-            sqlStatements.push(_generateStatement(generatedSQL))
+        for (const statement of ast.statement) {
+            sqlStatements.push(_generateStatement(generate(statement)))
         }
     } catch (err) {
         db.close()
