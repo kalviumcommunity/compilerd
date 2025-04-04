@@ -431,7 +431,8 @@ const _executeSqlQueries = async (dbPath, queries) => {
             return { data: [] }
         }
 
-        const statements = ast ?? []
+        // Handle single or multiple statements
+        const statements = Array.isArray(ast) ? ast : [ast]
 
         for (const statement of statements) {
             const generatedSQL = parser.sqlify(statement, opt)
