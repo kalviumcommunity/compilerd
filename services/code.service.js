@@ -26,9 +26,7 @@ const crypto = require('crypto')
 const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
-const { Parser } = require('node-sql-parser')
 const { TEST_STATUS } = require('../enums/testStatus.js')
-const parser = new Parser()
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
