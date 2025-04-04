@@ -25,6 +25,7 @@ const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
 const { Parser } = require('node-sql-parser')
+const { TEST_STATUS } = require('../enums/testStatus.js')
 const parser = new Parser()
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
@@ -685,9 +686,9 @@ const _runVitestTests = async (path) => {
 
                     for (const testResult of parsedJSON?.testResults || []) {
                         for (const assertion of testResult?.assertionResults || []) {
-                            if (assertion?.status === 'passed') {
+                            if (assertion?.status === TEST_STATUS.PASSED) {
                                 result?.success?.push(assertion?.fullName)
-                            } else if (assertion?.status === 'failed') {
+                            } else if (assertion?.status === TEST_STATUS.FAILED) {
                                 result?.failed?.push(assertion?.fullName)
                             }
                         }
@@ -697,7 +698,7 @@ const _runVitestTests = async (path) => {
                     vitestServer.kill() // Terminate the process once JSON is parsed
                 }
             } catch (err) {
-                // Ignore JSON parsing errors until complete JSON is received
+                logger.error('Error parsing JSON output: ', err)
             }
         })
 
