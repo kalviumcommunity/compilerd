@@ -26,7 +26,7 @@ const crypto = require('crypto')
 const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
-const { TEST_STATUS } = require('../enums/testStatus.js')
+const { PASSED, FAILED } = require('../enums/testStatus.js')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -681,9 +681,9 @@ const _runVitestTests = async (path) => {
 
                     for (const testResult of parsedJSON?.testResults || []) {
                         for (const assertion of testResult?.assertionResults || []) {
-                            if (assertion?.status === TEST_STATUS.PASSED) {
+                            if (assertion?.status === PASSED) {
                                 result?.success?.push(assertion?.fullName)
-                            } else if (assertion?.status === TEST_STATUS.FAILED) {
+                            } else if (assertion?.status === FAILED) {
                                 result?.failed?.push(assertion?.fullName)
                             }
                         }

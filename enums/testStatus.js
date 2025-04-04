@@ -1,4 +1,4 @@
-export const TEST_STATUS = {
+module.exports = {
     PASSED: 'passed',
     FAILED: 'failed',
 }
