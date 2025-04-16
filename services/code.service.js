@@ -17,7 +17,7 @@ const express = require('express')
 const http = require('http')
 const { spawn } = require('child_process');
 const appConfig = require('../configs/app.config.js')
-const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_STATIC_VITEST, FRONTEND_REACT_VITEST } = require('../enums/supportedPMFTypes.js')
+const { FRONTEND_STATIC_JASMINE, NODEJS_JUNIT, FRONTEND_REACT_JASMINE, FRONTEND_STATIC_VITEST, FRONTEND_REACT_VITEST, FULL_STACK_VITEST_JUNIT } = require('../enums/supportedPMFTypes.js')
 const axios = require('axios')
 const supportedLanguages = require('../enums/supportedLanguages')
 const { generate } = require('@builder.io/sqlgenerate')
@@ -955,6 +955,13 @@ const _executeMultiFile = async (req, res, response) => {
                 break
             }
             case NODEJS_JUNIT:
+                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+                    throw new Error(`No package.json found`)
+                }
+                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+                result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
+                break
+            case FULL_STACK_VITEST_JUNIT:
                 if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
                     throw new Error(`No package.json found`)
                 }

@@ -9,6 +9,7 @@ const {
     FRONTEND_REACT_JASMINE,
     FRONTEND_STATIC_JASMINE,
     FRONTEND_STATIC_VITEST,
+    FULL_STACK_VITEST_JUNIT,
     FRONTEND_REACT_VITEST,
     NODEJS_JUNIT,
 } = require('../enums/supportedPMFTypes')
@@ -37,23 +38,23 @@ const _getMultiFileSchema = () => {
         url: Joi.string().trim().required(),
         type: Joi.string()
             .trim()
-            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE, FRONTEND_STATIC_VITEST, FRONTEND_REACT_VITEST, NODEJS_JUNIT)
+            .valid(FRONTEND_REACT_JASMINE, FRONTEND_STATIC_JASMINE, FRONTEND_STATIC_VITEST, FRONTEND_REACT_VITEST, FULL_STACK_VITEST_JUNIT, NODEJS_JUNIT)
             .required(),
         non_editable_files: Joi.object()
             .pattern(Joi.string(), Joi.string().pattern(/^[a-fA-F0-9]{64}$/))
             .optional(),
         commands: Joi.alternatives().conditional('type', {
-            is: NODEJS_JUNIT,
+            is: Joi.valid(NODEJS_JUNIT, FULL_STACK_VITEST_JUNIT),
             then: Joi.array().items(Joi.string().required()),
             otherwise: Joi.optional(),
         }),
         output_file: Joi.alternatives().conditional('type', {
-            is: NODEJS_JUNIT,
+            is: Joi.valid(NODEJS_JUNIT, FULL_STACK_VITEST_JUNIT),
             then: Joi.string().required(),
             otherwise: Joi.optional(),
         }),
         output_format: Joi.alternatives().conditional('type', {
-            is: NODEJS_JUNIT,
+            is: Joi.valid(NODEJS_JUNIT, FULL_STACK_VITEST_JUNIT),
             then: Joi.string().valid(JUNIT).required(),
             otherwise: Joi.optional(),
         }),
