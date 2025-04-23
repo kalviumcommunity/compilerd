@@ -611,7 +611,7 @@ const _installDependenciesUsingYarn = async (path) => {
     return new Promise((resolve, reject) => {
         let isRejected = false
 
-        const yarnInstall = spawn('yarn', { cwd: path })
+        const yarnInstall = spawn('yarn', ['install', '--no-lockfile'], { cwd: path })
 
         let stdout = ''
         yarnInstall.stdout.on('data', (data) => {
