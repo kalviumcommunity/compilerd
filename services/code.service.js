@@ -138,8 +138,9 @@ const _executePrompt = async (
     langConfig,
     prompt,
     points = 10, // Maximum points that can be given by open AI
+    user_email = null,
 ) => {
-    openai = getLangfuse()
+    openai = getLangfuse(user_email)
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
             messages: [
@@ -299,13 +300,13 @@ const _calculateScoreConfidence = (evaluations) => {
     }
 }
 
-const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric) => {
+const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric, userEmail) => {
     try {
         const prompt = `Question: ${question}\n\nRubric: ${rubric}\n\nAnswer: ${userAnswer}`
         let totalRequests = 0
         let totalValidRequests = 0
 
-        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points)
+        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points, userEmail)
         totalRequests += 3
         totalValidRequests += (3 - errorResponsesCount)
 
@@ -519,6 +520,7 @@ const execute = async (req, res) => {
             req.points,
             req.userAnswer,
             req.rubric,
+            req.userEmail,
         )
     } else if (['multifile'].includes(req.language)) {
         response.output = {
