@@ -230,10 +230,10 @@ const _executeCode = async (req, res, response) => {
             let command
             if (language === 'java') {
                 // Remove ulimit as a temp fix
-                command = `cd /tmp/ && /usr/bin/time -v -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
             } else {
                 // Execute command with memory limits and resource monitoring for non-Java languages
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -v -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
             }
 
             // Check if there is any input that is to be provided to code execution
@@ -249,31 +249,27 @@ const _executeCode = async (req, res, response) => {
             let memoryKB = null
             try {
                 const path = '/tmp/memory_report.txt'
-                await fs.promises.access(path, fs.constants.F_OK) // Check if file exists
+                await fs.promises.access(path, fs.constants.F_OK)
                 const memoryReport = await fs.promises.readFile(path, 'utf8')
-                const memoryMatch = memoryReport.match(
-                    /Maximum resident set size \(kbytes\):\s*(\d+)/,
-                )
-                memoryKB = memoryMatch ? parseInt(memoryMatch[1], 10) : null
+                memoryKB = parseInt(memoryReport.trim(), 10)
             } catch (err) {
                 console.warn(`Memory report not found or failed to read: ${err.message}`)
             }
 
-            /**
-             * Alpine Linux time command reports 4x higher memory usage than
-             * GNU/Linux due to different measurement methods
-             */
-            response.memory = memoryKB / 4
-            console.log('memory used ', memoryKB / 4)
+            // Adjust if you're on Alpine to divide by 4
+            response.memory = memoryKB ? memoryKB / 4 : null
+            console.log('memory used', response.memory)
 
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
                     : outputLog.result.stdout
+
             if (outputLog.error) {
                 response.error = 1
             }
-        } else {
+        }
+        else {
             response.error = 1
         }
     } catch (e) {
