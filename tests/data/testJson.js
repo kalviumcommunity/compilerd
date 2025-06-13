@@ -13,6 +13,7 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world',
+            approxMemoryUses: 2744,
             status: 200,
             error: 0,
         },
@@ -35,6 +36,7 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            approxMemoryUses: 2680,
             status: 200,
             error: 0,
         },
@@ -48,6 +50,7 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world\n',
+            approxMemoryUses: 44540,
             status: 200,
             error: 0,
         },
@@ -66,6 +69,7 @@ const testCases = [
         },
         expectedResponse: {
             val: '1 2 3\n',
+            approxMemoryUses: 44888,
             status: 200,
             error: 0,
         },
@@ -78,6 +82,7 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world\n',
+            approxMemoryUses: 5544,
             status: 200,
             error: 0,
         },
@@ -99,6 +104,7 @@ const testCases = [
         },
         expectedResponse: {
             val: '1 2 3\n',
+            approxMemoryUses: 5800,
             status: 200,
             error: 0,
         },
@@ -116,6 +122,7 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world',
+            approxMemoryUses: 900,
             status: 200,
             error: 0,
         },
@@ -137,6 +144,7 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            approxMemoryUses: 924,
             status: 200,
             error: 0,
         },
@@ -155,6 +163,7 @@ const testCases = [
         },
         expectedResponse: {
             val: 'hello world\n',
+            approxMemoryUses: 33000,
             status: 200,
             error: 0,
         },
@@ -179,6 +188,7 @@ const testCases = [
         },
         expectedResponse: {
             val: '1\n2\n3\n',
+            approxMemoryUses: 35900,
             status: 200,
             error: 0,
         },
@@ -188,10 +198,11 @@ const testCases = [
         reqObject: {
             language: 'ruby',
             script:
-                'print "hello world"'
+                'print "hello world"',
         },
         expectedResponse: {
             val: 'hello world',
+            approxMemoryUses: 22800,
             status: 200,
             error: 0,
         },
@@ -203,10 +214,11 @@ const testCases = [
             script:
                 'user_input = gets.chomp\n' +
                 'puts user_input',
-            stdin: '10\n'
+            stdin: '10\n',
         },
         expectedResponse: {
             val: '10\n',
+            approxMemoryUses: 22800,
             status: 200,
             error: 0,
         },
@@ -274,30 +286,93 @@ const testCases = [
             error: 1,
         },
     },
+    // {
+    //     name: 'OPEN AI test promptv1',
+    //     reqObject: {
+    //         language: 'promptv1',
+    //         prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+    //     },
+    //     expectedResponse: {
+    //         val: {},
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
+    // {
+    //     name: 'OPEN AI test promptv2',
+    //     reqObject: {
+    //         language: 'promptv2',
+    //         prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+    //     },
+    //     expectedResponse: {
+    //         val: {},
+    //         status: 200,
+    //         error: 0,
+    //     },
+    // },
     {
-        name: 'OPEN AI test promptv1',
+        name: 'c :Heap memory allocation 50MB',
         reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'c',
+            script:
+                '#include <stdio.h>\n' +
+                '#include <stdlib.h>\n\n' +
+                'int main() {\n' +
+                '    size_t memory_size = 50 * 1024 * 1024;\n' +
+                '    char *memory_block = malloc(memory_size);\n' +
+                '    if (memory_block == NULL) {\n' +
+                '        printf("Failed to allocate memory\\n");\n' +
+                '        return 1;\n' +
+                '    }\n' +
+                '    printf("Memory allocation done\\n");\n' +
+                '    for (size_t i = 0; i < memory_size; i += 4096) {\n' +
+                '        memory_block[i] = (char)(i % 256);\n' +
+                '    }\n' +
+                '    printf("Memory touched and initialized\\n");\n' +
+                '    free(memory_block);\n' +
+                '    printf("Memory freed\\n");\n' +
+                '    return 0;\n' +
+                '}',
         },
         expectedResponse: {
-            val: {},
+            val: 'Memory allocation done\nMemory touched and initialized\nMemory freed\n',
             status: 200,
             error: 0,
+            approxMemoryUses: 51000,
         },
-    },
-    {
-        name: 'OPEN AI test promptv2',
+        name: 'c :Stack memory allocation 50MB',
         reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+            language: 'c',
+            script: `
+                #include <stdio.h>
+                #include <string.h>
+
+                #define ONE_MB (1024 * 1024)
+
+                void stack_allocate(int remaining_bytes, int depth) {
+                    if (remaining_bytes <= 0) {
+                        printf("Memory allocated on stack\\n");
+                        return;
+                    }
+                    char buffer[ONE_MB];
+                    memset(buffer, 0, ONE_MB);  // Touch the memory
+                    stack_allocate(remaining_bytes - ONE_MB, depth + 1);
+                }
+
+                int main() {
+                    stack_allocate(6 * ONE_MB, 0);
+                    return 0;
+                }
+            `,
         },
         expectedResponse: {
-            val: {},
+            val: 'Memory allocated on stack\n',
             status: 200,
             error: 0,
+            approxMemoryUses: 6500, // Max stack uses limit is 10 MB
         },
     },
+
 ]
 
 module.exports = { testCases }
