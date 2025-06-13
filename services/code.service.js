@@ -230,9 +230,10 @@ const _executeCode = async (req, res, response) => {
             let command
             if (language === 'java') {
                 // Remove ulimit as a temp fix
-                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && /usr/bin/time -v -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                // Execute command with memory limits and resource monitoring for non-Java languages
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -v -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
             }
 
             // Check if there is any input that is to be provided to code execution
@@ -244,6 +245,27 @@ const _executeCode = async (req, res, response) => {
             }
 
             const outputLog = await _runScript(command, res, true)
+
+            let memoryKB = null
+            try {
+                const path = '/tmp/memory_report.txt'
+                await fs.promises.access(path, fs.constants.F_OK) // Check if file exists
+                const memoryReport = await fs.promises.readFile(path, 'utf8')
+                const memoryMatch = memoryReport.match(
+                    /Maximum resident set size \(kbytes\):\s*(\d+)/,
+                )
+                memoryKB = memoryMatch ? parseInt(memoryMatch[1], 10) : null
+            } catch (err) {
+                console.warn(`Memory report not found or failed to read: ${err.message}`)
+            }
+
+            /**
+             * Alpine Linux time command reports 4x higher memory usage than
+             * GNU/Linux due to different measurement methods
+             */
+            response.memory = memoryKB / 4
+            console.log('memory used ', memoryKB / 4)
+
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
@@ -399,7 +421,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function(err, rows) {
+        db.all(sql, function (err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -887,14 +909,14 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
     await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
     switch (type) {
         case FRONTEND_STATIC_JASMINE:
-            if(staticServerInstance) {
+            if (staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.info('Exiting static server in post cleanup')
                 })
             }
             break
         case FRONTEND_REACT_JASMINE:
-            if(jasmineServer) {
+            if (jasmineServer) {
                 logger.info('Exiting react setup server in post cleanup')
                 process.kill(-jasmineServer.pid)
             }
@@ -917,7 +939,7 @@ const _executeMultiFile = async (req, res, response) => {
         let result
         if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
         switch (req.type) {
             case FRONTEND_STATIC_JASMINE:
