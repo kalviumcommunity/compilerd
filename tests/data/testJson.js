@@ -3,13 +3,13 @@ const testCases = [
         name: 'cpp : hello world',
         reqObject: {
             language: 'cpp',
-            script: `#include<bits/stdc++.h>
-using namespace std;
-int main(){
-    cout << "hello world";
-return 0;
-}
-`,
+            script: `
+                \n#include<bits/stdc++.h>
+                \nusing namespace std;
+                \nint main(){
+                \n    cout << "hello world";
+                \n    return 0;
+                \n}`,
         },
         expectedResponse: {
             val: 'hello world',
@@ -22,19 +22,16 @@ return 0;
         name: 'cpp : print stdin',
         reqObject: {
             language: 'cpp',
-            script: `#include<bits/stdc++.h>
-
-using namespace std;
-int main(){
-
-    int a;
-    while(cin >> a){
-        cout << a << endl;
-    }
-    return 0;
-
-}
-`,
+            script: `
+                \n#include<bits/stdc++.h>
+                \nusing namespace std;
+                \nint main(){
+                \nint a;
+                \nwhile(cin >> a){
+                \ncout << a << endl;
+                \n}
+                \nreturn 0;
+                \n}`,
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -49,7 +46,8 @@ int main(){
         name: 'nodejs : hello world',
         reqObject: {
             language: 'nodejs',
-            script: `console.log('hello world')`,
+            script: `
+                \nconsole.log('hello world')`,
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -62,12 +60,11 @@ int main(){
         name: 'nodejs : print stdin',
         reqObject: {
             language: 'nodejs',
-            script: `process.stdin.setEncoding('utf8'); 
-process.stdin.on('data', (input) => { 
-  console.log(input); 
- 
-}); 
-`,
+            script: `
+                \nprocess.stdin.setEncoding('utf8'); 
+                \nprocess.stdin.on('data', (input) => { 
+                \nconsole.log(input); 
+                \n});`,
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -81,7 +78,8 @@ process.stdin.on('data', (input) => {
         name: 'python : hello world',
         reqObject: {
             language: 'python',
-            script: `print('hello world')`,
+            script:
+                `\nprint('hello world')`,
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -94,14 +92,15 @@ process.stdin.on('data', (input) => {
         name: 'python : print stdin',
         reqObject: {
             language: 'python',
-            script: `try:
-    while(True):
-        line = input()
-        if not line:
-            break
-        print(line)
-except EOFError:
-    pass`,
+            script:
+                `\ntry:
+                \n    while(True):
+                \n        line = input()
+                \n        if not line:
+                \n            break
+                \n        print(line)
+                \nexcept EOFError:
+                \n    pass`,
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -115,14 +114,14 @@ except EOFError:
         name: 'c : hello world',
         reqObject: {
             language: 'c',
-            script: `#include<stdio.h>
-
-int main(){
-
-    printf("hello world");
-    return 0;
-}
-`,
+            script:
+                `\n#include<stdio.h>
+                \n
+                \nint main(){
+                \n
+                \n    printf("hello world");
+                \n    return 0;
+                \n}`,
         },
         expectedResponse: {
             val: 'hello world',
@@ -135,14 +134,15 @@ int main(){
         name: 'c : print stdin',
         reqObject: {
             language: 'c',
-            script: `#include <stdio.h>
-int main() {
-    int number;
-    while (scanf("%d", &number) == 1) {
-        printf("%d\\n", number);
-    } 
-    return 0;
-}`,
+            script:
+                `\n#include <stdio.h>
+                \nint main() {
+                \n    int number;
+                \n    while (scanf("%d", &number) == 1) {
+                \n        printf("%d\\n", number);
+                \n    } 
+                \n    return 0;
+                \n}`,
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -156,13 +156,14 @@ int main() {
         name: 'java : print stdin',
         reqObject: {
             language: 'java',
-            script: `import java.util.Scanner;
-public class Solution {
-    public static void main(String[] args) {
-        System.out.println("hello world");
-    }
-}
-`,
+            script:
+                `\nimport java.util.Scanner;
+                \npublic class Solution {
+                \n    public static void main(String[] args) {
+                \n        System.out.println("hello world");
+                \n    }
+                \n}
+                \n`,
         },
         expectedResponse: {
             val: 'hello world\n',
@@ -175,18 +176,18 @@ public class Solution {
         name: 'java : print stdin',
         reqObject: {
             language: 'java',
-            script: `import java.util.Scanner;
-public class Solution {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNextInt()) {
-            int number = scanner.nextInt();
-            System.out.println(number);
-        } 
-        scanner.close();
-    }
-}
-`,
+            script:
+                `\nimport java.util.Scanner;
+                \npublic class Solution {
+                \n    public static void main(String[] args) {
+                \n        Scanner scanner = new Scanner(System.in);
+                \n        while (scanner.hasNextInt()) {
+                \n            int number = scanner.nextInt();
+                \n            System.out.println(number);
+                \n        } 
+                \n        scanner.close();
+                \n    }
+                \n}`,
             stdin: '1 2 3',
         },
         expectedResponse: {
@@ -200,7 +201,8 @@ public class Solution {
         name: 'ruby : print hello world',
         reqObject: {
             language: 'ruby',
-            script: `print "hello world"`,
+            script:
+                `\nprint "hello world"`,
         },
         expectedResponse: {
             val: 'hello world',
@@ -213,8 +215,9 @@ public class Solution {
         name: 'ruby : print stdin',
         reqObject: {
             language: 'ruby',
-            script: `user_input = gets.chomp
-puts user_input`,
+            script:
+                `\nuser_input = gets.chomp
+            \nputs user_input`,
             stdin: '10\n',
         },
         expectedResponse: {
@@ -228,7 +231,8 @@ puts user_input`,
         name: 'TLE test',
         reqObject: {
             language: 'nodejs',
-            script: `for(let i=0 ; ; ){i++}`,
+            script:
+                `\nfor(let i=0 ; ; ){i++}`,
         },
         expectedResponse: {
             val: 'Time limit exceeded',
@@ -240,7 +244,8 @@ puts user_input`,
         name: 'MLE test',
         reqObject: {
             language: 'python',
-            script: `one_gb_data = bytearray(1000 * 1024 * 1024)`,
+            script:
+                `\none_gb_data = bytearray(1000 * 1024 * 1024)`,
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -252,19 +257,19 @@ puts user_input`,
         name: 'MLE test 2',
         reqObject: {
             language: 'python',
-            script: `import time
-def consume_memory(target_mb, duration_sec):
-    float_size = 8
-    floats_per_mb = (1024 * 1024) // float_size
-    total_floats = target_mb * floats_per_mb
-    iterations = int(duration_sec / 0.1)
-    floats_per_iteration = total_floats // iterations
-    memory_hog = []
-    for _ in range(iterations):
-        memory_hog.extend([0.0] * floats_per_iteration)
-        time.sleep(0.1)
-consume_memory(1000, 1)
-`,
+            script: `
+                \nimport time
+                \ndef consume_memory(target_mb, duration_sec):
+                \n    float_size = 8
+                \n    floats_per_mb = (1024 * 1024) // float_size
+                \n    total_floats = target_mb * floats_per_mb
+                \n    iterations = int(duration_sec / 0.1)
+                \n    floats_per_iteration = total_floats // iterations
+                \n    memory_hog = []
+                \n    for _ in range(iterations):
+                \n        memory_hog.extend([0.0] * floats_per_iteration)
+                \n        time.sleep(0.1)
+                \nconsume_memory(1000, 1)`,
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -276,10 +281,11 @@ consume_memory(1000, 1)
         name: 'MLE test 3',
         reqObject: {
             language: 'python',
-            script: `a = [100]
-for i in a:
-    a.append(i)
-`,
+            script:
+                `\na = [100]
+                \nfor i in a:
+                \n    a.append(i)
+                \n`,
         },
         expectedResponse: {
             val: 'Memory limit exceeded',
@@ -315,25 +321,25 @@ for i in a:
         name: 'c :Heap memory allocation',
         reqObject: {
             language: 'c',
-            script: `#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-    size_t memory_size = 50 * 1024 * 1024;
-    char *memory_block = malloc(memory_size);
-    if (memory_block == NULL) {
-        printf("Failed to allocate memory\\n");
-        return 1;
-    }
-    printf("Memory allocation done\\n");
-    for (size_t i = 0; i < memory_size; i += 4096) {
-        memory_block[i] = (char)(i % 256);
-    }
-    printf("Memory touched and initialized\\n");
-    free(memory_block);
-    printf("Memory freed\\n");
-    return 0;
-}`,
+            script:
+                `\n#include <stdio.h>
+                \n#include <stdlib.h>
+                \nint main() {
+                \n    size_t memory_size = 50 * 1024 * 1024;
+                \n    char *memory_block = malloc(memory_size);
+                \n    if (memory_block == NULL) {
+                \n        printf("Failed to allocate memory\\n");
+                \n        return 1;
+                \n    }
+                \n    printf("Memory allocation done\\n");
+                \n    for (size_t i = 0; i < memory_size; i += 4096) {
+                \n        memory_block[i] = (char)(i % 256);
+                \n    }
+                \n    printf("Memory touched and initialized\\n");
+                \n    free(memory_block);
+                \n    printf("Memory freed\\n");
+                \n    return 0;
+                \n}`,
         },
         expectedResponse: {
             val: 'Memory allocation done\nMemory touched and initialized\nMemory freed\n',
@@ -346,26 +352,23 @@ int main() {
         name: 'c :Stack memory allocation',
         reqObject: {
             language: 'c',
-            script: `#include <stdio.h>
-#include <string.h>
-
-#define ONE_MB (1024 * 1024)
-
-void stack_allocate(int remaining_bytes, int depth) {
-    if (remaining_bytes <= 0) {
-        printf("Memory allocated on stack\\n");
-        return;
-    }
-    char buffer[ONE_MB];
-    memset(buffer, 0, ONE_MB);  // Touch the memory
-    stack_allocate(remaining_bytes - ONE_MB, depth + 1);
-}
-
-int main() {
-    stack_allocate(6 * ONE_MB, 0);
-    return 0;
-}
-`,
+            script:
+                `\n#include <stdio.h>
+                \n#include <string.h>
+                \n#define ONE_MB (1024 * 1024)
+                \nvoid stack_allocate(int remaining_bytes, int depth) {
+                \n    if (remaining_bytes <= 0) {
+                \n        printf("Memory allocated on stack\\n");
+                \n        return;
+                \n    }
+                \n    char buffer[ONE_MB];
+                \n    memset(buffer, 0, ONE_MB);  // Touch the memory
+                \n    stack_allocate(remaining_bytes - ONE_MB, depth + 1);
+                \n}
+                \nint main() {
+                \n    stack_allocate(6 * ONE_MB, 0);
+                \n    return 0;
+                \n}`,
         },
         expectedResponse: {
             val: 'Memory allocated on stack\n',
