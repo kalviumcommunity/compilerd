@@ -30,984 +30,982 @@ const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
 const { PASSED, FAILED } = require('../enums/testStatus.js')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
-    let initialMemory = 0
-    let memoryCheckInterval
-    let childProcess
-    let isChildKilled = false
-    try {
-        if (runMemoryCheck) {
-            memoryCheckInterval = setInterval(async () => {
-                if (!initialMemory) {
-                    initialMemory = Math.round((os.freemem() / 1024 / 1024))
-                    logger.info({
-                        initial_memory: initialMemory,
-                    })
-                }
-
-                if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
-                    /**
-                     * detection logic of memory limit exceeded
-                     */
-                    logger.info({
-                        use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
-                        free_mem: Math.round((os.freemem() / 1024 / 1024)),
-                        total_mem: Math.round((os.totalmem() / 1024 / 1024)),
-                    })
-                    logger.warn('Memory exceeded')
-
-                    if (childProcess) {
-                        childProcess.kill('SIGKILL')
-                        isChildKilled = true
-                    } else {
-                        logger.warn('Child process is undefined and response is on way, trying to send another response')
-                        _respondWithMemoryExceeded(res)
-                    }
-                }
-            }, 50)
+  let initialMemory = 0
+  let memoryCheckInterval
+  let childProcess
+  let isChildKilled = false
+  try {
+    if (runMemoryCheck) {
+      memoryCheckInterval = setInterval(async () => {
+        if (!initialMemory) {
+          initialMemory = Math.round((os.freemem() / 1024 / 1024))
+          logger.info({
+            initial_memory: initialMemory,
+          })
         }
 
-        const execPromise = exec(cmd)
-        childProcess = execPromise.child
+        if ((initialMemory - Math.round((os.freemem() / 1024 / 1024))) > memoryUsedThreshold) {
+          /**
+           * detection logic of memory limit exceeded
+           */
+          logger.info({
+            use_mem: (initialMemory - Math.round((os.freemem() / 1024 / 1024))),
+            free_mem: Math.round((os.freemem() / 1024 / 1024)),
+            total_mem: Math.round((os.totalmem() / 1024 / 1024)),
+          })
+          logger.warn('Memory exceeded')
 
-        const result = await execPromise
-
-        if (memoryCheckInterval) {
-            clearInterval(memoryCheckInterval); childProcess = undefined
+          if (childProcess) {
+            childProcess.kill('SIGKILL')
+            isChildKilled = true
+          } else {
+            logger.warn('Child process is undefined and response is on way, trying to send another response')
+            _respondWithMemoryExceeded(res)
+          }
         }
-
-        return { result }
-    } catch (e) {
-        if (memoryCheckInterval) {
-            clearInterval(memoryCheckInterval); childProcess = undefined
-        }
-
-        if (isChildKilled) {
-            /**
-             * Logic for doing proper garbage collection once child process is killed
-             * 2 sec delay is added just to give enough time for GC to happen
-             */
-            gc()
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            // need some way to know from the error message that memory is the issue
-            e.message = e.message + ' Process killed due to Memory Limit Exceeded'
-        }
-        // languages like java, c and c++ sometimes throw an error and write it to stdout
-        return { error: e.message, stdout: e.stdout, stderr: e.stderr }
+      }, 50)
     }
+
+    const execPromise = exec(cmd)
+    childProcess = execPromise.child
+
+    const result = await execPromise
+
+    if (memoryCheckInterval) {
+      clearInterval(memoryCheckInterval); childProcess = undefined
+    }
+
+    return { result }
+  } catch (e) {
+    if (memoryCheckInterval) {
+      clearInterval(memoryCheckInterval); childProcess = undefined
+    }
+
+    if (isChildKilled) {
+      /**
+       * Logic for doing proper garbage collection once child process is killed
+       * 2 sec delay is added just to give enough time for GC to happen
+       */
+      gc()
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      // need some way to know from the error message that memory is the issue
+      e.message = e.message + ' Process killed due to Memory Limit Exceeded'
+    }
+    // languages like java, c and c++ sometimes throw an error and write it to stdout
+    return { error: e.message, stdout: e.stdout, stderr: e.stderr }
+  }
 }
 
 const _respondWithMemoryExceeded = (res) => {
-    if (!res.headersSent) {
-        res.status(200).send({
-            output: 'Memory exceeded',
-            execute_time: null,
-            status_code: 200,
-            memory: null,
-            cpu_time: null,
-            output_files: [],
-            compile_message: '',
-            error: 1,
-        })
-    }
+  if (!res.headersSent) {
+    res.status(200).send({
+      output: 'Memory exceeded',
+      execute_time: null,
+      status_code: 200,
+      memory: null,
+      cpu_time: null,
+      output_files: [],
+      compile_message: '',
+      error: 1,
+    })
+  }
 }
 
 const _prepareErrorMessage = (outputLog, language, command) => {
-    let errorMsg = outputLog?.error ?? ''
-    // strip the command info
-    if (errorMsg.startsWith('Command failed:')) {
-        errorMsg = errorMsg.replace('Command failed: ' + command, '')
-    }
+  let errorMsg = outputLog?.error ?? ''
+  // strip the command info
+  if (errorMsg.startsWith('Command failed:')) {
+    errorMsg = errorMsg.replace('Command failed: ' + command, '')
+  }
 
-    // Remove file path info
-    if (language === PYTHON) {
-        errorMsg = errorMsg.replace(/File ".*\/(.*?)"/g, 'File "$1"')
-    }
+  // Remove file path info
+  if (language === PYTHON) {
+    errorMsg = errorMsg.replace(/File ".*\/(.*?)"/g, 'File "$1"')
+  }
 
-    const subString = 'MemoryError\n'
-    if ((errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) || errorMsg.includes('Process killed due to Memory Limit Exceeded')) {
-        errorMsg = 'Memory limit exceeded'
-    }
+  const subString = 'MemoryError\n'
+  if ((errorMsg.substring(errorMsg.length - subString.length, errorMsg.length) === subString) || errorMsg.includes('Process killed due to Memory Limit Exceeded')) {
+    errorMsg = 'Memory limit exceeded'
+  }
 
-    // In case of no error message, the msg could be in stdout
-    if (!errorMsg.trim()) errorMsg = outputLog?.stdout || 'Time limit exceeded'
+  // In case of no error message, the msg could be in stdout
+  if (!errorMsg.trim()) errorMsg = outputLog?.stdout || 'Time limit exceeded'
 
-    return errorMsg.trim()
+  return errorMsg.trim()
 }
 
 const _executePrompt = async (
-    count,
-    langConfig,
-    prompt,
-    points = 10, // Maximum points that can be given by open AI
+  count,
+  langConfig,
+  prompt,
+  points = 10, // Maximum points that can be given by open AI
 ) => {
-    openai = getLangfuse()
-    const promises = Array.from({ length: count }, () =>
-        openai.chat.completions.create({
-            messages: [
-                {
-                    role: 'system',
-                    content: getDefaultAIEvalSystemPrompt(points),
-                },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
-            model: langConfig.model,
-            response_format: {
-                type: 'json_object',
-            },
-            temperature: 0.1,
-        }),
-    )
+  openai = getLangfuse()
+  const promises = Array.from({ length: count }, () =>
+    openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: getDefaultAIEvalSystemPrompt(points),
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      model: langConfig.model,
+      response_format: {
+        type: 'json_object',
+      },
+      temperature: 0.1,
+    }),
+  )
 
-    const evaluatedResponses = await Promise.allSettled(promises)
-    let errorResponsesCount = 0
-    const allValidResponses = []
+  const evaluatedResponses = await Promise.allSettled(promises)
+  let errorResponsesCount = 0
+  const allValidResponses = []
 
-    evaluatedResponses.forEach(res => {
-        if (res.status === 'fulfilled') {
-            let openAIResponse = {}
-            if (res.value.choices[0]?.message) {
-                openAIResponse = JSON.parse(res.value.choices[0].message.content)
-            }
+  evaluatedResponses.forEach(res => {
+    if (res.status === 'fulfilled') {
+      let openAIResponse = {}
+      if (res.value.choices[0]?.message) {
+        openAIResponse = JSON.parse(res.value.choices[0].message.content)
+      }
 
-            const schema = Joi.object({
-                score: Joi.number().integer().required(),
-                rationale: Joi.object({
-                    positives: Joi.string().required().allow(''),
-                    negatives: Joi.string().required().allow(''),
-                }).required(),
-                points: Joi.number().integer().required(),
-            })
+      const schema = Joi.object({
+        score: Joi.number().integer().required(),
+        rationale: Joi.object({
+          positives: Joi.string().required().allow(''),
+          negatives: Joi.string().required().allow(''),
+        }).required(),
+        points: Joi.number().integer().required(),
+      })
 
-            const validatedData = schema.validate(openAIResponse)
-            if (validatedData.error || openAIResponse.points !== points) {
-                logger.error(`The response received from Open AI failed the validation check: ${JSON.stringify(validatedData)}`)
-                ++errorResponsesCount
-            } else {
-                allValidResponses.push(openAIResponse)
-            }
-        } else {
-            logger.error('No response received from Open AI')
-            ++errorResponsesCount
-        }
-    })
-    return { allValidResponses, errorResponsesCount }
+      const validatedData = schema.validate(openAIResponse)
+      if (validatedData.error || openAIResponse.points !== points) {
+        logger.error(`The response received from Open AI failed the validation check: ${JSON.stringify(validatedData)}`)
+        ++errorResponsesCount
+      } else {
+        allValidResponses.push(openAIResponse)
+      }
+    } else {
+      logger.error('No response received from Open AI')
+      ++errorResponsesCount
+    }
+  })
+  return { allValidResponses, errorResponsesCount }
 }
 
 const _executeCode = async (req, res, response) => {
-    let args = null
-    let code = null
-    let hasInputFiles = false
-    let language = null
-    let stdin = null
+  let args = null
+  let code = null
+  let hasInputFiles = false
+  let language = null
+  let stdin = null
 
-    try {
-        // Parse Input
-        // eslint-disable-next-line no-unused-vars
-        args = req.args
-        // eslint-disable-next-line no-unused-vars
-        hasInputFiles = req.hasInputFiles
+  try {
+    // Parse Input
+    // eslint-disable-next-line no-unused-vars
+    args = req.args
+    // eslint-disable-next-line no-unused-vars
+    hasInputFiles = req.hasInputFiles
 
-        code = req.script
-        language = req.language
-        stdin = req.stdin
-        const langConfig = LANGUAGES_CONFIG[language]
-        // Remove all files from tmp folder
-        await _runScript('rm -rf /tmp/*', res)
+    code = req.script
+    language = req.language
+    stdin = req.stdin
+    const langConfig = LANGUAGES_CONFIG[language]
+    // Remove all files from tmp folder
+    await _runScript('rm -rf /tmp/*', res)
 
-        // Write file in tmp folder based on language
-        await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
+    // Write file in tmp folder based on language
+    await fs.promises.writeFile(`/tmp/${langConfig.filename}`, code)
 
-        const compileCommand = `cd /tmp/ && ${langConfig.compile}`
-        // Run compile command
-        const compileLog = await _runScript(compileCommand, res, true)
-        response.compileMessage =
-            compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
+    const compileCommand = `cd /tmp/ && ${langConfig.compile}`
+    // Run compile command
+    const compileLog = await _runScript(compileCommand, res, true)
+    response.compileMessage =
+      compileLog.error !== undefined ? _prepareErrorMessage(compileLog, language, compileCommand) : ''
 
-        // Check if there is no compilation error
-        if (response.compileMessage === '') {
-            let command
-            if (language === 'java') {
-                // Remove ulimit as a temp fix
-                command = `cd /tmp/ && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
-            } else {
-                // Execute command with memory limits and resource monitoring for non-Java languages
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
-            }
+    // Check if there is no compilation error
+    if (response.compileMessage === '') {
+      let command
+      if (language === 'java' || language === 'kotlin') {
+        // Remove ulimit as a temp fix
+        command = `cd /tmp/ && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+      } else {
+        // Execute command with memory limits and resource monitoring for non-Java languages
+        command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+      }
 
-            // Check if there is any input that is to be provided to code execution
-            if (stdin) {
-                // Write input in a file in tmp folder
-                await fs.promises.writeFile('/tmp/input.txt', stdin)
-                // Update the execution command
-                command += ' < input.txt'
-            }
+      // Check if there is any input that is to be provided to code execution
+      if (stdin) {
+        // Write input in a file in tmp folder
+        await fs.promises.writeFile('/tmp/input.txt', stdin)
+        // Update the execution command
+        command += ' < input.txt'
+      }
 
-            const outputLog = await _runScript(command, res, true)
+      const outputLog = await _runScript(command, res, true)
 
-            let memoryKB = null
-            try {
-                const path = '/tmp/memory_report.txt'
-                await fs.promises.access(path, fs.constants.F_OK)
-                const memoryReport = await fs.promises.readFile(path, 'utf8')
-                memoryKB = parseInt(memoryReport.trim(), 10)
-            } catch (err) {
-                console.error(`Memory report not found or failed to read: ${err.message}`)
-            }
+      let memoryKB = null
+      try {
+        const path = '/tmp/memory_report.txt'
+        await fs.promises.access(path, fs.constants.F_OK)
+        const memoryReport = await fs.promises.readFile(path, 'utf8')
+        memoryKB = parseInt(memoryReport.trim(), 10)
+      } catch (err) {
+        console.error(`Memory report not found or failed to read: ${err.message}`)
+      }
 
-            const isAlpine = fs.existsSync('/etc/alpine-release');
+      if (memoryKB) {
+        response.memory = memoryKB
+      } else {
+        response.memory = null;
+      }
 
-            if (memoryKB) {
-                response.memory = isAlpine ? memoryKB / 4 : memoryKB;
-            } else {
-                response.memory = null;
-            }
+      console.log('Memory used:', response.memory);
 
-            console.log('Memory used:', response.memory);
+      response.output =
+        outputLog.error !== undefined
+          ? _prepareErrorMessage(outputLog, language, command)
+          : outputLog.result.stdout
 
-            response.output =
-                outputLog.error !== undefined
-                    ? _prepareErrorMessage(outputLog, language, command)
-                    : outputLog.result.stdout
-
-            if (outputLog.error) {
-                response.error = 1
-            }
-        }
-        else {
-            response.error = 1
-        }
-    } catch (e) {
-        logger.error(e)
-        throw new Error('Unable to execute code.')
+      if (outputLog.error) {
+        response.error = 1
+      }
     }
+    else {
+      response.error = 1
+    }
+  } catch (e) {
+    logger.error(e)
+    throw new Error('Unable to execute code.')
+  }
 }
 
 // This function expects an array of size greater than 0
 const _calculateScoreConfidence = (evaluations) => {
-    const scoreDetails = new Map()
+  const scoreDetails = new Map()
 
-    for (let i = 0; i < evaluations.length; ++i) {
-        const score = evaluations[i].score
-        if (scoreDetails.has(score)) {
-            const details = scoreDetails.get(score)
-            details.frequency++
-            scoreDetails.set(score, details)
-        } else {
-            scoreDetails.set(score, {
-                frequency: 1,
-                rationale: evaluations[i].rationale,
-                points: evaluations[i].points,
-            })
-        }
+  for (let i = 0; i < evaluations.length; ++i) {
+    const score = evaluations[i].score
+    if (scoreDetails.has(score)) {
+      const details = scoreDetails.get(score)
+      details.frequency++
+      scoreDetails.set(score, details)
+    } else {
+      scoreDetails.set(score, {
+        frequency: 1,
+        rationale: evaluations[i].rationale,
+        points: evaluations[i].points,
+      })
     }
+  }
 
-    const sortedEntries = Array.from(scoreDetails.entries())
-        .map(([score, details]) => ({
-            score,
-            frequency: details.frequency,
-            rationale: details.rationale,
-            points: details.points,
-        }))
-        .sort((a, b) => b.frequency - a.frequency)
+  const sortedEntries = Array.from(scoreDetails.entries())
+    .map(([score, details]) => ({
+      score,
+      frequency: details.frequency,
+      rationale: details.rationale,
+      points: details.points,
+    }))
+    .sort((a, b) => b.frequency - a.frequency)
 
-    const highestFrequencyDetails = sortedEntries[0]
+  const highestFrequencyDetails = sortedEntries[0]
 
-    return {
-        score: highestFrequencyDetails.score,
-        frequency: highestFrequencyDetails.frequency,
-        rationale: highestFrequencyDetails.rationale,
-        points: highestFrequencyDetails.points,
-        total: evaluations.length,
-    }
+  return {
+    score: highestFrequencyDetails.score,
+    frequency: highestFrequencyDetails.frequency,
+    rationale: highestFrequencyDetails.rationale,
+    points: highestFrequencyDetails.points,
+    total: evaluations.length,
+  }
 }
 
 const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric) => {
-    try {
-        const prompt = `Question: ${question}\n\nRubric: ${rubric}\n\nAnswer: ${userAnswer}`
-        let totalRequests = 0
-        let totalValidRequests = 0
+  try {
+    const prompt = `Question: ${question}\n\nRubric: ${rubric}\n\nAnswer: ${userAnswer}`
+    let totalRequests = 0
+    let totalValidRequests = 0
 
-        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points)
-        totalRequests += 3
-        totalValidRequests += (3 - errorResponsesCount)
+    let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points)
+    totalRequests += 3
+    totalValidRequests += (3 - errorResponsesCount)
 
-        if (errorResponsesCount === 3) {
-            throw new Error('Open AI is not responding with valid responses or It is not in service')
-        }
-
-        let scoreConfidence = _calculateScoreConfidence(allValidResponses)
-
-        // If there's variation in the scores, increase the number of requests
-        if (scoreConfidence.frequency !== 3) {
-            const { allValidResponses: additionalValidResponses, errorResponsesCount: additionalErrorCount } = await _executePrompt(
-                7 + errorResponsesCount,
-                langConfig,
-                prompt,
-                points,
-            )
-
-            if ((7 + errorResponsesCount) === additionalErrorCount) {
-                throw new Error(
-                    'Open AI is not responding with valid responses or It is not in service',
-                )
-            }
-
-            allValidResponses = allValidResponses.concat(additionalValidResponses)
-            totalRequests += (7 + errorResponsesCount)
-            totalValidRequests += (7 + errorResponsesCount - additionalErrorCount)
-            scoreConfidence = _calculateScoreConfidence(allValidResponses)
-
-            if (scoreConfidence.frequency / scoreConfidence.total < 0.5 && totalValidRequests < 10) {
-                const {
-                    allValidResponses: additionalValidResponses,
-                    errorResponsesCount: additionalErrorNewCount,
-                } = await _executePrompt(
-                    5 + additionalErrorCount,
-                    langConfig,
-                    prompt,
-                    points,
-                )
-
-                if ((5 + additionalErrorCount) === additionalErrorNewCount) {
-                    throw new Error(
-                        'Open AI is not responding with valid responses or It is not in service',
-                    )
-                }
-
-                allValidResponses = allValidResponses.concat(additionalValidResponses)
-                totalRequests += (5 + additionalErrorCount)
-                scoreConfidence = _calculateScoreConfidence(allValidResponses)
-            }
-        } else {
-            response.output = {
-                score: scoreConfidence.score,
-                points: scoreConfidence.points,
-                rationale: scoreConfidence.rationale,
-                confidence:
-                    (scoreConfidence.frequency / scoreConfidence.total) * 100,
-            }
-            return
-        }
-
-        // Keep requesting until a high confidence score is determined, respecting the request limit
-        while (totalRequests < 20) {
-            const {
-                allValidResponses: additionalValidResponses,
-            } = await _executePrompt(1, langConfig, prompt, points)
-
-            allValidResponses = allValidResponses.concat(additionalValidResponses)
-            ++totalRequests
-            scoreConfidence = _calculateScoreConfidence(allValidResponses)
-            if (allValidResponses.length >= 10 && scoreConfidence.frequency / scoreConfidence.total >= 0.5) {
-                break
-            }
-        }
-
-        if (allValidResponses.length < 10) {
-            throw new Error('We were not able to achieve 10 valid evaluations from Open AI to generate a confidence')
-        }
-
-        const confidence = (scoreConfidence.frequency / scoreConfidence.total) * 100
-        response.output = {
-            score: scoreConfidence.score,
-            points: scoreConfidence.points,
-            rationale: scoreConfidence.rationale,
-            confidence,
-        }
-    } catch (err) {
-        throw new Error(err.message)
+    if (errorResponsesCount === 3) {
+      throw new Error('Open AI is not responding with valid responses or It is not in service')
     }
+
+    let scoreConfidence = _calculateScoreConfidence(allValidResponses)
+
+    // If there's variation in the scores, increase the number of requests
+    if (scoreConfidence.frequency !== 3) {
+      const { allValidResponses: additionalValidResponses, errorResponsesCount: additionalErrorCount } = await _executePrompt(
+        7 + errorResponsesCount,
+        langConfig,
+        prompt,
+        points,
+      )
+
+      if ((7 + errorResponsesCount) === additionalErrorCount) {
+        throw new Error(
+          'Open AI is not responding with valid responses or It is not in service',
+        )
+      }
+
+      allValidResponses = allValidResponses.concat(additionalValidResponses)
+      totalRequests += (7 + errorResponsesCount)
+      totalValidRequests += (7 + errorResponsesCount - additionalErrorCount)
+      scoreConfidence = _calculateScoreConfidence(allValidResponses)
+
+      if (scoreConfidence.frequency / scoreConfidence.total < 0.5 && totalValidRequests < 10) {
+        const {
+          allValidResponses: additionalValidResponses,
+          errorResponsesCount: additionalErrorNewCount,
+        } = await _executePrompt(
+          5 + additionalErrorCount,
+          langConfig,
+          prompt,
+          points,
+        )
+
+        if ((5 + additionalErrorCount) === additionalErrorNewCount) {
+          throw new Error(
+            'Open AI is not responding with valid responses or It is not in service',
+          )
+        }
+
+        allValidResponses = allValidResponses.concat(additionalValidResponses)
+        totalRequests += (5 + additionalErrorCount)
+        scoreConfidence = _calculateScoreConfidence(allValidResponses)
+      }
+    } else {
+      response.output = {
+        score: scoreConfidence.score,
+        points: scoreConfidence.points,
+        rationale: scoreConfidence.rationale,
+        confidence:
+          (scoreConfidence.frequency / scoreConfidence.total) * 100,
+      }
+      return
+    }
+
+    // Keep requesting until a high confidence score is determined, respecting the request limit
+    while (totalRequests < 20) {
+      const {
+        allValidResponses: additionalValidResponses,
+      } = await _executePrompt(1, langConfig, prompt, points)
+
+      allValidResponses = allValidResponses.concat(additionalValidResponses)
+      ++totalRequests
+      scoreConfidence = _calculateScoreConfidence(allValidResponses)
+      if (allValidResponses.length >= 10 && scoreConfidence.frequency / scoreConfidence.total >= 0.5) {
+        break
+      }
+    }
+
+    if (allValidResponses.length < 10) {
+      throw new Error('We were not able to achieve 10 valid evaluations from Open AI to generate a confidence')
+    }
+
+    const confidence = (scoreConfidence.frequency / scoreConfidence.total) * 100
+    response.output = {
+      score: scoreConfidence.score,
+      points: scoreConfidence.points,
+      rationale: scoreConfidence.rationale,
+      confidence,
+    }
+  } catch (err) {
+    throw new Error(err.message)
+  }
 }
 
 const _executeStatement = (db, sql) => {
-    return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(rows)
-            }
-        })
+  return new Promise((resolve, reject) => {
+    db.all(sql, function(err, rows) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows)
+      }
     })
+  })
 }
 
 const _generateStatement = (sql) => {
-    return sql.replace(/`([^`]+\.[^`]+)`/g, '$1');
+  return sql.replace(/`([^`]+\.[^`]+)`/g, '$1');
 }
 
 const _executeSqlQueries = async (dbPath, queries) => {
-    const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
-        if (err) {
-            throw new Error(
-                'Was not able to connect to the SQLite database: ' + err.message,
-            )
-        }
-    })
+  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+      throw new Error(
+        'Was not able to connect to the SQLite database: ' + err.message,
+      )
+    }
+  })
 
-    const sqlStatements = []
+  const sqlStatements = []
+  try {
+    const ast = parser(queries);
+    if (!ast) {
+      db.close()
+      return { data: [] }
+    }
+    for (const statement of ast.statement) {
+      sqlStatements.push(_generateStatement(generate(statement)))
+    }
+  } catch (err) {
+    db.close()
+    return { error: true, data: err.message }
+  }
+
+  for (let i = 0; i < sqlStatements.length; i++) {
     try {
-        const ast = parser(queries);
-        if (!ast) {
-            db.close()
-            return { data: [] }
-        }
-        for (const statement of ast.statement) {
-            sqlStatements.push(_generateStatement(generate(statement)))
-        }
-    } catch (err) {
+      const res = await _executeStatement(db, sqlStatements[i])
+      if (i == sqlStatements.length - 1) {
         db.close()
-        return { error: true, data: err.message }
+        return { data: res }
+      }
+    } catch (err) {
+      logger.error(err)
+      db.close()
+      return {
+        error: true, data: `${err.message} at statement ${i + 1}`
+      }
     }
-
-    for (let i = 0; i < sqlStatements.length; i++) {
-        try {
-            const res = await _executeStatement(db, sqlStatements[i])
-            if (i == sqlStatements.length - 1) {
-                db.close()
-                return { data: res }
-            }
-        } catch (err) {
-            logger.error(err)
-            db.close()
-            return {
-                error: true, data: `${err.message} at statement ${i + 1}`
-            }
-        }
-    }
+  }
 }
 
 const _downloadSqliteDatabase = async (fileUrl, dbPath) => {
-    const writer = fs.createWriteStream(dbPath)
-    const response = await axios({
-        url: fileUrl,
-        method: 'GET',
-        responseType: 'stream',
-    })
+  const writer = fs.createWriteStream(dbPath)
+  const response = await axios({
+    url: fileUrl,
+    method: 'GET',
+    responseType: 'stream',
+  })
 
-    response.data.pipe(writer)
+  response.data.pipe(writer)
 
-    return new Promise((resolve, reject) => {
-        writer.on('finish', resolve)
-        writer.on('error', reject)
-    })
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve)
+    writer.on('error', reject)
+  })
 }
 
 const _executeSqlite3Query = async (req, res, response) => {
-    const dbPath = appConfig.dbConfig.PATH
-    try {
-        const dbDirectory = path.dirname(dbPath)
-        if (!fs.existsSync(dbDirectory)) {
-            fs.mkdirSync(dbDirectory, { recursive: true })
-        }
-        if (!fs.existsSync(dbPath)) {
-            fs.closeSync(fs.openSync(dbPath, 'w'))
-        }
-        await _downloadSqliteDatabase(req.stdin, dbPath)
-        const queryResults = await _executeSqlQueries(dbPath, req.script, response)
-        if (queryResults.error) {
-            response.error = 1
-        }
-        response.output = JSON.stringify(queryResults.data)
-
-        fs.unlinkSync(dbPath)
-    } catch (err) {
-        if (fs.existsSync(dbPath)) {
-            fs.unlinkSync(dbPath)
-        }
-        logger.error(err)
-        throw err
+  const dbPath = appConfig.dbConfig.PATH
+  try {
+    const dbDirectory = path.dirname(dbPath)
+    if (!fs.existsSync(dbDirectory)) {
+      fs.mkdirSync(dbDirectory, { recursive: true })
     }
+    if (!fs.existsSync(dbPath)) {
+      fs.closeSync(fs.openSync(dbPath, 'w'))
+    }
+    await _downloadSqliteDatabase(req.stdin, dbPath)
+    const queryResults = await _executeSqlQueries(dbPath, req.script, response)
+    if (queryResults.error) {
+      response.error = 1
+    }
+    response.output = JSON.stringify(queryResults.data)
+
+    fs.unlinkSync(dbPath)
+  } catch (err) {
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath)
+    }
+    logger.error(err)
+    throw err
+  }
 }
 
 const execute = async (req, res) => {
-    const response = {
-        output: '',
-        executeTime: null,
-        statusCode: 200,
-        memory: null,
-        cpuTime: null,
-        outputFiles: [],
-        compileMessage: '',
-        error: 0,
-        stdin: req?.stdin,
-        errorMessage: '',
-    }
+  const response = {
+    output: '',
+    executeTime: null,
+    statusCode: 200,
+    memory: null,
+    cpuTime: null,
+    outputFiles: [],
+    compileMessage: '',
+    error: 0,
+    stdin: req?.stdin,
+    errorMessage: '',
+  }
 
-    if ([PROMPTV1, PROMPTV2, PROMPTV3].includes(req.language)) {
-        await _getAiScore(
-            LANGUAGES_CONFIG[req.language],
-            req.question,
-            response,
-            req.points,
-            req.userAnswer,
-            req.rubric,
-        )
-    } else if (['multifile'].includes(req.language)) {
-        response.output = {
-            success: [],
-            failed: [],
-        }
-        await _executeMultiFile(req, res, response)
-    } else if (req.language === supportedLanguages.SQLITE3) {
-        await _executeSqlite3Query(req, res, response)
-    } else {
-        await _executeCode(req, res, response)
+  if ([PROMPTV1, PROMPTV2, PROMPTV3].includes(req.language)) {
+    await _getAiScore(
+      LANGUAGES_CONFIG[req.language],
+      req.question,
+      response,
+      req.points,
+      req.userAnswer,
+      req.rubric,
+    )
+  } else if (['multifile'].includes(req.language)) {
+    response.output = {
+      success: [],
+      failed: [],
     }
-    return response
+    await _executeMultiFile(req, res, response)
+  } else if (req.language === supportedLanguages.SQLITE3) {
+    await _executeSqlite3Query(req, res, response)
+  } else {
+    await _executeCode(req, res, response)
+  }
+  return response
 }
 
 const _getSubmissionDataFromGCS = async (url) => {
-    try {
-        const response = await axios.get(url)
-        const jsonData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
-        // console.log('printing json data ', jsonData)
-        return jsonData
-    } catch (err) {
-        logger.error('Error fetching data from GCS:', err)
-        throw err
-    }
+  try {
+    const response = await axios.get(url)
+    const jsonData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
+    // console.log('printing json data ', jsonData)
+    return jsonData
+  } catch (err) {
+    logger.error('Error fetching data from GCS:', err)
+    throw err
+  }
 }
 
 const _startStaticServer = async (rootPath) => {
-    const submissionDir = rootPath
-    const staticServer = express()
-    staticServer.use(express.static(submissionDir))
-    const staticServerInstance = http.createServer(staticServer)
-    return new Promise((resolve, reject) => {
-        staticServerInstance.listen(appConfig.multifile.jasminePort, () => {
-            resolve(staticServerInstance)
-        }).on('error', (err) => {
-            logger.error('Failed to start server:', err)
-            reject(err)
-        })
+  const submissionDir = rootPath
+  const staticServer = express()
+  staticServer.use(express.static(submissionDir))
+  const staticServerInstance = http.createServer(staticServer)
+  return new Promise((resolve, reject) => {
+    staticServerInstance.listen(appConfig.multifile.jasminePort, () => {
+      resolve(staticServerInstance)
+    }).on('error', (err) => {
+      logger.error('Failed to start server:', err)
+      reject(err)
     })
+  })
 }
 
 const _cleanUpDir = async (dirPath, downloadedFilePath) => {
-    await fs.promises.rm(dirPath, { recursive: true, force: true })
-    await fs.promises.rm(downloadedFilePath, { recursive: true, force: true })
+  await fs.promises.rm(dirPath, { recursive: true, force: true })
+  await fs.promises.rm(downloadedFilePath, { recursive: true, force: true })
 }
 
 const _installDependencies = async (path) => {
-    return new Promise((resolve, reject) => {
-        let isRejected = false
-        const npmInstall = spawn('npm', ['install'], { cwd: path })
+  return new Promise((resolve, reject) => {
+    let isRejected = false
+    const npmInstall = spawn('npm', ['install'], { cwd: path })
 
-        let stdout = ''
-        npmInstall.stdout.on('data', (data) => {
-            stdout += data.toString()
-        })
-
-        let stderr = ''
-        npmInstall.stderr.on('data', (data) => {
-            stderr += data.toString()
-        })
-
-        npmInstall.on('exit', (code) => {
-            logger.info(`npm install exited with code ${code}`)
-        })
-
-        npmInstall.on('close', (code) => {
-            logger.info(`npm install closed with code ${code}`)
-            if (code === 0) {
-                resolve()
-            } else {
-                if (!isRejected) {
-                    isRejected = true
-                    reject(new Error('Failed to install dependencies'))
-                }
-            }
-        })
-
-        npmInstall.on('error', (err) => {
-            logger.error('Failed to start npm install process:', err)
-            if (!isRejected) {
-                isRejected = true
-                reject(err)
-            }
-        });
+    let stdout = ''
+    npmInstall.stdout.on('data', (data) => {
+      stdout += data.toString()
     })
+
+    let stderr = ''
+    npmInstall.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+
+    npmInstall.on('exit', (code) => {
+      logger.info(`npm install exited with code ${code}`)
+    })
+
+    npmInstall.on('close', (code) => {
+      logger.info(`npm install closed with code ${code}`)
+      if (code === 0) {
+        resolve()
+      } else {
+        if (!isRejected) {
+          isRejected = true
+          reject(new Error('Failed to install dependencies'))
+        }
+      }
+    })
+
+    npmInstall.on('error', (err) => {
+      logger.error('Failed to start npm install process:', err)
+      if (!isRejected) {
+        isRejected = true
+        reject(err)
+      }
+    });
+  })
 }
 
 const _installDependenciesUsingYarn = async (path) => {
-    return new Promise((resolve, reject) => {
-        let isRejected = false
+  return new Promise((resolve, reject) => {
+    let isRejected = false
 
-        const yarnInstall = spawn('yarn', ['install', '--no-lockfile'], { cwd: path })
+    const yarnInstall = spawn('yarn', ['install', '--no-lockfile'], { cwd: path })
 
-        let stdout = ''
-        yarnInstall.stdout.on('data', (data) => {
-            stdout += data.toString()
-        })
-
-        let stderr = ''
-        yarnInstall.stderr.on('data', (data) => {
-            stderr += data.toString()
-        })
-
-        yarnInstall.on('exit', (code) => {
-            logger.info(`yarn install exited with code ${code}`)
-        })
-
-        yarnInstall.on('close', (code) => {
-            logger.info(`yarn install closed with code ${code}`)
-            if (code === 0) {
-                resolve()
-            } else {
-                if (!isRejected) {
-                    isRejected = true
-                    reject(new Error(`Failed to install dependencies. Exit code: ${code}`))
-                }
-            }
-        })
-
-        yarnInstall.on('error', (err) => {
-            logger.error('Failed to start yarn install process:', err)
-            if (!isRejected) {
-                isRejected = true
-                reject(err)
-            }
-        })
+    let stdout = ''
+    yarnInstall.stdout.on('data', (data) => {
+      stdout += data.toString()
     })
+
+    let stderr = ''
+    yarnInstall.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+
+    yarnInstall.on('exit', (code) => {
+      logger.info(`yarn install exited with code ${code}`)
+    })
+
+    yarnInstall.on('close', (code) => {
+      logger.info(`yarn install closed with code ${code}`)
+      if (code === 0) {
+        resolve()
+      } else {
+        if (!isRejected) {
+          isRejected = true
+          reject(new Error(`Failed to install dependencies. Exit code: ${code}`))
+        }
+      }
+    })
+
+    yarnInstall.on('error', (err) => {
+      logger.error('Failed to start yarn install process:', err)
+      if (!isRejected) {
+        isRejected = true
+        reject(err)
+      }
+    })
+  })
 }
 
 const _runVitestTests = async (path) => {
-    logger.log('Starting Vitest server in path: ', path)
+  logger.log('Starting Vitest server in path: ', path)
 
-    return new Promise((resolve, reject) => {
-        const vitestServer = spawn('yarn', ['test:json'], {
-            cwd: path,
-            detached: true,
-        })
-
-        let isRejected = false
-        let stdout = ''
-        let stderr = ''
-
-        vitestServer.stdout.on('data', (data) => {
-            const output = data.toString()
-            stdout += output
-
-            // Attempt to parse JSON output and resolve the promise
-            try {
-                const jsonStartIndex = stdout.indexOf('{')
-                const jsonEndIndex = stdout.lastIndexOf('}')
-                if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
-                    const jsonString = stdout.slice(jsonStartIndex, jsonEndIndex + 1)
-                    const parsedJSON = JSON.parse(jsonString)
-
-                    const result = {
-                        success: [],
-                        failed: [],
-                    }
-
-                    for (const testResult of parsedJSON?.testResults || []) {
-                        for (const assertion of testResult?.assertionResults || []) {
-                            if (assertion?.status === PASSED) {
-                                result?.success?.push(assertion?.fullName)
-                            } else if (assertion?.status === FAILED) {
-                                result?.failed?.push(assertion?.fullName)
-                            }
-                        }
-                    }
-
-                    resolve(result)
-                    vitestServer.kill() // Terminate the process once JSON is parsed
-                }
-            } catch (err) {
-                logger.error('Error parsing JSON output: ', err)
-            }
-        })
-
-        vitestServer.stderr.on('data', (data) => {
-            stderr += data.toString()
-        })
-
-        vitestServer.on('error', (err) => {
-            logger.error('Failed to start Vitest server:', err)
-            if (!isRejected) {
-                isRejected = true
-                reject(err)
-            }
-        })
-
-        vitestServer.on('close', (code) => {
-            if (code !== 0) {
-                if (!isRejected) {
-                    isRejected = true
-                    reject(
-                        new Error(
-                            `Vitest server closed with code ${code}. Stderr: ${stderr}`,
-                        ),
-                    )
-                }
-            }
-        })
-
-        vitestServer.on('exit', (code) => {
-            logger.info(`Vitest server exited with code ${code}`)
-        })
+  return new Promise((resolve, reject) => {
+    const vitestServer = spawn('yarn', ['test:json'], {
+      cwd: path,
+      detached: true,
     })
+
+    let isRejected = false
+    let stdout = ''
+    let stderr = ''
+
+    vitestServer.stdout.on('data', (data) => {
+      const output = data.toString()
+      stdout += output
+
+      // Attempt to parse JSON output and resolve the promise
+      try {
+        const jsonStartIndex = stdout.indexOf('{')
+        const jsonEndIndex = stdout.lastIndexOf('}')
+        if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+          const jsonString = stdout.slice(jsonStartIndex, jsonEndIndex + 1)
+          const parsedJSON = JSON.parse(jsonString)
+
+          const result = {
+            success: [],
+            failed: [],
+          }
+
+          for (const testResult of parsedJSON?.testResults || []) {
+            for (const assertion of testResult?.assertionResults || []) {
+              if (assertion?.status === PASSED) {
+                result?.success?.push(assertion?.fullName)
+              } else if (assertion?.status === FAILED) {
+                result?.failed?.push(assertion?.fullName)
+              }
+            }
+          }
+
+          resolve(result)
+          vitestServer.kill() // Terminate the process once JSON is parsed
+        }
+      } catch (err) {
+        logger.error('Error parsing JSON output: ', err)
+      }
+    })
+
+    vitestServer.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+
+    vitestServer.on('error', (err) => {
+      logger.error('Failed to start Vitest server:', err)
+      if (!isRejected) {
+        isRejected = true
+        reject(err)
+      }
+    })
+
+    vitestServer.on('close', (code) => {
+      if (code !== 0) {
+        if (!isRejected) {
+          isRejected = true
+          reject(
+            new Error(
+              `Vitest server closed with code ${code}. Stderr: ${stderr}`,
+            ),
+          )
+        }
+      }
+    })
+
+    vitestServer.on('exit', (code) => {
+      logger.info(`Vitest server exited with code ${code}`)
+    })
+  })
 }
 
 const _startJasmineServer = async () => {
-    return new Promise((resolve, reject) => {
-        const jasmineServer = spawn('npm', ['run', 'test:serve'], { cwd: appConfig.multifile.workingDir, detached: true }) // run independent of parent to prevent it from getting orphan
-        let isRejected = false
+  return new Promise((resolve, reject) => {
+    const jasmineServer = spawn('npm', ['run', 'test:serve'], { cwd: appConfig.multifile.workingDir, detached: true }) // run independent of parent to prevent it from getting orphan
+    let isRejected = false
 
-        let stdout = ''
-        jasmineServer.stdout.on('data', (data) => {
-            const output = data.toString()
-            stdout += output
+    let stdout = ''
+    jasmineServer.stdout.on('data', (data) => {
+      const output = data.toString()
+      stdout += output
 
-            if (output.includes('Jasmine server is running here')) {
-                resolve(jasmineServer)
-            }
-        });
-        let stderr = ''
-        jasmineServer.stderr.on('data', (data) => {
-            stderr += data.toString()
-        });
+      if (output.includes('Jasmine server is running here')) {
+        resolve(jasmineServer)
+      }
+    });
+    let stderr = ''
+    jasmineServer.stderr.on('data', (data) => {
+      stderr += data.toString()
+    });
 
-        jasmineServer.on('error', (err) => {
-            logger.error('Failed to start jasmine server:', err)
-            if (!isRejected) {
-                isRejected = true
-                reject(err)
-            }
-        })
-
-        jasmineServer.on('close', (code) => {
-            if (code !== 0) {
-                if (!isRejected) {
-                    isRejected = true
-                    reject(new Error('Failed to start jasmine server'))
-                }
-            }
-        })
-
-        jasmineServer.on('exit', (code) => {
-            logger.info(`Jasmine server exited with code ${code}`)
-        })
+    jasmineServer.on('error', (err) => {
+      logger.error('Failed to start jasmine server:', err)
+      if (!isRejected) {
+        isRejected = true
+        reject(err)
+      }
     })
+
+    jasmineServer.on('close', (code) => {
+      if (code !== 0) {
+        if (!isRejected) {
+          isRejected = true
+          reject(new Error('Failed to start jasmine server'))
+        }
+      }
+    })
+
+    jasmineServer.on('exit', (code) => {
+      logger.info(`Jasmine server exited with code ${code}`)
+    })
+  })
 }
 
 const _runTests = async () => {
-    let browser
-    try {
-        browser = await puppeteer.launch({
-            executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        })
-        const page = await browser.newPage()
+  let browser
+  try {
+    browser = await puppeteer.launch({
+      executablePath: '/usr/bin/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    })
+    const page = await browser.newPage()
 
-        await page.setRequestInterception(true)
+    await page.setRequestInterception(true)
 
-        page.on('request', (request) => {
-            if (request.isInterceptResolutionHandled()) return
-            request.continue()
-        })
+    page.on('request', (request) => {
+      if (request.isInterceptResolutionHandled()) return
+      request.continue()
+    })
 
-        page.on('requestfailed', request => {
-            logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
-        })
-        page.on('response', response => {
-            if (!response.ok()) {
-                logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
-            }
-        });
+    page.on('requestfailed', request => {
+      logger.error(`Request to ${request.url()} failed with reason ${request.abortErrorReason()}`)
+    })
+    page.on('response', response => {
+      if (!response.ok()) {
+        logger.error(`Failed response: ${response.url()} - ${response.status()} ${response.statusText()}`)
+      }
+    });
 
-        let jasmineResults
-        const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
-        if (resp.status() !== 200) {
-            throw new Error('Failed to load the entry page')
-        }
-        await page.waitForFunction(() =>
-            document.querySelector('.jasmine-duration')?.textContent.includes('finished')
-        )
-        const summaryElement = await page.$('.jasmine-summary')
-
-        // Parse the test results for all suites
-        jasmineResults = await page.evaluate((summaryElement) => {
-            const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
-            const results = {
-                'success': [],
-                'failed': []
-            };
-
-            suiteElements.forEach((suiteElement) => {
-                const specElements = suiteElement.querySelectorAll(':scope > .jasmine-specs'); // only look at direct children to avoid duplicates
-
-                specElements.forEach((specElement) => {
-                    const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
-                    const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
-
-                    results['success'].push(...passedTests)
-                    results['failed'].push(...failedTests)
-                });
-            });
-
-            return results
-        }, summaryElement)
-        await browser.close()
-        return jasmineResults
-    } catch (error) {
-        if (browser) await browser.close()
-        throw (error)
+    let jasmineResults
+    const resp = await page.goto(`http://localhost:${appConfig.multifile.jasminePort}/`)
+    if (resp.status() !== 200) {
+      throw new Error('Failed to load the entry page')
     }
+    await page.waitForFunction(() =>
+      document.querySelector('.jasmine-duration')?.textContent.includes('finished')
+    )
+    const summaryElement = await page.$('.jasmine-summary')
+
+    // Parse the test results for all suites
+    jasmineResults = await page.evaluate((summaryElement) => {
+      const suiteElements = summaryElement.querySelectorAll('.jasmine-suite');
+      const results = {
+        'success': [],
+        'failed': []
+      };
+
+      suiteElements.forEach((suiteElement) => {
+        const specElements = suiteElement.querySelectorAll(':scope > .jasmine-specs'); // only look at direct children to avoid duplicates
+
+        specElements.forEach((specElement) => {
+          const passedTests = Array.from(specElement.querySelectorAll('.jasmine-passed'), el => el.textContent)
+          const failedTests = Array.from(specElement.querySelectorAll('.jasmine-failed'), el => el.textContent)
+
+          results['success'].push(...passedTests)
+          results['failed'].push(...failedTests)
+        });
+      });
+
+      return results
+    }, summaryElement)
+    await browser.close()
+    return jasmineResults
+  } catch (error) {
+    if (browser) await browser.close()
+    throw (error)
+  }
 }
 
 const _writeFileToDisk = async (filePath, fileContent, workingDir) => {
-    try {
-        const finalPathOnDisk = workingDir + filePath
-        const dirName = path.dirname(finalPathOnDisk)
-        if (!fs.existsSync(dirName)) {
-            await fs.promises.mkdir(dirName, { recursive: true })
-        }
-        await fs.promises.writeFile(finalPathOnDisk, fileContent)
-    } catch (err) {
-        logger.error(err)
-        throw err
+  try {
+    const finalPathOnDisk = workingDir + filePath
+    const dirName = path.dirname(finalPathOnDisk)
+    if (!fs.existsSync(dirName)) {
+      await fs.promises.mkdir(dirName, { recursive: true })
     }
+    await fs.promises.writeFile(finalPathOnDisk, fileContent)
+  } catch (err) {
+    logger.error(err)
+    throw err
+  }
 }
 
 const _writeFilesToDisk = async (files, workingDir) => {
-    for (const file in files) {
-        const filePath = file
-        const fileContent = files[file]
-        await _writeFileToDisk(filePath, fileContent, workingDir)
-    }
+  for (const file in files) {
+    const filePath = file
+    const fileContent = files[file]
+    await _writeFileToDisk(filePath, fileContent, workingDir)
+  }
 }
 
 
 const _checkIntegrity = async (non_editable_files) => {
-    for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
-        try {
-            const fullPath = path.join(appConfig.multifile.workingDir, filePath)
-            const fileContent = await fs.promises.readFile(fullPath)
-            const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
-            if (actualHash !== expectedHash) {
-                logger.warn(`Integrity check failed for file: ${filePath}`)
-                return false
-            }
-        } catch (error) {
-            logger.error(`Error reading file ${filePath}: ${error.message}`)
-            return false
-        }
+  for (const [filePath, expectedHash] of Object.entries(non_editable_files)) {
+    try {
+      const fullPath = path.join(appConfig.multifile.workingDir, filePath)
+      const fileContent = await fs.promises.readFile(fullPath)
+      const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
+      if (actualHash !== expectedHash) {
+        logger.warn(`Integrity check failed for file: ${filePath}`)
+        return false
+      }
+    } catch (error) {
+      logger.error(`Error reading file ${filePath}: ${error.message}`)
+      return false
     }
-    return true
+  }
+  return true
 }
 
 const parseResults = async (filePath, testCaseFormat) => {
-    switch (testCaseFormat) {
-        case JUNIT:
-            return extractTestCasesJunit(filePath)
-    }
+  switch (testCaseFormat) {
+    case JUNIT:
+      return extractTestCasesJunit(filePath)
+  }
 }
 
 const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServer = undefined) => {
-    await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
-    switch (type) {
-        case FRONTEND_STATIC_JASMINE:
-            if (staticServerInstance) {
-                staticServerInstance.close(() => {
-                    logger.info('Exiting static server in post cleanup')
-                })
-            }
-            break
-        case FRONTEND_REACT_JASMINE:
-            if (jasmineServer) {
-                logger.info('Exiting react setup server in post cleanup')
-                process.kill(-jasmineServer.pid)
-            }
-            break
-    }
+  await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
+  switch (type) {
+    case FRONTEND_STATIC_JASMINE:
+      if (staticServerInstance) {
+        staticServerInstance.close(() => {
+          logger.info('Exiting static server in post cleanup')
+        })
+      }
+      break
+    case FRONTEND_REACT_JASMINE:
+      if (jasmineServer) {
+        logger.info('Exiting react setup server in post cleanup')
+        process.kill(-jasmineServer.pid)
+      }
+      break
+  }
 }
 
 const _executeMultiFile = async (req, res, response) => {
-    logger.info(`serving ${req.type}`)
-    try {
-        const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
-        await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
-    } catch (err) {
-        logger.error(err)
-        throw (new Error('Error in running multifile submission, check service logs for the issue'))
+  logger.info(`serving ${req.type}`)
+  try {
+    const fileContent = await _getSubmissionDataFromGCS(req.url, appConfig.multifile.submissionFileDownloadPath)
+    await _writeFilesToDisk(fileContent, appConfig.multifile.workingDir)
+  } catch (err) {
+    logger.error(err)
+    throw (new Error('Error in running multifile submission, check service logs for the issue'))
+  }
+
+  let staticServerInstance, jasmineServer
+  try {
+    let result
+    if (req?.non_editable_files) {
+      const isValidSubmission = await _checkIntegrity(req.non_editable_files)
+      if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+    }
+    switch (req.type) {
+      case FRONTEND_STATIC_JASMINE:
+        staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
+        result = await _runTests()
+        if (staticServerInstance) {
+          staticServerInstance.close(() => {
+            logger.error('Static server closed')
+          })
+        }
+        break
+      case FRONTEND_REACT_JASMINE:
+        if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+          throw new Error(`No package.json found`)
+        }
+        await _installDependencies(appConfig.multifile.workingDir)
+        jasmineServer = await _startJasmineServer()
+        result = await _runTests()
+        process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
+        break
+      case FRONTEND_STATIC_VITEST: {
+        if (!fs.existsSync(`${appConfig.multifile.workingDir}package.json`)) {
+          throw new Error('No package.json found')
+        }
+        await _installDependenciesUsingYarn(appConfig.multifile.workingDir)
+        result = await _runVitestTests(appConfig.multifile.workingDir)
+        break
+      }
+      case FRONTEND_REACT_VITEST: {
+        if (!fs.existsSync(`${appConfig.multifile.workingDir}package.json`)) {
+          throw new Error('No package.json found')
+        }
+        await _installDependenciesUsingYarn(appConfig.multifile.workingDir)
+        result = await _runVitestTests(appConfig.multifile.workingDir)
+        break
+      }
+      case NODEJS_JUNIT:
+        if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+          throw new Error(`No package.json found`)
+        }
+        await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+        result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
+        break
+      case FULL_STACK_VITEST_JUNIT:
+        if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
+          throw new Error(`No package.json found`)
+        }
+        await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+        result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
     }
 
-    let staticServerInstance, jasmineServer
-    try {
-        let result
-        if (req?.non_editable_files) {
-            const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
-        }
-        switch (req.type) {
-            case FRONTEND_STATIC_JASMINE:
-                staticServerInstance = await _startStaticServer(appConfig.multifile.staticServerPath)
-                result = await _runTests()
-                if (staticServerInstance) {
-                    staticServerInstance.close(() => {
-                        logger.error('Static server closed')
-                    })
-                }
-                break
-            case FRONTEND_REACT_JASMINE:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await _installDependencies(appConfig.multifile.workingDir)
-                jasmineServer = await _startJasmineServer()
-                result = await _runTests()
-                process.kill(-jasmineServer.pid) // kill entire process group including child process and transitive child processes
-                break
-            case FRONTEND_STATIC_VITEST: {
-                if (!fs.existsSync(`${appConfig.multifile.workingDir}package.json`)) {
-                    throw new Error('No package.json found')
-                }
-                await _installDependenciesUsingYarn(appConfig.multifile.workingDir)
-                result = await _runVitestTests(appConfig.multifile.workingDir)
-                break
-            }
-            case FRONTEND_REACT_VITEST: {
-                if (!fs.existsSync(`${appConfig.multifile.workingDir}package.json`)) {
-                    throw new Error('No package.json found')
-                }
-                await _installDependenciesUsingYarn(appConfig.multifile.workingDir)
-                result = await _runVitestTests(appConfig.multifile.workingDir)
-                break
-            }
-            case NODEJS_JUNIT:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
-                result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
-                break
-            case FULL_STACK_VITEST_JUNIT:
-                if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
-                    throw new Error(`No package.json found`)
-                }
-                await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
-                result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
-        }
-
-        await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
-        response.output = result
-    } catch (err) {
-        await _postCleanUp(req.type, staticServerInstance, jasmineServer)
-        if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
-            throw err
-        } else {
-            // respond with empty success and failed array
-            logger.error(err)
-            response.errorMessage = "Error in running tests"
-            response.statusCode = 200
-            return response
-        }
+    await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
+    response.output = result
+  } catch (err) {
+    await _postCleanUp(req.type, staticServerInstance, jasmineServer)
+    if (err.message === 'No package.json found' || err.message.includes('Browser was not found at')) {
+      throw err
+    } else {
+      // respond with empty success and failed array
+      logger.error(err)
+      response.errorMessage = "Error in running tests"
+      response.statusCode = 200
+      return response
     }
+  }
 }
 
 module.exports = { execute }
