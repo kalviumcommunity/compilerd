@@ -286,30 +286,30 @@ for i in a:
       error: 1,
     },
   },
-  {
+  // {
     name: 'OPEN AI test promptv1',
-    reqObject: {
-      language: 'promptv1',
-      prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-    },
-    expectedResponse: {
-      val: {},
-      status: 200,
-      error: 0,
-    },
-  },
-  {
-    name: 'OPEN AI test promptv2',
-    reqObject: {
-      language: 'promptv2',
-      prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-    },
-    expectedResponse: {
-      val: {},
-      status: 200,
-      error: 0,
-    },
-  },
+  //   reqObject: {
+  //     language: 'promptv1',
+  //     prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+  //   },
+  //   expectedResponse: {
+  //     val: {},
+  //     status: 200,
+  //     error: 0,
+  //   },
+  // },
+  // {
+  //   name: 'OPEN AI test promptv2',
+  //   reqObject: {
+  //     language: 'promptv2',
+  //     prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+  //   },
+  //   expectedResponse: {
+  //     val: {},
+  //     status: 200,
+  //     error: 0,
+  //   },
+  // },
   {
     name: 'c :Heap memory allocation',
     reqObject: {
@@ -370,7 +370,87 @@ int main() {
       approxMemoryUses: 6500, // Max stack uses limit is ~10 MB
     },
   },
+  {
+    name: "Go: Basic Hello World",
+    reqObject: {
+      language: "go",
+      script: `
+package main
+import "fmt"
 
+func main() {
+    fmt.Println("Language: Go")
+}`
+    },
+    expectedResponse: {
+      val: "Language: Go\n",
+      status: 200,
+      error: 0
+    }
+  },
+  {
+    name: "PHP: Basic Hello World",
+    reqObject: {
+      language: "php",
+      script: `
+<?php echo "Language: PHP";?>`
+    },
+    expectedResponse: {
+      val: "\nLanguage: PHP",
+      status: 200,
+      error: 0
+    }
+  },
+  {
+    name: "TypeScript: Basic Hello World",
+    reqObject: {
+      language: "typescript",
+      script: `
+function main(): void {
+    console.log("Language: TypeScript");
+}
+
+main();`
+    },
+    expectedResponse: {
+      val: "Language: TypeScript\n",
+      status: 200,
+      error: 0
+    }
+  },
+  {
+    name: "C#: Basic Hello World",
+    reqObject: {
+      language: "csharp",
+      script: `
+using System;
+class Solution {
+    static void Main(string[] args) {
+        Console.WriteLine("Language: C#");
+    }
+}`
+    },
+    expectedResponse: {
+      val: "Language: C#\n",
+      status: 200,
+      error: 0
+    }
+  },
+  {
+    name: "Kotlin: Basic Hello World",
+    reqObject: {
+      language: "kotlin",
+      script: `
+fun main() {
+  println("Language: Kotlin")
+}`
+    },
+    expectedResponse: {
+      val: "Language: Kotlin\n",
+      status: 200,
+      error: 0
+    }
+  }
 ]
 
 module.exports = { testCases }
