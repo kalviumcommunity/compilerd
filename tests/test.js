@@ -23,8 +23,8 @@ describe('Tests', () => {
                     const actual = response.data.memory
                     const expected = testCase.expectedResponse.approxMemoryUses
                     const tolerance = (MEMORY_TOLERANCE_PERCENT / 100) * expected
-                    expect(actual).toBeGreaterThanOrEqual(expected - tolerance)
-                    expect(actual).toBeLessThanOrEqual(expected + tolerance)
+                    expect(actual).toBeGreaterThanOrEqual(expected - tolerance, `Memory usage should be within tolerance (min: ${expected - tolerance})`)
+                    expect(actual).toBeLessThanOrEqual(expected + tolerance, `Memory usage should be within tolerance (max: ${expected + tolerance})`)
                 }
             }
             expect(response).toHaveProperty('status', testCase.expectedResponse.status)
