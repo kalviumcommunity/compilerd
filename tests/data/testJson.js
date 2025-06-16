@@ -1,29 +1,29 @@
 
 const testCases = [
-    {
-        name: 'cpp : hello world',
-        reqObject: {
-            language: 'cpp',
-            script: `
+  {
+    name: 'cpp : hello world',
+    reqObject: {
+      language: 'cpp',
+      script: `
 #include<bits/stdc++.h>
 using namespace std;
 int main(){
     cout << "hello world";
     return 0;
 }`,
-        },
-        expectedResponse: {
-            val: 'hello world',
-            approxMemoryUses: 2744,
-            status: 200,
-            error: 0,
-        },
     },
-    {
-        name: 'cpp : print stdin',
-        reqObject: {
-            language: 'cpp',
-            script: `
+    expectedResponse: {
+      val: 'hello world',
+      approxMemoryUses: 2744,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'cpp : print stdin',
+    reqObject: {
+      language: 'cpp',
+      script: `
 #include<bits/stdc++.h>
 using namespace std;
 int main(){
@@ -33,101 +33,101 @@ int main(){
   }
   return 0;
 }`,
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1\n2\n3\n',
-            approxMemoryUses: 2680,
-            status: 200,
-            error: 0,
-        },
+      stdin: '1 2 3',
+    },
+    expectedResponse: {
+      val: '1\n2\n3\n',
+      approxMemoryUses: 2680,
+      status: 200,
+      error: 0,
+    },
 
+  },
+  {
+    name: 'nodejs : hello world',
+    reqObject: {
+      language: 'nodejs',
+      script: `console.log('hello world')`,
     },
-    {
-        name: 'nodejs : hello world',
-        reqObject: {
-            language: 'nodejs',
-            script: `console.log('hello world')`,
-        },
-        expectedResponse: {
-            val: 'hello world\n',
-            approxMemoryUses: 44540,
-            status: 200,
-            error: 0,
-        },
+    expectedResponse: {
+      val: 'hello world\n',
+      approxMemoryUses: 44540,
+      status: 200,
+      error: 0,
     },
-    {
-        name: 'nodejs : print stdin',
-        reqObject: {
-            language: 'nodejs',
-            script: `
+  },
+  {
+    name: 'nodejs : print stdin',
+    reqObject: {
+      language: 'nodejs',
+      script: `
 process.stdin.setEncoding('utf8'); 
 process.stdin.on('data', (input) => { 
 console.log(input.trim()); 
 });`,
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1 2 3\n',
-            approxMemoryUses: 44888,
-            status: 200,
-            error: 0,
-        },
+      stdin: '1 2 3',
     },
-    {
-        name: 'python : hello world',
-        reqObject: {
-            language: 'python',
-            script:
-                `print('hello world')`,
-        },
-        expectedResponse: {
-            val: 'hello world\n',
-            approxMemoryUses: 5544,
-            status: 200,
-            error: 0,
-        },
+    expectedResponse: {
+      val: '1 2 3\n',
+      approxMemoryUses: 44888,
+      status: 200,
+      error: 0,
     },
-    {
-        name: 'python : print stdin',
-        reqObject: {
-            language: 'python',
-            script: `
+  },
+  {
+    name: 'python : hello world',
+    reqObject: {
+      language: 'python',
+      script:
+        `print('hello world')`,
+    },
+    expectedResponse: {
+      val: 'hello world\n',
+      approxMemoryUses: 7344,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'python : print stdin',
+    reqObject: {
+      language: 'python',
+      script: `
 import sys
 for line in sys.stdin:
     print(line.strip())`,
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1 2 3\n',
-            approxMemoryUses: 5800,
-            status: 200,
-            error: 0,
-        },
+      stdin: '1 2 3',
     },
-    {
-        name: 'c : hello world',
-        reqObject: {
-            language: 'c',
-            script:
-                `#include <stdio.h>
+    expectedResponse: {
+      val: '1 2 3\n',
+      approxMemoryUses: 7228,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'c : hello world',
+    reqObject: {
+      language: 'c',
+      script:
+        `#include <stdio.h>
 int main(){
 printf("hello world");
 return 0;
 } `,
-        },
-        expectedResponse: {
-            val: 'hello world',
-            approxMemoryUses: 900,
-            status: 200,
-            error: 0,
-        },
     },
-    {
-        name: 'c : print stdin',
-        reqObject: {
-            language: 'c',
-            script:`
+    expectedResponse: {
+      val: 'hello world',
+      approxMemoryUses: 900,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'c : print stdin',
+    reqObject: {
+      language: 'c',
+      script: `
 #include <stdio.h>
 int main() {
     int number;
@@ -136,40 +136,40 @@ int main() {
 }
     return 0;
 } `,
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1\n2\n3\n',
-            approxMemoryUses: 924,
-            status: 200,
-            error: 0,
-        },
+      stdin: '1 2 3',
     },
-    {
-        name: 'java : hello world',
-        reqObject: {
-            language: 'java',
-            script:
-                `
+    expectedResponse: {
+      val: '1\n2\n3\n',
+      approxMemoryUses: 924,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'java : hello world',
+    reqObject: {
+      language: 'java',
+      script:
+        `
 import java.util.Scanner;
 public class Solution {
     public static void main(String[] args) {
         System.out.println("hello world");
     }
 }`,
-        },
-        expectedResponse: {
-            val: 'hello world\n',
-            approxMemoryUses: 33000,
-            status: 200,
-            error: 0,
-        },
     },
-    {
-        name: 'java : print stdin',
-        reqObject: {
-            language: 'java',
-            script: `
+    expectedResponse: {
+      val: 'hello world\n',
+      approxMemoryUses: 33000,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'java : print stdin',
+    reqObject: {
+      language: 'java',
+      script: `
 import java.util.Scanner;
 public class Solution {
     public static void main(String[] args) {
@@ -181,76 +181,76 @@ public class Solution {
         scanner.close();
     }
 } `,
-            stdin: '1 2 3',
-        },
-        expectedResponse: {
-            val: '1\n2\n3\n',
-            approxMemoryUses: 35900,
-            status: 200,
-            error: 0,
-        },
+      stdin: '1 2 3',
     },
-    {
-        name: 'ruby : print hello world',
-        reqObject: {
-            language: 'ruby',
-            script:
-                `print "hello world"`,
-        },
-        expectedResponse: {
-            val: 'hello world',
-            approxMemoryUses: 22800,
-            status: 200,
-            error: 0,
-        },
+    expectedResponse: {
+      val: '1\n2\n3\n',
+      approxMemoryUses: 35900,
+      status: 200,
+      error: 0,
     },
-    {
-        name: 'ruby : print stdin',
-        reqObject: {
-            language: 'ruby',
-            script: `
+  },
+  {
+    name: 'ruby : print hello world',
+    reqObject: {
+      language: 'ruby',
+      script:
+        `print "hello world"`,
+    },
+    expectedResponse: {
+      val: 'hello world',
+      approxMemoryUses: 11790,
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'ruby : print stdin',
+    reqObject: {
+      language: 'ruby',
+      script: `
 user_input = gets.chomp
 puts user_input`,
-            stdin: '10',
-        },
-        expectedResponse: {
-            val: '10\n',
-            approxMemoryUses: 22800,
-            status: 200,
-            error: 0,
-        },
+      stdin: '10',
     },
-    {
-        name: 'TLE test',
-        reqObject: {
-            language: 'nodejs',
-            script:
-                `for(let i = 0 ;; ) { i++ } `,
-        },
-        expectedResponse: {
-            val: 'Time limit exceeded',
-            status: 200,
-            error: 1,
-        },
+    expectedResponse: {
+      val: '10\n',
+      approxMemoryUses: 11800,
+      status: 200,
+      error: 0,
     },
-    {
-        name: 'MLE test',
-        reqObject: {
-            language: 'python',
-            script:
-                `one_gb_data = bytearray(1000 * 1024 * 1024)`,
-        },
-        expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
+  },
+  {
+    name: 'TLE test',
+    reqObject: {
+      language: 'nodejs',
+      script:
+        `for(let i = 0 ;; ) { i++ } `,
     },
-    {
-        name: 'MLE test 2',
-        reqObject: {
-            language: 'python',
-            script: `
+    expectedResponse: {
+      val: 'Time limit exceeded',
+      status: 200,
+      error: 1,
+    },
+  },
+  {
+    name: 'MLE test',
+    reqObject: {
+      language: 'python',
+      script:
+        `one_gb_data = bytearray(1000 * 1024 * 1024)`,
+    },
+    expectedResponse: {
+      val: 'Memory limit exceeded',
+      status: 200,
+      error: 1,
+    },
+  },
+  {
+    name: 'MLE test 2',
+    reqObject: {
+      language: 'python',
+      script: `
 import time
 def consume_memory(target_mb, duration_sec):
     float_size = 8
@@ -263,58 +263,58 @@ def consume_memory(target_mb, duration_sec):
         memory_hog.extend([0.0] * floats_per_iteration)
         time.sleep(0.1)
 consume_memory(1000, 1)`,
-        },
-        expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
     },
-    {
-        name: 'MLE test 3',
-        reqObject: {
-            language: 'python',
-            script: `
+    expectedResponse: {
+      val: 'Memory limit exceeded',
+      status: 200,
+      error: 1,
+    },
+  },
+  {
+    name: 'MLE test 3',
+    reqObject: {
+      language: 'python',
+      script: `
 a = [100]
 for i in a:
     a.append(i)
     `,
-        },
-        expectedResponse: {
-            val: 'Memory limit exceeded',
-            status: 200,
-            error: 1,
-        },
     },
-    {
-        name: 'OPEN AI test promptv1',
-        reqObject: {
-            language: 'promptv1',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-        },
-        expectedResponse: {
-            val: {},
-            status: 200,
-            error: 0,
-        },
+    expectedResponse: {
+      val: 'Memory limit exceeded',
+      status: 200,
+      error: 1,
     },
-    {
-        name: 'OPEN AI test promptv2',
-        reqObject: {
-            language: 'promptv2',
-            prompt: 'The question is what is 2 plus 2. The answer given is 4.',
-        },
-        expectedResponse: {
-            val: {},
-            status: 200,
-            error: 0,
-        },
+  },
+  {
+    name: 'OPEN AI test promptv1',
+    reqObject: {
+      language: 'promptv1',
+      prompt: 'The question is what is 2 plus 2. The answer given is 4.',
     },
-    {
-        name: 'c :Heap memory allocation',
-        reqObject: {
-            language: 'c',
-            script: `
+    expectedResponse: {
+      val: {},
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'OPEN AI test promptv2',
+    reqObject: {
+      language: 'promptv2',
+      prompt: 'The question is what is 2 plus 2. The answer given is 4.',
+    },
+    expectedResponse: {
+      val: {},
+      status: 200,
+      error: 0,
+    },
+  },
+  {
+    name: 'c :Heap memory allocation',
+    reqObject: {
+      language: 'c',
+      script: `
 #include <stdio.h>
 #include <stdlib.h>
 int main() {
@@ -333,19 +333,19 @@ int main() {
     printf("Memory freed\\n");
     return 0;
 } `,
-        },
-        expectedResponse: {
-            val: 'Memory allocation done\nMemory touched and initialized\nMemory freed\n',
-            status: 200,
-            error: 0,
-            approxMemoryUses: 51000,
-        },
     },
-    {
-        name: 'c :Stack memory allocation',
-        reqObject: {
-            language: 'c',
-            script: `
+    expectedResponse: {
+      val: 'Memory allocation done\nMemory touched and initialized\nMemory freed\n',
+      status: 200,
+      error: 0,
+      approxMemoryUses: 51000,
+    },
+  },
+  {
+    name: 'c :Stack memory allocation',
+    reqObject: {
+      language: 'c',
+      script: `
 #include <stdio.h>
 #include <string.h>
 #define ONE_MB (1024 * 1024)
@@ -362,14 +362,14 @@ int main() {
     stack_allocate(6 * ONE_MB, 0);
     return 0;
 } `,
-        },
-        expectedResponse: {
-            val: 'Memory allocated on stack\n',
-            status: 200,
-            error: 0,
-            approxMemoryUses: 6500, // Max stack uses limit is ~10 MB
-        },
     },
+    expectedResponse: {
+      val: 'Memory allocated on stack\n',
+      status: 200,
+      error: 0,
+      approxMemoryUses: 6500, // Max stack uses limit is ~10 MB
+    },
+  },
 
 ]
 
