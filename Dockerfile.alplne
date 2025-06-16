@@ -26,14 +26,7 @@ RUN set -ex && \
     openjdk21 \
     ruby \
     php82 php82-cli php82-common php82-phar php82-json php82-openssl php82-curl php82-dev \
-    go
-
-# Install .NET 8 SDK manually
-RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && \
-    chmod +x dotnet-install.sh && \
-    ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet && \
-    ln -s /usr/share/dotnet/dotnet /usr/local/bin/dotnet && \
-    rm dotnet-install.sh
+    go mono
 
 # Install Kotlin manually
 ARG KOTLIN_VERSION=2.1.0
@@ -77,7 +70,6 @@ RUN addgroup -S -g 2000 runner && \
 # Set up environment variables for all languages
 ENV PATH="/opt/node/bin:/opt/swift/usr/bin:$PATH"
 ENV JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
-ENV DOTNET_ROOT="/usr/share/dotnet"
 ENV GOPATH="/tmp/go"
 ENV GOCACHE="/tmp/go-cache"
 
@@ -92,7 +84,7 @@ RUN echo "=== Language Versions ===" && \
     echo "Go: $(go version)" && \
     echo "PHP: $(php --version | head -1)" && \
     echo "TypeScript: $(tsc --version)" && \
-    echo "C#/.NET: $(dotnet --version)" && \
+    echo "C#: $(mono --version) | head -1" && \
     echo "Kotlin: $(kotlin -version)" && \
     echo "========================"
 

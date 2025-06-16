@@ -67,12 +67,12 @@ const LANGUAGES_CONFIG = {
     memory: 786432, // Similar to Node.js since it compiles to JS
   },
   [CSHARP]: {
-    compile: 'dotnet build solution.csproj -o .',
-    run: 'dotnet solution.dll',
+    compile: 'mcs -out:solution.exe solution.cs',
+    run: 'mono solution.exe',
     timeout: 6,
     filename: 'solution.cs',
-    memory: ALLOWED_RAM * ONE_MB * 1.5, // .NET typically needs more memory
-    projectFile: 'solution.csproj', // Additional config for .NET projects
+    memory: ALLOWED_RAM * ONE_MB * 1.5,
+    requiresProjectFile: false, // Not needed for Mono
   },
   [KOTLIN]: {
     compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
