@@ -257,9 +257,15 @@ const _executeCode = async (req, res, response) => {
                 console.warn(`Memory report not found or failed to read: ${err.message}`)
             }
 
-            // Adjust if you're on Alpine to divide by 4
-            response.memory = memoryKB ? memoryKB / 4 : null
-            console.log('memory used', response.memory)
+            const isAlpine = fs.existsSync('/etc/alpine-release');
+
+            if (memoryKB) {
+                response.memory = isAlpine ? memoryKB / 4 : memoryKB;
+            } else {
+                response.memory = null;
+            }
+
+            console.log('Memory used:', response.memory);
 
             response.output =
                 outputLog.error !== undefined
