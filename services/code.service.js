@@ -265,7 +265,7 @@ const _executeCode = async (req, res, response) => {
                 response.memory = null;
             }
 
-            console.log('Memory used:', response.memory);
+            logger.info(`Memory usage for ${language} code execution: ${response.memory} KB`);
 
             response.output =
                 outputLog.error !== undefined
