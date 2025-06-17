@@ -887,7 +887,7 @@ const _checkIntegrity = async (non_editable_files) => {
             const fullPath = path.join(appConfig.multifile.workingDir, filePath)
             const fileContent = await fs.promises.readFile(fullPath)
             const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
-            if(actualHash !== expectedHash) {
+            if (actualHash !== expectedHash) {
                 logger.warn(`Integrity check failed for file: ${filePath}`)
                 return false
             }
@@ -940,7 +940,7 @@ const _executeMultiFile = async (req, res, response) => {
         let result
         if (req?.non_editable_files) {
             const isValidSubmission = await _checkIntegrity(req.non_editable_files)
-            if (!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
+            if(!isValidSubmission) throw new Error(`A non editable file has been modified, exiting...`)
         }
         switch (req.type) {
             case FRONTEND_STATIC_JASMINE:
