@@ -254,7 +254,7 @@ const _executeCode = async (req, res, response) => {
                 const memoryReport = await fs.promises.readFile(memoryReportPath, 'utf8')
                 memoryKB = parseInt(memoryReport.trim(), 10)
             } catch (err) {
-                console.error(`Memory report not found or failed to read: ${err.message}`)
+                logger.error(`Memory report not found or failed to read: ${err.message}`)
             }
 
             const isAlpine = fs.existsSync('/etc/alpine-release');
