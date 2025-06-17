@@ -228,13 +228,15 @@ const _executeCode = async (req, res, response) => {
 
         // Check if there is no compilation error
         if (response.compileMessage === '') {
-            let command
+            const memoryReportPath = `/tmp/memory_report_${process.pid}_${Date.now()}.txt`;
+
+            let command;
             if (language === 'java') {
                 // Remove ulimit as a temp fix
-                command = `cd /tmp/ && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && /usr/bin/time -f "%M" -o ${memoryReportPath} timeout ${langConfig.timeout}s ${langConfig.run}`;
             } else {
                 // Execute command with memory limits and resource monitoring for non-Java languages
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o /tmp/memory_report.txt timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o ${memoryReportPath} timeout ${langConfig.timeout}s ${langConfig.run}`;
             }
 
             // Check if there is any input that is to be provided to code execution
@@ -249,9 +251,8 @@ const _executeCode = async (req, res, response) => {
 
             let memoryKB = null
             try {
-                const path = '/tmp/memory_report.txt'
-                await fs.promises.access(path, fs.constants.F_OK)
-                const memoryReport = await fs.promises.readFile(path, 'utf8')
+                await fs.promises.access(memoryReportPath, fs.constants.F_OK)
+                const memoryReport = await fs.promises.readFile(memoryReportPath, 'utf8')
                 memoryKB = parseInt(memoryReport.trim(), 10)
             } catch (err) {
                 console.error(`Memory report not found or failed to read: ${err.message}`)
