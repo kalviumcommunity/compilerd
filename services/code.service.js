@@ -1,4 +1,3 @@
-
 /* globals gc */
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
@@ -272,12 +271,10 @@ const _executeCode = async (req, res, response) => {
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
                     : outputLog.result.stdout
-
             if (outputLog.error) {
                 response.error = 1
             }
-        }
-        else {
+        } else {
             response.error = 1
         }
     } catch (e) {
@@ -425,7 +422,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 
 const _executeStatement = (db, sql) => {
     return new Promise((resolve, reject) => {
-        db.all(sql, function (err, rows) {
+        db.all(sql, function(err, rows) {
             if (err) {
                 reject(err);
             } else {
@@ -890,7 +887,7 @@ const _checkIntegrity = async (non_editable_files) => {
             const fullPath = path.join(appConfig.multifile.workingDir, filePath)
             const fileContent = await fs.promises.readFile(fullPath)
             const actualHash = crypto.createHash('sha256').update(fileContent).digest('hex')
-            if (actualHash !== expectedHash) {
+            if(actualHash !== expectedHash) {
                 logger.warn(`Integrity check failed for file: ${filePath}`)
                 return false
             }
@@ -913,14 +910,14 @@ const _postCleanUp = async (type, staticServerInstance = undefined, jasmineServe
     await _cleanUpDir(appConfig.multifile.workingDir, appConfig.multifile.submissionFileDownloadPath)
     switch (type) {
         case FRONTEND_STATIC_JASMINE:
-            if (staticServerInstance) {
+            if(staticServerInstance) {
                 staticServerInstance.close(() => {
                     logger.info('Exiting static server in post cleanup')
                 })
             }
             break
         case FRONTEND_REACT_JASMINE:
-            if (jasmineServer) {
+            if(jasmineServer) {
                 logger.info('Exiting react setup server in post cleanup')
                 process.kill(-jasmineServer.pid)
             }
