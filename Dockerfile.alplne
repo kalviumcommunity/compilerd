@@ -1,0 +1,93 @@
+FROM alpine:latest
+
+ENV PYTHONUNBUFFERED=1
+
+# Switch to edge repository for latest packages
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+# Install basic tools and build dependencies in smaller chunks
+RUN set -ex && \
+    apk add --no-cache gcc g++ make musl-dev curl wget tar gzip
+
+RUN set -ex && \
+    apk add --no-cache libffi-dev openssl-dev zlib-dev bzip2-dev xz-dev readline-dev sqlite-dev
+
+RUN set -ex && \
+    apk add --no-cache autoconf bison yaml-dev gdbm-dev ncurses-dev git bash ca-certificates
+
+RUN set -ex && \
+    apk add --no-cache chromium lsof iptables ip6tables
+
+# Install available packages from Alpine Edge
+RUN set -ex && \
+    apk add --no-cache \
+    openjdk21 \
+    ruby \
+    php82 php82-cli php82-common php82-phar php82-json php82-openssl php82-curl php82-dev \
+    go mono
+
+# Install Kotlin manually
+ARG KOTLIN_VERSION=2.1.0
+RUN cd /opt && \
+    wget https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip && \
+    unzip kotlin-compiler-${KOTLIN_VERSION}.zip && \
+    mv kotlinc /opt/kotlin && \
+    ln -s /opt/kotlin/bin/kotlin /usr/local/bin/kotlin && \
+    ln -s /opt/kotlin/bin/kotlinc /usr/local/bin/kotlinc && \
+    rm kotlin-compiler-${KOTLIN_VERSION}.zip
+
+
+RUN apk add --no-cache nodejs npm
+ENV PATH="/opt/node/bin:$PATH"
+RUN npm install -g typescript ts-node
+
+RUN apk add --no-cache python3
+
+# Create symbolic links and fix paths
+RUN ln -sf python3 /usr/bin/python && \
+    ln -sf pip3 /usr/bin/pip && \
+    ln -s /usr/bin/php82 /usr/bin/php
+
+# Remove unneeded GCC internals to save space
+RUN set -ex && \
+    find /usr/libexec/gcc -name "cc1obj" -delete 2>/dev/null || true && \
+    find /usr/libexec/gcc -name "lto1" -delete 2>/dev/null || true && \
+    find /usr/libexec/gcc -name "lto-wrapper" -delete 2>/dev/null || true && \
+    rm -f /usr/bin/x86_64-alpine-linux-musl-gcj 2>/dev/null || true
+
+# Copy application files
+COPY . /usr/bin/
+COPY start.sh /usr/bin/
+
+# Install npm dependencies
+RUN npm --prefix /usr/bin/ install
+
+# Create non-root user for security
+RUN addgroup -S -g 2000 runner && \
+    adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
+
+# Set up environment variables for all languages
+ENV PATH="/opt/node/bin:/opt/swift/usr/bin:$PATH"
+ENV JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+ENV GOPATH="/tmp/go"
+ENV GOCACHE="/tmp/go-cache"
+
+EXPOSE 8080
+
+# Health check to verify installations
+RUN echo "=== Language Versions ===" && \
+    echo "Node: $(node --version)" && \
+    echo "Python: $(python --version)" && \
+    echo "Java: $(java --version | head -1)" && \
+    echo "Ruby: $(ruby --version)" && \
+    echo "Go: $(go version)" && \
+    echo "PHP: $(php --version | head -1)" && \
+    echo "TypeScript: $(tsc --version)" && \
+    echo "C#: $(mono --version) | head -1" && \
+    echo "Kotlin: $(kotlin -version)" && \
+    echo "========================"
+
+# USER runner
+CMD sh /usr/bin/start.sh
