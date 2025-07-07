@@ -30,6 +30,7 @@ const _getAiSchema = () => {
         userAnswer: Joi.string().required(),
         points: Joi.number().integer().optional(),
         rubric: Joi.string().optional(),
+        metadata: Joi.object().unknown(true).optional(),
     })
 }
 
