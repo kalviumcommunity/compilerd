@@ -138,6 +138,7 @@ const _executePrompt = async (
     langConfig,
     prompt,
     points = 10, // Maximum points that can be given by open AI
+    metadata = {}, // Metadata to be sent to Open AI for post processing
 ) => {
     openai = getLangfuse()
     const promises = Array.from({ length: count }, () =>
@@ -156,6 +157,7 @@ const _executePrompt = async (
             response_format: {
                 type: 'json_object',
             },
+            metadata,
             temperature: 0.1,
         }),
     )
@@ -299,13 +301,13 @@ const _calculateScoreConfidence = (evaluations) => {
     }
 }
 
-const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric) => {
+const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric, metadata = {}) => {
     try {
         const prompt = `Question: ${question}\n\nRubric: ${rubric}\n\nAnswer: ${userAnswer}`
         let totalRequests = 0
         let totalValidRequests = 0
 
-        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points)
+        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points, metadata)
         totalRequests += 3
         totalValidRequests += (3 - errorResponsesCount)
 
@@ -322,6 +324,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 langConfig,
                 prompt,
                 points,
+                metadata,
             )
 
             if ((7 + errorResponsesCount) === additionalErrorCount) {
@@ -344,6 +347,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                     langConfig,
                     prompt,
                     points,
+                    metadata,
                 )
 
                 if ((5 + additionalErrorCount) === additionalErrorNewCount) {
@@ -371,7 +375,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
         while (totalRequests < 20) {
             const {
                 allValidResponses: additionalValidResponses,
-            } = await _executePrompt(1, langConfig, prompt, points)
+            } = await _executePrompt(1, langConfig, prompt, points, metadata)
 
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             ++totalRequests
@@ -519,6 +523,7 @@ const execute = async (req, res) => {
             req.points,
             req.userAnswer,
             req.rubric,
+            req.metadata || {}, // Metadata to be sent to Open AI for post processing
         )
     } else if (['multifile'].includes(req.language)) {
         response.output = {
