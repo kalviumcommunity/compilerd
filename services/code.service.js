@@ -140,7 +140,7 @@ const _executePrompt = async (
     points = 10, // Maximum points that can be given by open AI
     metadata = {}, // Metadata to be sent to Open AI for post processing
 ) => {
-    openai = getLangfuse()
+    openai = getLangfuse(metadata)
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
             messages: [

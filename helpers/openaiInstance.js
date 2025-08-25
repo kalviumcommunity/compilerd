@@ -19,7 +19,7 @@ const getOpenAI = () => {
     return openaiClient || instantiateOpenAI();
 };
 
-let langfuseClient;
+let baseLangfuseClient;
 const instantiateLangfuse = () => {
     // First ensure OpenAI is instantiated
     if (!openaiClient) {
@@ -32,22 +32,59 @@ const instantiateLangfuse = () => {
     }
 
     if (langfuseConfig.baseUrl) {
-        langfuseClient = observeOpenAI(openaiClient, {
+        baseLangfuseClient = observeOpenAI(openaiClient, {
             clientInitParams: langfuseConfig,
             generationName: "compilerd",
-        })
+        });
     } else {
-        langfuseClient = openaiClient;
+        baseLangfuseClient = openaiClient;
     }
     
-    return langfuseClient;
+    return baseLangfuseClient;
 };
 
-const getLangfuse = () => {
-    if (!langfuseClient) {
-        return instantiateLangfuse();
+const createLangfuseWithMetadata = (metadata) => {
+    if (!openaiClient) {
+        openaiClient = instantiateOpenAI();
     }
-    return langfuseClient;
+    
+    if (!openaiClient) {
+        throw new Error('OpenAI client could not be instantiated. Check API key.');
+    }
+
+    if (langfuseConfig.baseUrl) {
+        const { slug, course_slug } = metadata;
+        
+        // Build tags array from metadata
+        const tags = [];
+        if (slug) tags.push(slug);
+        if (course_slug) tags.push(`course:${course_slug}`);
+        
+        // Build configuration object
+        const config = {
+            clientInitParams: langfuseConfig,
+            generationName: "compilerd",
+        };
+        
+        // Add optional properties only if they have values
+        if (tags.length > 0) {
+            config.tags = tags;
+        }
+        
+        return observeOpenAI(openaiClient, config);
+    } else {
+        return openaiClient;
+    }
+};
+
+const getLangfuse = (metadata = {}) => {
+    // If no metadata provided, return cached base client
+    if (!metadata || Object.keys(metadata).length === 0) {
+        return baseLangfuseClient || instantiateLangfuse();
+    }
+    
+    // Create a new client with metadata configuration
+    return createLangfuseWithMetadata(metadata);
 };
 
 module.exports = {
