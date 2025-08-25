@@ -157,7 +157,10 @@ const _executePrompt = async (
             response_format: {
                 type: 'json_object',
             },
-            metadata,
+            metadata: {
+                assessment_slug: metadata.slug,
+                course_slug: metadata.course_slug,
+            },
             temperature: 0.1,
         }),
     )
