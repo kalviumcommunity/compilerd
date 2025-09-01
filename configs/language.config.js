@@ -1,6 +1,9 @@
 const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
+const { 
+    openaiConfig,
+} = require('../configs/app.config')
 
 const LANGUAGES_CONFIG = {
     [C]: {
@@ -49,7 +52,7 @@ const LANGUAGES_CONFIG = {
         model: 'gpt-4-1106-preview',
     },
     [PROMPTV2]: {
-        model: 'gpt-3.5-turbo-1106',
+        model: openaiConfig.SUBJECTIVE_OPENAI_MODEL,
     },
     [PROMPTV3]: {
         model: 'gpt-4o-2024-05-13',
