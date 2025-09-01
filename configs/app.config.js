@@ -10,7 +10,7 @@ module.exports = {
     },
     openaiConfig: {
         API_KEY:process.env.OPENAI_API_KEY,
-        SUBJECTIVE_MODEL: process.env.SUBJECTIVE_OPENAI_MODEL
+        SUBJECTIVE_OPENAI_MODEL: process.env.SUBJECTIVE_OPENAI_MODEL
     },
     langfuseConfig: {
         publicKey:process.env.LANGFUSE_PUBLIC_KEY, 
