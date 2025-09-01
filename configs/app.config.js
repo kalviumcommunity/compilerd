@@ -9,7 +9,7 @@ module.exports = {
         PATH: "/tmp/database.db",
     },
     openaiConfig: {
-        API_KEY:process.env.OPENAI_API_KEY,
+        API_KEY: process.env.OPENAI_API_KEY,
         SUBJECTIVE_OPENAI_MODEL: process.env.SUBJECTIVE_OPENAI_MODEL
     },
     langfuseConfig: {
