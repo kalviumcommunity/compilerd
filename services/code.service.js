@@ -306,7 +306,22 @@ const _calculateScoreConfidence = (evaluations) => {
 
 const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric, metadata = {}) => {
     try {
-        const prompt = `Question: ${question}\n\nRubric: ${rubric}\n\nAnswer: ${userAnswer}`
+        // helper to escape XML special characters in values
+        const xmlEscape = (str) => {
+            if (str === undefined || str === null) return ''
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;')
+        }
+
+    const prompt = `<evaluation>\n` +
+            `  <question>${xmlEscape(question)}</question>\n` +
+            `  <rubric>${xmlEscape(rubric)}</rubric>\n` +
+            `  <answer>${xmlEscape(userAnswer)}</answer>\n` +
+            `</evaluation>`
         let totalRequests = 0
         let totalValidRequests = 0
 
