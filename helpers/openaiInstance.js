@@ -1,18 +1,19 @@
-const OpenAI = require('openai')
-const { observeOpenAI } = require('langfuse')
-const { 
+const OpenAI = require('openai');
+const { observeOpenAI } = require('langfuse');
+const { LangfuseClient } = require('@langfuse/client'); 
+const {
     openaiConfig,
     langfuseConfig
-} = require('../configs/app.config')
+} = require('../configs/app.config');
 
 let openaiClient = null;
 const instantiateOpenAI = () => {
-    if (!openaiClient && openaiConfig.API_KEY) { 
+    if (!openaiClient && openaiConfig.API_KEY) {
         openaiClient = new OpenAI({
             apiKey: openaiConfig.API_KEY,
         });
     }
-    return openaiClient; 
+    return openaiClient;
 };
 
 const getOpenAI = () => {
@@ -25,7 +26,7 @@ const instantiateLangfuse = () => {
     if (!openaiClient) {
         openaiClient = instantiateOpenAI();
     }
-    
+
     // If we couldn't create OpenAI client, throw error
     if (!openaiClient) {
         throw new Error('OpenAI client could not be instantiated. Check API key.');
@@ -47,30 +48,30 @@ const createLangfuseWithMetadata = (metadata) => {
     if (!openaiClient) {
         openaiClient = instantiateOpenAI();
     }
-    
+
     if (!openaiClient) {
         throw new Error('OpenAI client could not be instantiated. Check API key.');
     }
 
     if (langfuseConfig.baseUrl) {
         const { slug, course_slug } = metadata;
-        
+
         // Build tags array from metadata
         const tags = [];
         if (slug) tags.push(slug);
         if (course_slug) tags.push(`course:${course_slug}`);
-        
+
         // Build configuration object
         const config = {
             clientInitParams: langfuseConfig,
             generationName: "compilerd",
         };
-        
+
         // Add optional properties only if they have values
         if (tags.length > 0) {
             config.tags = tags;
         }
-        
+
         return observeOpenAI(openaiClient, config);
     } else {
         return openaiClient;
@@ -82,12 +83,24 @@ const getLangfuse = (metadata = {}) => {
     if (!metadata || Object.keys(metadata).length === 0) {
         return baseLangfuseClient || instantiateLangfuse();
     }
-    
+
     // Create a new client with metadata configuration
     return createLangfuseWithMetadata(metadata);
 };
 
+const getLangfusePromptClient = (() => {
+    let langfusePromptClient = null;
+    return () => {
+        if (!langfusePromptClient && langfuseConfig.publicKey) {
+            langfusePromptClient = new LangfuseClient(langfuseConfig);
+        }
+        return langfusePromptClient;
+    }
+})();
+
+
 module.exports = {
     instantiateLangfuse,
-    getLangfuse
+    getLangfuse,
+    getLangfusePromptClient
 }

@@ -7,7 +7,7 @@ const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
 const { PYTHON, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
 const logger = require('../loader').helpers.l
-const { getLangfuse } = require('../helpers/openaiInstance.js')
+const { getLangfuse, getLangfusePromptClient } = require('../helpers/openaiInstance.js')
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
@@ -136,23 +136,25 @@ const _prepareErrorMessage = (outputLog, language, command) => {
 const _executePrompt = async (
     count,
     langConfig,
-    prompt,
+    evaluationData,
+    chatPrompt,
     points = 10, // Maximum points that can be given by open AI
     metadata = {}, // Metadata to be sent to Open AI for post processing
 ) => {
-    openai = getLangfuse(metadata)
+    const openai = getLangfuse(metadata)
+    
+    const compiledMessages = chatPrompt.compile({
+        maxPoints: points,
+        question: evaluationData.question,
+        rubric: evaluationData.rubric,
+        answer: evaluationData.answer,
+    });
+
+
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
-            messages: [
-                {
-                    role: 'system',
-                    content: getDefaultAIEvalSystemPrompt(points),
-                },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
+            // Use the compiled messages array directly
+            messages: compiledMessages,
             model: langConfig.model,
             response_format: {
                 type: 'json_object',
@@ -163,7 +165,7 @@ const _executePrompt = async (
             },
             temperature: 0.1,
         }),
-    )
+    );
 
     const evaluatedResponses = await Promise.allSettled(promises)
     let errorResponsesCount = 0
@@ -317,16 +319,27 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 .replace(/'/g, '&apos;')
         }
 
-    const prompt = `<evaluation>\n` +
-            `  <question>${xmlEscape(question)}</question>\n` +
-            `  <rubric>${xmlEscape(rubric)}</rubric>\n` +
-            `  <answer>${xmlEscape(userAnswer)}</answer>\n` +
-            `</evaluation>`
+        const evaluationData = {
+            question: xmlEscape(question),
+            rubric: xmlEscape(rubric),
+            answer: xmlEscape(userAnswer)
+        };
+
+        const langfusePromptClient = getLangfusePromptClient()
+        if (!langfusePromptClient) {
+            throw new Error("Langfuse Prompt Client not initialized. Check configuration.");
+        }
+        const chatPrompt = await langfusePromptClient.prompt.get(appConfig.langfuseConfig.promptName, {
+            type: "chat",
+        });
+
         let totalRequests = 0
         let totalValidRequests = 0
 
-        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, prompt, points, metadata)
+        // Pass the new evaluationData object to _executePrompt
+        let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, evaluationData, chatPrompt, points, metadata);
         totalRequests += 3
+
         totalValidRequests += (3 - errorResponsesCount)
 
         if (errorResponsesCount === 3) {
@@ -340,7 +353,8 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
             const { allValidResponses: additionalValidResponses, errorResponsesCount: additionalErrorCount } = await _executePrompt(
                 7 + errorResponsesCount,
                 langConfig,
-                prompt,
+                evaluationData,
+                chatPrompt,
                 points,
                 metadata,
             )
@@ -363,7 +377,8 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
                 } = await _executePrompt(
                     5 + additionalErrorCount,
                     langConfig,
-                    prompt,
+                    evaluationData,
+                    chatPrompt,
                     points,
                     metadata,
                 )
@@ -393,7 +408,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
         while (totalRequests < 20) {
             const {
                 allValidResponses: additionalValidResponses,
-            } = await _executePrompt(1, langConfig, prompt, points, metadata)
+            } = await _executePrompt(1, langConfig, evaluationData, chatPrompt, points, metadata)
 
             allValidResponses = allValidResponses.concat(additionalValidResponses)
             ++totalRequests
