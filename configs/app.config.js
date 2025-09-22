@@ -15,7 +15,8 @@ module.exports = {
     langfuseConfig: {
         publicKey:process.env.LANGFUSE_PUBLIC_KEY, 
         secretKey:process.env.LANGFUSE_SECRET_KEY,
-        baseUrl:process.env.LANGFUSE_BASE_URL
+        baseUrl:process.env.LANGFUSE_BASE_URL,
+        promptName: process.env.LANGFUSE_PROMPT_NAME || "subjective_prompt"
     }
     
 }
