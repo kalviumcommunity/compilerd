@@ -1,5 +1,5 @@
 const OpenAI = require('openai');
-const { observeOpenAI } = require('langfuse');
+const { observeOpenAI } = require('@langfuse/openai');
 const { LangfuseClient } = require('@langfuse/client'); 
 const {
     openaiConfig,
@@ -33,10 +33,10 @@ const instantiateLangfuse = () => {
     }
 
     if (langfuseConfig.baseUrl) {
-        baseLangfuseClient = observeOpenAI(openaiClient, {
-            clientInitParams: langfuseConfig,
-            generationName: "compilerd",
-        });
+               baseLangfuseClient = observeOpenAI(openaiClient, {
+                   clientInitParams: langfuseConfig,
+                   generationName: "subjective",
+               });
     } else {
         baseLangfuseClient = openaiClient;
     }
@@ -62,10 +62,10 @@ const createLangfuseWithMetadata = (metadata) => {
         if (course_slug) tags.push(`course:${course_slug}`);
 
         // Build configuration object
-        const config = {
-            clientInitParams: langfuseConfig,
-            generationName: "compilerd",
-        };
+               const config = {
+                   clientInitParams: langfuseConfig,
+                   generationName: "subjective",
+               };
 
         // Add optional properties only if they have values
         if (tags.length > 0) {
