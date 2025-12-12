@@ -27,7 +27,7 @@ const { JUNIT } = require('../enums/supportedPMFOutputFormats.js')
 const { runCommandsSequentially } = require('../helpers/childProcess.helper.js')
 const { extractTestCasesJunit } = require('../helpers/fileParser.helper.js')
 const { PASSED, FAILED } = require('../enums/testStatus.js')
-const { getActiveTraceId, startActiveObservation } = require('@langfuse/tracing')
+const { startActiveObservation } = require('@langfuse/tracing')
 
 const _runScript = async (cmd, res, runMemoryCheck = false) => {
     let initialMemory = 0
@@ -308,7 +308,7 @@ const _calculateScoreConfidence = (evaluations) => {
 }
 
 const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric, metadata = {}) => {
-    // Wrap the evaluation in a trace context (if tracing is available) so getActiveTraceId works
+    // Wrap the evaluation in a trace context (if tracing is available) to enable trace tracking
     if (startActiveObservation) {
         return await startActiveObservation('subjective', async (observation) => {
             if (observation?.updateTrace) {
@@ -369,34 +369,13 @@ const _executeAiEvaluation = async (langConfig, question, response, points, user
 
         let totalRequests = 0
         let totalValidRequests = 0
-        let traceId = null
-
-        if (getActiveTraceId) {
-            try {
-                const activeTraceId = getActiveTraceId()
-                if (activeTraceId) {
-                    traceId = activeTraceId
-                }
-            } catch (error) {
-                logger.info('Trace ID not available yet (trace not active or OTel not initialized)', { error: error?.message })
-            }
-        }
+        // Get traceId directly from the observation object (simpler than calling getActiveTraceId)
+        const traceId = activeObservation?.traceId || null
 
         // Pass the new evaluationData object to _executePrompt
         let { allValidResponses, errorResponsesCount } = await _executePrompt(3, langConfig, evaluationData, chatPrompt, points, metadata);
         totalRequests += 3
         totalValidRequests += (3 - errorResponsesCount)
-
-        if (getActiveTraceId && !traceId) {
-            try {
-                const activeTraceId = getActiveTraceId()
-                if (activeTraceId) {
-                    traceId = activeTraceId
-                }
-            } catch (error) {
-                logger.info('Trace ID not available after first call', { error: error?.message })
-            }
-        }
 
         if (errorResponsesCount === 3) {
             throw new Error('Open AI is not responding with valid responses or It is not in service')
