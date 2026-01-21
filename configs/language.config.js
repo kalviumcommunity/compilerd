@@ -1,4 +1,4 @@
-const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
+const { CPP, C, PYTHON, JAVA, NODEJS, RUBY, GO, PHP, TYPESCRIPT, CSHARP, KOTLIN, PROMPTV1, PROMPTV2, PROMPTV3 } = require('../enums/supportedLanguages')
 const ONE_MB = 1024 // ulimit uses Kilobyte as base unit
 const ALLOWED_RAM = process.env.ALLOWED_RAM || 512
 const { 
@@ -47,6 +47,42 @@ const LANGUAGES_CONFIG = {
         timeout: 10,
         filename: 'solution.rb',
         memory: ALLOWED_RAM * ONE_MB,
+    },
+    [GO]: {
+        compile: 'go build -o solution solution.go',
+        run: './solution',
+        timeout: 4,
+        filename: 'solution.go',
+        memory: 1024 * ONE_MB, // Go programs can be memory-intensive, so we allocate 1GB
+    },
+    [PHP]: {
+        compile: 'php -l solution.php',
+        run: 'php solution.php',
+        timeout: 8,
+        filename: 'solution.php',
+        memory: ALLOWED_RAM * ONE_MB,
+    },
+    [TYPESCRIPT]: {
+        compile: 'tsc solution.ts --outDir .',
+        run: 'node solution.js',
+        timeout: 10,
+        filename: 'solution.ts',
+        memory: 786432, // Similar to Node.js since it compiles to JS
+    },
+    [CSHARP]: {
+        compile: 'mcs -out:solution.exe solution.cs',
+        run: 'mono solution.exe',
+        timeout: 6,
+        filename: 'solution.cs',
+        memory: ALLOWED_RAM * ONE_MB * 1.5,
+        requiresProjectFile: false, // Not needed for Mono
+    },
+    [KOTLIN]: {
+        compile: 'kotlinc solution.kt -include-runtime -d solution.jar',
+        run: 'java -jar solution.jar',
+        timeout: 6,
+        filename: 'solution.kt',
+        memory: 1024 * ONE_MB //Kotlin/JVM needs slightly more memory
     },
     [PROMPTV1]: {
         model: 'gpt-4-1106-preview',
