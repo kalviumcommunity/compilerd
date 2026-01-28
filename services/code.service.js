@@ -165,6 +165,7 @@ const _executePrompt = async (
                 course_slug: metadata.course_slug,
             },
             temperature: 0.1,
+            store: true,
         }),
     );
 
