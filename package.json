@@ -11,6 +11,11 @@
   "dependencies": {
     "@builder.io/sqlgenerate": "^1.2.9",
     "@langfuse/client": "4.2.0",
+    "@langfuse/client": "4.2.0",
+    "@langfuse/openai": "4.4.9",
+    "@langfuse/otel": "4.4.9",
+    "@langfuse/tracing": "4.4.9",
+    "@opentelemetry/sdk-node": "0.208.0",
     "@supercharge/promise-pool": "^2.3.2",
     "axios": "^0.27.2",
     "compression": "^1.7.4",
