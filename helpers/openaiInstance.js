@@ -9,9 +9,16 @@ const {
 let openaiClient = null;
 const instantiateOpenAI = () => {
     if (!openaiClient && openaiConfig.API_KEY) {
-        openaiClient = new OpenAI({
-            apiKey: openaiConfig.API_KEY,
-        });
+        if (openaiConfig.USE_CREDEX) {
+            openaiClient = new OpenAI({
+                apiKey: openaiConfig.API_KEY,
+                baseURL: openaiConfig.BASE_URL,
+            });
+        } else {
+            openaiClient = new OpenAI({
+                apiKey: openaiConfig.API_KEY,
+            });
+        }
     }
     return openaiClient;
 };
