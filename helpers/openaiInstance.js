@@ -5,16 +5,19 @@ const {
     openaiConfig,
     langfuseConfig
 } = require('../configs/app.config');
+const { logger } = require('./logger');
 
 let openaiClient = null;
 const instantiateOpenAI = () => {
     if (!openaiClient && openaiConfig.API_KEY) {
         if (openaiConfig.USE_CREDEX) {
+            logger.info("Using Credex for OpenAI");
             openaiClient = new OpenAI({
                 apiKey: openaiConfig.API_KEY,
                 baseURL: openaiConfig.BASE_URL,
             });
         } else {
+            logger.info("Using OpenAI");
             openaiClient = new OpenAI({
                 apiKey: openaiConfig.API_KEY,
             });
