@@ -10,14 +10,15 @@ const { logger } = require('./logger');
 let openaiClient = null;
 const instantiateOpenAI = () => {
     if (!openaiClient && openaiConfig.API_KEY) {
+        const maskedKey = openaiConfig.API_KEY.substring(0, 4) + '...' + openaiConfig.API_KEY.substring(openaiConfig.API_KEY.length - 3);
         if (openaiConfig.USE_CREDEX) {
-            logger.info("Using Credex for OpenAI");
+            logger.info(`Using Credex for OpenAI - BaseURL: ${openaiConfig.BASE_URL}, Key: ${maskedKey}`);
             openaiClient = new OpenAI({
                 apiKey: openaiConfig.API_KEY,
                 baseURL: openaiConfig.BASE_URL,
             });
         } else {
-            logger.info("Using OpenAI");
+            logger.info(`Using default OpenAI - Key: ${maskedKey}`);
             openaiClient = new OpenAI({
                 apiKey: openaiConfig.API_KEY,
             });

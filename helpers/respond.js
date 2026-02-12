@@ -18,7 +18,7 @@ const respond = (res, code, body = null) => {
 const respondWithException = (res, error) => {
     logger.error(error)
 
-    let errorCode = 401
+    let errorCode = error.status || 500
 
     if (error instanceof ValidationError || error.isJoi) {
         errorCode = 400
