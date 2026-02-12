@@ -11,12 +11,19 @@ let openaiClient = null;
 const instantiateOpenAI = () => {
     if (!openaiClient && openaiConfig.API_KEY) {
         const maskedKey = openaiConfig.API_KEY.substring(0, 4) + '...' + openaiConfig.API_KEY.substring(openaiConfig.API_KEY.length - 3);
+        const clientOptions = {
+            apiKey: openaiConfig.API_KEY,
+            // Add default headers to bypass Cloudflare bot detection
+            defaultHeaders: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+            }
+        };
+
         if (openaiConfig.USE_CREDEX) {
             logger.info(`Using Credex for OpenAI - BaseURL: ${openaiConfig.BASE_URL}, Key: ${maskedKey}`);
-            openaiClient = new OpenAI({
-                apiKey: openaiConfig.API_KEY,
-                baseURL: openaiConfig.BASE_URL,
-            });
+            clientOptions.baseURL = openaiConfig.BASE_URL;
+            openaiClient = new OpenAI(clientOptions);
         } else {
             logger.info(`Using default OpenAI - Key: ${maskedKey}`);
             openaiClient = new OpenAI({
