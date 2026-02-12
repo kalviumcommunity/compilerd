@@ -151,7 +151,8 @@ const _executePrompt = async (
         answer: evaluationData.answer,
     });
 
-
+    logger.info(`Sending ${count} requests to OpenAI with model: ${langConfig.model}`);
+    
     const promises = Array.from({ length: count }, () =>
         openai.chat.completions.create({
             // Use the compiled messages array directly
@@ -166,6 +167,13 @@ const _executePrompt = async (
             },
             temperature: 0.1,
             store: true,
+        }).catch(err => {
+            logger.error(`OpenAI Request failed for model ${langConfig.model}: ${err.message}`, { 
+                status: err.status, 
+                code: err.code,
+                type: err.type
+            });
+            throw err;
         }),
     );
 
@@ -201,6 +209,7 @@ const _executePrompt = async (
             ++errorResponsesCount
         }
     })
+    logger.info(`AI Evaluation Batch Complete: ${allValidResponses.length} valid, ${errorResponsesCount} errors`);
     return { allValidResponses, errorResponsesCount }
 }
 
@@ -310,6 +319,7 @@ const _calculateScoreConfidence = (evaluations) => {
 
 const _getAiScore = async (langConfig, question, response, points, userAnswer, rubric, metadata = {}) => {
     // Wrap the evaluation in a trace context (if tracing is available) to enable trace tracking
+    logger.info(`Starting AI Evaluation for model: ${langConfig.model}, question: ${question}`)
     if (startActiveObservation) {
         return await startActiveObservation('subjective', async (observation) => {
             if (observation?.updateTrace) {
@@ -333,6 +343,7 @@ const _getAiScore = async (langConfig, question, response, points, userAnswer, r
 }
 
 const _executeAiEvaluation = async (langConfig, question, response, points, userAnswer, rubric, metadata = {}, activeObservation = null) => {
+    logger.info(`Inside _executeAiEvaluation for model: ${langConfig.model}, question: ${question}`)
     try {
         const setResponseOutput = (payload) => {
             response.output = payload
@@ -379,6 +390,7 @@ const _executeAiEvaluation = async (langConfig, question, response, points, user
         totalValidRequests += (3 - errorResponsesCount)
 
         if (errorResponsesCount === 3) {
+            logger.error(`Failed to get any valid response after 3 attempts in initial batch`);
             throw new Error('Open AI is not responding with valid responses or It is not in service')
         }
 
