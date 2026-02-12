@@ -245,12 +245,15 @@ const _executeCode = async (req, res, response) => {
 
         // Check if there is no compilation error
         if (response.compileMessage === '') {
-            let command
+            const memoryReportPath = `/tmp/memory_report_${process.pid}_${Date.now()}.txt`;
+
+            let command;
             if (language === 'java') {
                 // Remove ulimit as a temp fix
-                command = `cd /tmp/ && timeout ${langConfig.timeout}s ${langConfig.run}`
+                command = `cd /tmp/ && /usr/bin/time -f "%M" -o ${memoryReportPath} timeout ${langConfig.timeout}s ${langConfig.run}`;
             } else {
-                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && timeout ${langConfig.timeout}s ${langConfig.run}`
+                // Execute command with memory limits and resource monitoring for non-Java languages
+                command = `cd /tmp/ && ulimit -v ${langConfig.memory} && ulimit -m ${langConfig.memory} && /usr/bin/time -f "%M" -o ${memoryReportPath} timeout ${langConfig.timeout}s ${langConfig.run}`;
             }
 
             // Check if there is any input that is to be provided to code execution
@@ -262,6 +265,26 @@ const _executeCode = async (req, res, response) => {
             }
 
             const outputLog = await _runScript(command, res, true)
+
+            let memoryKB = null
+            try {
+                await fs.promises.access(memoryReportPath, fs.constants.F_OK)
+                const memoryReport = await fs.promises.readFile(memoryReportPath, 'utf8')
+                memoryKB = parseInt(memoryReport.trim(), 10)
+            } catch (err) {
+                logger.error(`Memory report not found or failed to read: ${err.message}`)
+            }
+
+            const isAlpine = fs.existsSync('/etc/alpine-release');
+
+            if (memoryKB) {
+                response.memory = isAlpine ? memoryKB / 4 : memoryKB;
+            } else {
+                response.memory = null;
+            }
+
+            logger.info(`Memory usage for ${language} code execution: ${response.memory} KB`);
+
             response.output =
                 outputLog.error !== undefined
                     ? _prepareErrorMessage(outputLog, language, command)
