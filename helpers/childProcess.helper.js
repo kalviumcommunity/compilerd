@@ -9,6 +9,7 @@ const runCommand = async (command, workingDir) => {
     const execa = await initExeca()
     logger.info(`Executing: ${command}`);
     try {
+        const startTime = Date.now()
         const result = await execa(command, {
             cwd: workingDir,
             shell: true,  // Usefull for npm commands having '&&'
@@ -17,6 +18,12 @@ const runCommand = async (command, workingDir) => {
             localDir: workingDir,
             reject: false, // Don't throw on non-zero exit code
         })
+
+        logger.info({
+            command,
+            exitCode: result.exitCode,
+            duration_ms: Date.now() - startTime,
+        }, 'Command finished')
 
         if (result.failed) {
             throw new Error(`Command failed with exit code ${result.exitCode}`)
@@ -39,6 +46,7 @@ const runCommandsSequentially = async (
     commands,
     workingDir = process.cwd()
 ) => {
+    logger.info({ commands, workingDir }, 'Starting command sequence')
     for (const command of commands) {
         try {
             await runCommand(command, workingDir)
