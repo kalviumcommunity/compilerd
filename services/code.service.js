@@ -1049,8 +1049,21 @@ const _executeMultiFile = async (req, res, response) => {
                 if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
                     throw new Error(`No package.json found`)
                 }
+                logger.info({
+                    type: req.type,
+                    commands: req.commands,
+                    output_file: req.output_file,
+                    output_format: req.output_format,
+                    workingDir: appConfig.multifile.workingDir,
+                }, 'Starting NODEJS_JUNIT execution')
+
                 await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
+                logger.info({ resultPath }, 'Parsing JUnit results')
                 result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
+                logger.info({
+                    success_count: result?.success?.length || 0,
+                    failed_count: result?.failed?.length || 0,
+                }, 'Parsed JUnit results')
                 break
             case FULL_STACK_VITEST_JUNIT:
                 if (!fs.existsSync(appConfig.multifile.workingDir + 'package.json')) {
