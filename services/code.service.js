@@ -1058,7 +1058,7 @@ const _executeMultiFile = async (req, res, response) => {
                 }, 'Starting NODEJS_JUNIT execution')
 
                 await runCommandsSequentially(req.commands, appConfig.multifile.workingDir)
-                logger.info({ resultPath }, 'Parsing JUnit results')
+                logger.info({ resultPath: (appConfig.multifile.workingDir + req.output_file) }, 'Parsing JUnit results')
                 result = await parseResults(appConfig.multifile.workingDir + req.output_file, req.output_format)
                 logger.info({
                     success_count: result?.success?.length || 0,
