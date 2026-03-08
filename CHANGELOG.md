@@ -1,5 +1,10 @@
 ## Changelog
 
+### v0.4.3
+
+#### Improved
+    Added memory uses tracker
+
 ### v0.4.2
 
 #### Improved
