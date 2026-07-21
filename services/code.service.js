@@ -11,6 +11,9 @@ const { getLangfuse, getLangfusePromptClient } = require('../helpers/openaiInsta
 const { LANGUAGES_CONFIG } = require('../configs/language.config')
 const Joi = require('joi')
 const memoryUsedThreshold = process.env.MEMORY_USED_THRESHOLD || 512
+const JEST_DOM_DEPENDENCY = '@testing-library/jest-dom'
+const BROKEN_JEST_DOM_RANGE = '^6.6.3'
+const NODE_20_JEST_DOM_VERSION = '6.9.1'
 const getDefaultAIEvalSystemPrompt = require('../helpers/defaultAIEvalSystemPrompt')
 const puppeteer = require('puppeteer');
 const express = require('express')
@@ -657,7 +660,29 @@ const _cleanUpDir = async (dirPath, downloadedFilePath) => {
     await fs.promises.rm(downloadedFilePath, { recursive: true, force: true })
 }
 
+const _pinNode20CompatibleJestDom = async (workingDir) => {
+    const packageJsonPath = path.join(workingDir, 'package.json')
+    if (!fs.existsSync(packageJsonPath)) return
+
+    const packageJson = JSON.parse(await fs.promises.readFile(packageJsonPath, 'utf8'))
+    const dependencyGroups = ['dependencies', 'devDependencies']
+    let isUpdated = false
+
+    for (const dependencyGroup of dependencyGroups) {
+        if (packageJson[dependencyGroup]?.[JEST_DOM_DEPENDENCY] === BROKEN_JEST_DOM_RANGE) {
+            packageJson[dependencyGroup][JEST_DOM_DEPENDENCY] = NODE_20_JEST_DOM_VERSION
+            isUpdated = true
+        }
+    }
+
+    if (!isUpdated) return
+
+    await fs.promises.writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`)
+    logger.info(`Pinned ${JEST_DOM_DEPENDENCY} to ${NODE_20_JEST_DOM_VERSION}`)
+}
+
 const _installDependencies = async (path) => {
+    await _pinNode20CompatibleJestDom(path)
     return new Promise((resolve, reject) => {
         let isRejected = false
         const npmInstall = spawn('npm', ['install'], { cwd: path })
@@ -699,6 +724,7 @@ const _installDependencies = async (path) => {
 }
 
 const _installDependenciesUsingYarn = async (path) => {
+    await _pinNode20CompatibleJestDom(path)
     return new Promise((resolve, reject) => {
         let isRejected = false
 
